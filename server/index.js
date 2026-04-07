@@ -14,7 +14,7 @@ const rateLimit   = require('express-rate-limit');
 const cron        = require('node-cron');
 const path        = require('path');
 
-const { ask }       = require('./ai');
+const { ask, logProviders } = require('./ai');
 const { runUpdate, load } = require('./updater');
 const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
 
@@ -201,9 +201,7 @@ app.listen(PORT, () => {
   console.log(`║  http://localhost:${PORT}                        ║`);
   console.log('╚══════════════════════════════════════════════╝');
   console.log('');
-  const _k = process.env.GEMINI_API_KEY || '';
-  const _masked = _k && _k !== 'your-gemini-api-key-here' ? `✓ Key set (${_k.slice(0,4)}...${_k.slice(-4)})` : '✗ Not set — see .env.example';
-  console.log(`Gemini API:     ${_masked}`);
+  logProviders();
   console.log(`Data ready:     ${load('conflicts.json') ? '✓ Yes' : '✗ Run: npm run update'}`);
   console.log(`Auto-update:    Every ${UPDATE_MINS} minutes`);
   console.log(`Schedule:       ${cronExpr} (Asia/Kolkata)`);

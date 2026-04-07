@@ -1,50 +1,62 @@
 // server/ai.js
 // ─────────────────────────────────────────────
 //  Unified Intelligence Bureau
-//  Implements automatic fallback from Gemini to Groq
+//  4-Layer Automatic Failover:
+//  1. Gemini 2.5 Flash (Google — primary)
+//  2. Cerebras (Llama 3.3 70B — blazing fast)
+//  3. OpenRouter (DeepSeek/Llama — multi-model gateway)
+//  4. Pollinations (Free, no key — last resort)
 // ─────────────────────────────────────────────
 
 const { ask: askGemini } = require('./gemini');
-const { askGroq } = require('./groq');
+const { askCerebras } = require('./cerebras');
+const { askOpenRouter } = require('./openrouter');
 const { askPollinations } = require('./pollinations');
 
+// Check which providers are configured
+function getProviders() {
+  const providers = [
+    { name: 'Gemini', fn: askGemini, ready: !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here' },
+    { name: 'Cerebras', fn: askCerebras, ready: !!process.env.CEREBRAS_API_KEY },
+    { name: 'OpenRouter', fn: askOpenRouter, ready: !!process.env.OPENROUTER_API_KEY },
+    { name: 'Pollinations', fn: askPollinations, ready: true } // Always available (no key needed)
+  ];
+  return providers;
+}
+
 async function ask(prompt, opts = {}) {
-  try {
-    // Try Gemini first (Main provider)
-    return await askGemini(prompt, opts);
-  } catch (e) {
-    const errorMsg = e.message.toLowerCase();
-    
-    // Check if it's a rate limit or quota error, OR a 503 overloaded error
-    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('exhausted') || errorMsg.includes('503') || errorMsg.includes('overloaded')) {
-      console.warn(`[ai] Gemini failed (${e.message.substring(0, 40)}...). Falling back to Groq...`);
-      
-      try {
-        // Fallback to Groq (Llama-3-70B)
-        return await askGroq(prompt, { ...opts, model: 'llama-3.3-70b-versatile' });
-      } catch (groqErr) {
-        console.warn(`[ai] Groq failed (${groqErr.message.substring(0, 40)}...). Falling back to Pollinations...`);
-        try {
-          return await askPollinations(prompt, opts);
-        } catch (polyErr) {
-          throw new Error(`AI pipeline failed: Gemini, Groq, AND Pollinations are unavailable.`);
-        }
-      }
+  const providers = getProviders();
+  const errors = [];
+
+  for (const provider of providers) {
+    if (!provider.ready) {
+      continue; // Skip unconfigured providers
     }
-    
-    // If we want to be hyper-resilient, any Gemini failure could trigger Fallback cascade
-    console.warn(`[ai] Gemini failed with unexpected error. Falling back to Groq...`);
+
     try {
-        return await askGroq(prompt, { ...opts, model: 'llama-3.3-70b-versatile' });
-    } catch(groqErr) {
-        console.warn(`[ai] Groq failed with unexpected error. Falling back to Pollinations...`);
-        try {
-          return await askPollinations(prompt, opts);
-        } catch(polyErr) {
-          throw new Error(`AI pipeline failed completely. Gemini: ${e.message}. Groq: ${groqErr.message}`);
-        }
+      const result = await provider.fn(prompt, opts);
+      return result;
+    } catch (e) {
+      const shortErr = e.message.substring(0, 60);
+      console.warn(`[ai] ${provider.name} failed (${shortErr}...). Falling back...`);
+      errors.push({ provider: provider.name, error: e.message });
     }
+  }
+
+  // All providers failed
+  const summary = errors.map(e => `${e.provider}: ${e.error.substring(0, 40)}`).join(' | ');
+  throw new Error(`AI pipeline failed — all ${errors.length} providers down. ${summary}`);
+}
+
+// Log configured providers on startup
+function logProviders() {
+  const providers = getProviders();
+  const configured = providers.filter(p => p.ready);
+  console.log(`AI Providers:   ${configured.map(p => `✓ ${p.name}`).join(' → ')} (${configured.length}-layer failover)`);
+  const unconfigured = providers.filter(p => !p.ready);
+  if (unconfigured.length) {
+    console.log(`AI Unconfigured: ${unconfigured.map(p => `✗ ${p.name}`).join(', ')} (add API keys to enable)`);
   }
 }
 
-module.exports = { ask };
+module.exports = { ask, logProviders };
