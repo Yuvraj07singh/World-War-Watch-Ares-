@@ -1037,11 +1037,23 @@ function renderMeta(meta){
 
 // ── RENDER CONFLICTS ──────────────────────────────────────
 function renderConflicts(data){
+  // AI sometimes wraps in a parent key or returns an array. Let's normalize it.
+  let nData = data;
+  if(data && data.conflicts) nData = data.conflicts;
+  // If it's an array (e.g. [{id: 'iran', ...}]), convert it back to mapped object
+  if (Array.isArray(nData)) {
+    const temp = {};
+    nData.forEach(item => { if(item && item.id) temp[item.id] = item; else if(item && item.name && item.name.toLowerCase().includes('iran')) temp['iran']=item; });
+    nData = temp;
+  }
+  
   const order=['iran','india-pakistan','pakistan-afghanistan','russia-ukraine'];
   const stamps={iran:['Classified','r'],['india-pakistan']:['High risk','a'],['pakistan-afghanistan']:['Active war','a'],['russia-ukraine']:['Monitoring','b']};
   const wms={iran:'IRN',['india-pakistan']:'PAK',['pakistan-afghanistan']:'AFG',['russia-ukraine']:'UKR'};
+  
   document.getElementById('conflictGrid').innerHTML=order.map(id=>{
-    const c=data[id]; if(!c) return '';
+    const c=nData[id] || Object.values(nData).find(x => x?.id === id); 
+    if(!c) return '';
     const [stamp,sc]=stamps[id]||['','r'];
     const badgeCls=c.level==='crit'?'r':c.level==='high'?'a':'b';
     const hl=(c.topHeadlines||[]).slice(0,2).map(h=>`<div class="cc-hl">${h}</div>`).join('');
@@ -1068,9 +1080,14 @@ function navConflict(e, id){
 
 // ── RENDER TENSIONS ──────────────────────────────────────
 function renderTensions(data){
+  let nData = data;
+  if(data && data.conflicts) nData = data.conflicts;
+  if(Array.isArray(nData)){ const t={}; nData.forEach(i=>{if(i?.id)t[i.id]=i; else if(i?.name?.toLowerCase().includes('iran'))t['iran']=i;}); nData=t; }
+
   const order=['iran','india-pakistan','pakistan-afghanistan','russia-ukraine'];
   order.forEach((id,i)=>{
-    const c=data[id]; if(!c)return;
+    const c=nData[id] || Object.values(nData).find(x => x?.id === id); 
+    if(!c)return;
     const pct=c.tensionPct||0;
     setTimeout(()=>{ const f=document.getElementById('tf'+i); if(f)f.style.width=pct+'%'; },200);
     const tp=document.getElementById('tp'+i); if(tp)tp.textContent=pct+'%';
