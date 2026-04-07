@@ -202,6 +202,24 @@ app.listen(PORT, () => {
   console.log(`Data ready:     ${load('conflicts.json') ? '✓ Yes' : '✗ Run: npm run update'}`);
   console.log(`Auto-update:    Every ${UPDATE_MINS} minutes`);
   console.log(`Schedule:       ${cronExpr} (Asia/Kolkata)`);
+
+  // ── NEVER-SLEEP SELF-PING (FOR RENDER) ─────────────────────────────────────
+  // Pings the server every 10 minutes to keep the Render Free Tier instance awake.
+  const selfUrl = process.env.RENDER_EXTERNAL_URL;
+  if (selfUrl) {
+    console.log(`Self-Ping:      Active (Target: ${selfUrl})`);
+    setInterval(async () => {
+      try {
+        const fetch = require('node-fetch');
+        await fetch(`${selfUrl}/api/health`);
+        console.log(`[self-ping] Keep-alive heartbeat sent to ${selfUrl}`);
+      } catch (e) {
+        console.error('[self-ping] Heartbeat failed:', e.message);
+      }
+    }, 10 * 60 * 1000); // 10 minutes
+  } else {
+    console.log('Self-Ping:      Inactive (Local Environment)');
+  }
   console.log('');
 });
 
