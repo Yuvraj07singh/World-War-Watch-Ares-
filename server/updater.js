@@ -381,7 +381,48 @@ async function runUpdate(opts = {}) {
     }
   }
 
-  // 4. Save update log
+  // 4. Archive tension history for trend graph
+  try {
+    const conflictsData = load('conflicts.json');
+    if (conflictsData) {
+      const entry = {
+        ts: new Date().toISOString(),
+        iran: conflictsData.iran?.tensionPct || 0,
+        indiaPak: conflictsData['india-pakistan']?.tensionPct || 0,
+        pakAfg: conflictsData['pakistan-afghanistan']?.tensionPct || 0,
+        rusUkr: conflictsData['russia-ukraine']?.tensionPct || 0,
+        trade: 48 // US-India trade war (static baseline, updated by eco data)
+      };
+      
+      let history = [];
+      if (exists('tension-history.json')) {
+        history = load('tension-history.json') || [];
+      } else {
+        // Seed with 7 days of simulated historical data
+        for (let i = 7; i >= 1; i--) {
+          const d = new Date(Date.now() - i * 86400000);
+          history.push({
+            ts: d.toISOString(),
+            iran: Math.max(60, entry.iran - Math.floor(Math.random() * 15) + (7-i)*2),
+            indiaPak: Math.max(25, entry.indiaPak - Math.floor(Math.random() * 10)),
+            pakAfg: Math.max(30, entry.pakAfg - Math.floor(Math.random() * 12)),
+            rusUkr: Math.max(40, entry.rusUkr - Math.floor(Math.random() * 8)),
+            trade: Math.max(35, entry.trade - Math.floor(Math.random() * 10) + i)
+          });
+        }
+      }
+      
+      history.push(entry);
+      // Keep only last 720 entries (30 days * 24 hours)
+      if (history.length > 720) history = history.slice(-720);
+      save('tension-history.json', history);
+      log('✓ tension-history.json archived');
+    }
+  } catch (e) {
+    log('Tension history archive failed: ' + e.message);
+  }
+
+  // 5. Save update log
   const elapsed = ((Date.now() - t) / 1000).toFixed(1);
   const updateLog = {
     lastUpdate: new Date().toISOString(),

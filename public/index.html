@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>World War Watch — Global Conflict Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
 :root{
   --bg:#07070a;--bg2:#0e0e12;--bg3:#15151a;--bg4:#1c1c22;
@@ -242,6 +244,39 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .f-copy{font-size:11px;color:var(--t4);font-weight:400;}
 .f-coord{font-family:var(--mono);font-size:10px;color:var(--t4);text-align:right;line-height:1.8;}
 
+/* ── CONFLICT MAP ── */
+.cmap-wrap{background:var(--bg2);border:1px solid var(--b1);position:relative;overflow:hidden;}
+.cmap-svg{width:100%;height:auto;display:block;}
+.cmap-dot{cursor:pointer;transition:opacity .2s;}
+.cmap-dot:hover{opacity:1 !important;}
+.cmap-tooltip{position:absolute;background:var(--bg);border:1px solid var(--b2);padding:8px 12px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;border-radius:var(--radius);font-size:11px;white-space:nowrap;}
+.cmap-tooltip.on{opacity:1;}
+.cmap-tt-name{font-family:var(--head);font-size:16px;color:var(--t1);letter-spacing:.04em;}
+.cmap-tt-level{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:2px;}
+.cmap-tt-level.r{color:var(--red);}
+.cmap-tt-level.a{color:var(--amber);}
+.cmap-tt-level.b{color:var(--blue);}
+.cmap-label{font-size:7px;fill:var(--t4);text-anchor:middle;pointer-events:none;font-family:var(--inter);letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+
+/* ── TREND CHART ── */
+.chart-wrap{background:var(--bg2);border:1px solid var(--b1);padding:16px;}
+.chart-wrap canvas{max-height:220px;}
+
+/* ── EXPORT BTN ── */
+.export-btn{background:none;border:1px solid var(--b2);color:var(--t4);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;cursor:pointer;border-radius:var(--radius);font-weight:600;font-family:var(--inter);transition:all .15s;white-space:nowrap;}
+.export-btn:hover{color:var(--t1);border-color:var(--t2);background:var(--bg3);}
+.export-btn:disabled{opacity:.35;cursor:not-allowed;}
+.export-menu{display:none;position:absolute;right:0;top:100%;background:var(--bg);border:1px solid var(--b2);z-index:100;margin-top:4px;min-width:180px;}
+.export-menu.on{display:block;}
+.export-opt{display:block;width:100%;background:none;border:none;border-bottom:1px solid var(--b1);color:var(--t3);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px;cursor:pointer;font-weight:600;font-family:var(--inter);text-align:left;transition:all .12s;}
+.export-opt:last-child{border-bottom:none;}
+.export-opt:hover{background:var(--bg3);color:var(--t1);}
+.export-wrap{position:relative;}
+
+/* ── DISCLAIMER ── */
+.disclaimer{background:#050508;border-top:1px solid var(--b1);padding:18px 20px;text-align:center;font-size:10px;color:var(--t4);line-height:1.8;letter-spacing:.02em;font-weight:400;}
+.disclaimer strong{color:var(--t3);font-weight:600;}
+
 /* ── DOOM MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9000;display:none;overflow-y:auto;padding:20px 14px;}
 .modal-overlay.on{display:block;}
@@ -378,6 +413,13 @@ img,svg{content-visibility:auto;}
     <div class="hdr-ts" id="hdrTs">Loading...</div>
   </div>
   <div class="hdr-right">
+    <div class="export-wrap">
+      <button class="export-btn" id="exportBtn" onclick="toggleExportMenu()">⬇ Export Intel</button>
+      <div class="export-menu" id="exportMenu">
+        <button class="export-opt" onclick="exportReport('download')">⬇ Download PNG</button>
+        <button class="export-opt" onclick="exportReport('clipboard')">📋 Copy to Clipboard</button>
+      </div>
+    </div>
     <div class="live-badge"><div class="ldot"></div><span class="live-txt">Live</span></div>
     <div class="war-counter"><div class="wc-num">04</div><div class="wc-lbl">Active wars</div></div>
   </div>
@@ -409,6 +451,81 @@ img,svg{content-visibility:auto;}
   <div class="ubar-dot"></div>
   <span class="ubar-text" id="ubarText">Loading...</span>
   <button class="ubar-btn" onclick="init()">↻ Refresh</button>
+</div>
+
+<!-- GLOBAL CONFLICT MAP -->
+<div class="sh"><span class="sh-label">// Global Conflict Theater Map — Live Zones</span><div class="sh-line"></div></div>
+<div class="cmap-wrap" id="cmapWrap">
+  <div class="cmap-tooltip" id="cmapTip">
+    <div class="cmap-tt-name" id="cmapTipName"></div>
+    <div class="cmap-tt-level" id="cmapTipLevel"></div>
+  </div>
+  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
+    </defs>
+    <!-- Ocean background -->
+    <rect width="1000" height="500" fill="#08080e"/>
+    <!-- Simplified continent outlines -->
+    <!-- Europe -->
+    <path d="M480,120 L500,110 L520,108 L540,115 L555,120 L560,135 L540,150 L530,165 L520,170 L510,180 L505,195 L495,200 L490,195 L480,190 L470,180 L465,165 L470,150 L475,135 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- Russia/Central Asia -->
+    <path d="M555,90 L600,80 L650,78 L700,80 L750,85 L800,90 L820,100 L810,120 L790,130 L760,135 L720,140 L680,138 L640,130 L600,120 L570,115 L555,105 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- Middle East -->
+    <path d="M540,180 L560,175 L580,180 L590,195 L585,210 L575,220 L560,225 L545,230 L535,220 L530,210 L528,195 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- Africa -->
+    <path d="M470,220 L490,215 L510,218 L530,230 L535,250 L540,280 L535,310 L525,340 L510,360 L495,370 L480,360 L470,340 L465,310 L460,280 L458,250 L462,230 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- South Asia -->
+    <path d="M620,170 L660,160 L690,170 L700,185 L695,200 L685,220 L670,240 L655,250 L640,245 L630,230 L625,210 L618,195 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- East Asia / China -->
+    <path d="M700,120 L740,110 L780,115 L810,125 L830,140 L825,160 L810,175 L785,185 L760,180 L740,170 L720,160 L710,145 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- North America -->
+    <path d="M120,80 L180,70 L240,80 L280,100 L300,130 L290,160 L270,180 L250,200 L220,210 L190,205 L160,190 L140,170 L125,145 L115,120 L118,95 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+    <!-- South America -->
+    <path d="M240,260 L270,250 L290,265 L300,290 L305,320 L300,350 L290,380 L275,400 L260,410 L245,400 L235,380 L228,350 L225,320 L228,290 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
+
+    <!-- Grid lines -->
+    <line x1="0" y1="250" x2="1000" y2="250" stroke="#15151e" stroke-width=".3" stroke-dasharray="4,8"/>
+    <line x1="500" y1="0" x2="500" y2="500" stroke="#15151e" stroke-width=".3" stroke-dasharray="4,8"/>
+
+    <!-- CONFLICT ZONE 1: Iran / Middle East (approx 52°E, 32°N) -->
+    <a href="/conflict.html?id=iran" class="cmap-dot" onmouseenter="showMapTip(event,'US + Israel vs Iran','● CRITICAL — Active War','r')" onmouseleave="hideMapTip()">
+      <circle cx="565" cy="195" r="30" fill="url(#gRed)" opacity=".6"><animate attributeName="r" values="25;35;25" dur="2.5s" repeatCount="indefinite"/></circle>
+      <circle cx="565" cy="195" r="5" fill="#e02010"><animate attributeName="opacity" values="1;.4;1" dur="1.5s" repeatCount="indefinite"/></circle>
+      <text x="565" y="175" class="cmap-label" fill="#e02010">Iran</text>
+    </a>
+
+    <!-- CONFLICT ZONE 2: India-Pakistan border (approx 74°E, 33°N) -->
+    <a href="/conflict.html?id=india-pakistan" class="cmap-dot" onmouseenter="showMapTip(event,'India vs Pakistan','● HIGH — Ceasefire Fragile','a')" onmouseleave="hideMapTip()">
+      <circle cx="645" cy="190" r="25" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="20;30;20" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="645" cy="190" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/></circle>
+      <text x="645" y="172" class="cmap-label" fill="#d08000">India-Pak</text>
+    </a>
+
+    <!-- CONFLICT ZONE 3: Af-Pak border (approx 70°E, 34°N) -->
+    <a href="/conflict.html?id=pakistan-afghanistan" class="cmap-dot" onmouseenter="showMapTip(event,'Pakistan vs Afghanistan','● HIGH — Active War','a')" onmouseleave="hideMapTip()">
+      <circle cx="625" cy="180" r="22" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="18;26;18" dur="2.8s" repeatCount="indefinite"/></circle>
+      <circle cx="625" cy="180" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2.2s" repeatCount="indefinite"/></circle>
+      <text x="610" y="165" class="cmap-label" fill="#d08000">Af-Pak</text>
+    </a>
+
+    <!-- CONFLICT ZONE 4: Russia-Ukraine (approx 36°E, 49°N) -->
+    <a href="/conflict.html?id=russia-ukraine" class="cmap-dot" onmouseenter="showMapTip(event,'Russia vs Ukraine','● ELEVATED — Year 4','b')" onmouseleave="hideMapTip()">
+      <circle cx="545" cy="140" r="24" fill="url(#gBlue)" opacity=".5"><animate attributeName="r" values="19;28;19" dur="3.2s" repeatCount="indefinite"/></circle>
+      <circle cx="545" cy="140" r="4" fill="#2878c8"><animate attributeName="opacity" values="1;.3;1" dur="2.5s" repeatCount="indefinite"/></circle>
+      <text x="545" y="123" class="cmap-label" fill="#2878c8">Ukraine</text>
+    </a>
+
+    <!-- US-India trade route indicator -->
+    <line x1="250" y1="170" x2="640" y2="210" stroke="#6a4000" stroke-width=".8" stroke-dasharray="6,4" opacity=".35"/>
+    <text x="420" y="185" class="cmap-label" fill="#6a4000" font-size="6">US–India Trade Route</text>
+
+    <!-- Coordinates -->
+    <text x="10" y="495" fill="#1e1e28" font-size="6" font-family="monospace">MERCATOR PROJECTION · REAL-TIME CONFLICT OVERLAY</text>
+    <text x="990" y="495" fill="#1e1e28" font-size="6" font-family="monospace" text-anchor="end">WORLD WAR WATCH — THEATER MAP</text>
+  </svg>
 </div>
 
 <!-- CONFLICT CARDS -->
@@ -458,6 +575,12 @@ img,svg{content-visibility:auto;}
   <div class="t-row"><span class="t-lbl">Russia vs Ukraine</span><div class="t-bar"><div class="t-fill" id="tf3" style="width:0%;background:linear-gradient(90deg,var(--blue2),var(--blue))"></div></div><span class="t-pct" id="tp3">--</span></div>
   <div class="t-row"><span class="t-lbl">US–India Trade War</span><div class="t-bar"><div class="t-fill" id="tf4" style="width:48%;background:linear-gradient(90deg,#6a3000,#a06000)"></div></div><span class="t-pct" id="tp4">48%</span></div>
   <div class="t-note">Tension = (active_hostilities×0.4) + (escalation_rhetoric×0.25) + (casualty_rate×0.2) + (nuclear_risk×0.15) — scored hourly from live news</div>
+</div>
+
+<!-- TENSION TREND CHART -->
+<div class="sh"><span class="sh-label">// Tension Trend — 30-Day History</span><div class="sh-line"></div><span class="sh-right" id="trendRange">Loading...</span></div>
+<div class="chart-wrap">
+  <canvas id="tensionChart"></canvas>
 </div>
 
 <!-- KEY DATES -->
@@ -595,6 +718,11 @@ img,svg{content-visibility:auto;}
 
 </div><!-- /wrap -->
 
+<!-- LEGAL DISCLAIMER -->
+<div class="disclaimer">
+  <strong>⚠ DISCLAIMER:</strong> World War Watch is an experimental AI-aggregated news dashboard. All data is sourced from publicly available RSS feeds (BBC, Reuters, Al Jazeera, AP, The Guardian, etc.) and processed by Large Language Models. This is <strong>NOT</strong> an official government, military, or intelligence agency product. AI-generated summaries may contain inaccuracies or hallucinations. Do not use this for emergency decision-making. Always verify critical information through official channels.
+</div>
+
 <!-- DOOMSDAY MODAL -->
 <div class="modal-overlay" id="doomOverlay" onclick="closeDoom(event)">
   <div class="doom-modal" onclick="event.stopPropagation()">
@@ -720,6 +848,7 @@ async function init(){
     else                renderEvents(FALLBACK_EVENTS);
     if(d.conflicts)     renderTensions(d.conflicts);
     if(d.updateLog)     renderUpdateBar(d.updateLog);
+    if(d.tensionHistory) renderTrendChart(d.tensionHistory);
     if(d.dailyBriefing){
       document.getElementById('bOut').classList.add('on');
       document.getElementById('bHdr').textContent='// Daily Briefing · Updated '+fmtDate(d.dailyBriefing._updatedAt);
@@ -929,6 +1058,175 @@ function openDoom(){document.getElementById('doomOverlay').classList.add('on');d
 function closeDoom(e){if(e.target===document.getElementById('doomOverlay'))closeDoomDirect();}
 function closeDoomDirect(){document.getElementById('doomOverlay').classList.remove('on');document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDoomDirect();});
+
+// ── MAP TOOLTIPS ─────────────────────────────────────────
+function showMapTip(e, name, level, cls) {
+  const tip = document.getElementById('cmapTip');
+  const wrap = document.getElementById('cmapWrap');
+  const rect = wrap.getBoundingClientRect();
+  document.getElementById('cmapTipName').textContent = name;
+  const lvl = document.getElementById('cmapTipLevel');
+  lvl.textContent = level;
+  lvl.className = 'cmap-tt-level ' + cls;
+  // Position relative to map container
+  const x = e.clientX - rect.left + 12;
+  const y = e.clientY - rect.top - 40;
+  tip.style.left = Math.min(x, rect.width - 200) + 'px';
+  tip.style.top = Math.max(y, 4) + 'px';
+  tip.classList.add('on');
+}
+function hideMapTip() {
+  document.getElementById('cmapTip').classList.remove('on');
+}
+
+// ── TREND CHART ──────────────────────────────────────────
+let tensionChart = null;
+function renderTrendChart(history) {
+  if (!history || !Array.isArray(history) || history.length < 2) {
+    document.getElementById('trendRange').textContent = 'No data yet';
+    return;
+  }
+  // Wait for Chart.js to load
+  if (typeof Chart === 'undefined') {
+    setTimeout(() => renderTrendChart(history), 500);
+    return;
+  }
+  const labels = history.map(h => {
+    const d = new Date(h.ts);
+    return `${d.getMonth()+1}/${d.getDate()}`;
+  });
+  // De-duplicate labels (show only unique dates)
+  const uniqueLabels = labels.map((l, i) => {
+    if (i === 0 || l !== labels[i-1]) return l;
+    return '';
+  });
+
+  const datasets = [
+    { label: 'US-Israel vs Iran', data: history.map(h=>h.iran), borderColor: '#e02010', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+    { label: 'India vs Pakistan', data: history.map(h=>h.indiaPak), borderColor: '#d08000', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+    { label: 'Pak vs Afghanistan', data: history.map(h=>h.pakAfg), borderColor: '#c07000', borderWidth: 1.5, pointRadius: 0, tension: 0.3, borderDash: [4,2] },
+    { label: 'Russia vs Ukraine', data: history.map(h=>h.rusUkr), borderColor: '#2878c8', borderWidth: 1.5, pointRadius: 0, tension: 0.3 },
+    { label: 'US-India Trade', data: history.map(h=>h.trade), borderColor: '#6a4000', borderWidth: 1, pointRadius: 0, tension: 0.3, borderDash: [6,3] }
+  ];
+
+  const ctx = document.getElementById('tensionChart').getContext('2d');
+  if (tensionChart) tensionChart.destroy();
+  tensionChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: uniqueLabels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { color: '#807060', font: { size: 10, family: 'Inter' }, boxWidth: 12, padding: 12, usePointStyle: true }
+        },
+        tooltip: {
+          backgroundColor: '#0e0e12',
+          borderColor: '#2e2e38',
+          borderWidth: 1,
+          titleColor: '#f0e8cc',
+          bodyColor: '#c0b490',
+          titleFont: { size: 11, family: 'Inter' },
+          bodyFont: { size: 11, family: 'Inter' },
+          callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}%` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#484038', font: { size: 9, family: 'Share Tech Mono' }, maxRotation: 0 },
+          grid: { color: '#1a1a22', lineWidth: 0.5 },
+          border: { color: '#22222a' }
+        },
+        y: {
+          min: 0, max: 100,
+          ticks: { color: '#484038', font: { size: 9, family: 'Share Tech Mono' }, callback: v => v + '%', stepSize: 25 },
+          grid: { color: '#1a1a22', lineWidth: 0.5 },
+          border: { color: '#22222a' }
+        }
+      },
+      interaction: { intersect: false, mode: 'index' }
+    }
+  });
+
+  const first = new Date(history[0].ts);
+  const last = new Date(history[history.length-1].ts);
+  const ms = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('trendRange').textContent = `${first.getDate()} ${ms[first.getMonth()]} — ${last.getDate()} ${ms[last.getMonth()]} ${last.getFullYear()}`;
+}
+
+// ── EXPORT INTEL REPORT ──────────────────────────────────
+function toggleExportMenu() {
+  document.getElementById('exportMenu').classList.toggle('on');
+}
+// Close menu when clicking outside
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.export-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('exportMenu').classList.remove('on');
+  }
+});
+
+async function exportReport(mode) {
+  document.getElementById('exportMenu').classList.remove('on');
+  const btn = document.getElementById('exportBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+
+  try {
+    // Wait for html2canvas to load
+    if (typeof html2canvas === 'undefined') {
+      btn.textContent = '⬇ Export Intel';
+      btn.disabled = false;
+      alert('Export library still loading. Try again in a moment.');
+      return;
+    }
+
+    // Capture the main content area (header through tension meters)
+    const wrap = document.querySelector('.wrap');
+    const canvas = await html2canvas(wrap, {
+      backgroundColor: '#07070a',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      height: Math.min(wrap.scrollHeight, 2400), // Cap at reasonable height
+      windowHeight: Math.min(wrap.scrollHeight, 2400)
+    });
+
+    if (mode === 'download') {
+      const link = document.createElement('a');
+      const now = new Date();
+      link.download = `wwwatch-intel-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      btn.textContent = '✓ Downloaded!';
+    } else if (mode === 'clipboard') {
+      canvas.toBlob(async blob => {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          btn.textContent = '✓ Copied!';
+        } catch {
+          // Fallback: download if clipboard fails
+          const link = document.createElement('a');
+          link.download = 'wwwatch-intel.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          btn.textContent = '✓ Downloaded (clipboard unavailable)';
+        }
+      });
+    }
+  } catch (e) {
+    console.error('Export failed:', e);
+    btn.textContent = '✗ Export failed';
+  }
+
+  setTimeout(() => {
+    btn.textContent = '⬇ Export Intel';
+    btn.disabled = false;
+  }, 2500);
+}
 
 // ── START ────────────────────────────────────────────────
 init();
