@@ -1,0 +1,208 @@
+// server/index.js
+// ─────────────────────────────────────────────
+//  World War Watch — Backend Server v2
+//  Free APIs: Google Gemini + RSS feeds
+//  Auto-updates every hour
+// ─────────────────────────────────────────────
+
+require('dotenv').config();
+const express     = require('express');
+const cors        = require('cors');
+const helmet      = require('helmet');
+const compression = require('compression');
+const rateLimit   = require('express-rate-limit');
+const cron        = require('node-cron');
+const path        = require('path');
+
+const { ask }       = require('./gemini');
+const { runUpdate, load } = require('./updater');
+const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
+
+const app  = express();
+const PORT = process.env.PORT || 3000;
+const UPDATE_MINS = parseInt(process.env.UPDATE_INTERVAL_MINUTES || '60');
+
+// ── MIDDLEWARE ─────────────────────────────────────────────────────────────────
+app.use(compression());
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors());
+app.use(express.json({ limit: '10kb' }));
+
+// Rate limiters
+const apiLimiter = rateLimit({ windowMs: 60000, max: 30, message: { error: 'Too many requests. Try again in a minute.' } });
+const aiLimiter  = rateLimit({ windowMs: 60000, max: 10, message: { error: 'Too many AI requests. Try again in a minute.' } });
+
+// ── STATIC FILES ───────────────────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  maxAge: '2m', etag: true
+}));
+
+// ── DATA ENDPOINTS (cached, from JSON files) ───────────────────────────────────
+function serve(filename) {
+  return (req, res) => {
+    const d = load(filename);
+    if (!d) return res.status(503).json({ error: 'Data not ready. Run: npm run update', hint: 'Takes ~60 seconds on first run.' });
+    res.set('Cache-Control', 'public, max-age=120');
+    res.json(d);
+  };
+}
+
+app.get('/api/meta',            apiLimiter, serve('meta.json'));
+app.get('/api/conflicts',       apiLimiter, serve('conflicts.json'));
+app.get('/api/economic',        apiLimiter, serve('economic.json'));
+app.get('/api/briefing',        apiLimiter, serve('daily-briefing.json'));
+app.get('/api/events',          apiLimiter, serve('upcoming-events.json'));
+app.get('/api/update-log',      apiLimiter, serve('update-log.json'));
+
+// Per-conflict detail page data
+app.get('/api/conflict/:id', apiLimiter, (req, res) => {
+  const { id } = req.params;
+  const valid = ['iran', 'india-pakistan', 'pakistan-afghanistan', 'russia-ukraine'];
+  if (!valid.includes(id)) return res.status(400).json({ error: 'Invalid conflict ID.' });
+  const d = load(`conflict-${id}.json`);
+  if (!d) return res.status(503).json({ error: 'Detail data not yet generated. Run: npm run update' });
+  res.set('Cache-Control', 'public, max-age=600');
+  res.json(d);
+});
+
+// Latest news articles (raw)
+app.get('/api/news', apiLimiter, (req, res) => {
+  const d = load('raw-news.json');
+  if (!d) return res.status(503).json({ error: 'News not loaded yet.' });
+  const { conflict, limit = 20 } = req.query;
+  let articles = d.articles || [];
+  if (conflict) articles = filterByConflict(articles, conflict);
+  res.json({ articles: articles.slice(0, parseInt(limit)), total: articles.length, _updatedAt: d._updatedAt });
+});
+
+// Combined all-data endpoint
+app.get('/api/all', apiLimiter, (req, res) => {
+  const files = ['meta.json', 'conflicts.json', 'economic.json', 'daily-briefing.json', 'upcoming-events.json', 'update-log.json'];
+  const result = {};
+  for (const f of files) {
+    const d = load(f);
+    if (!d) return res.status(503).json({ error: 'Data not initialized. Run: npm run update' });
+    const key = f.replace('.json', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase()).replace('Daily','daily');
+    result[key] = d;
+  }
+  res.set('Cache-Control', 'public, max-age=120');
+  res.json(result);
+});
+
+// ── LIVE AI ENDPOINTS ──────────────────────────────────────────────────────────
+// These call Gemini fresh (use for user queries)
+
+app.post('/api/ask', aiLimiter, async (req, res) => {
+  const { query } = req.body;
+  if (!query || typeof query !== 'string' || query.length > 600)
+    return res.status(400).json({ error: 'Invalid query.' });
+
+  try {
+    // Get latest news context
+    const newsData = load('raw-news.json');
+    const newsContext = newsData?.articles?.slice(0,12)
+      .map(a => `- ${a.title} (${a.source})`).join('\n') || 'No cached news available.';
+
+    const prompt = `You are a geopolitical intelligence analyst. Answer this question clearly and factually for a general audience.
+
+Question: ${query}
+
+Use these latest news headlines as context (from the last hour):
+${newsContext}
+
+Write in plain English. Be direct and informative. Under 250 words. If the question is about an ongoing conflict, mention the latest developments you know of.`;
+
+    const text = await ask(prompt, { maxTokens: 800 });
+    res.json({ text, query, generatedAt: new Date().toISOString() });
+  } catch (e) {
+    console.error('[/api/ask]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Live impact analysis
+app.post('/api/impact', aiLimiter, async (req, res) => {
+  const { type } = req.body;
+  const prompts = {
+    economic: `Write a clear economic analysis (250 words) of how the current active wars (US-Israel vs Iran, India-Pakistan, Pakistan-Afghanistan, Russia-Ukraine) are affecting the global economy as of April 2026. Focus on: Hormuz blockade, oil prices, shipping costs, global inflation, India's specific exposure. Plain English, not jargon.`,
+    india: `Write a clear analysis (250 words) of how all 4 active wars are affecting India specifically right now. Cover: oil import crisis, US tariff shock, Pakistan border tension, INR weakness, 8M+ Indian workers in Gulf. What should ordinary Indians know? Plain language.`,
+    humanitarian: `Write a clear humanitarian impact analysis (250 words) across all 4 active wars. Iran casualties, Afghan civilian situation, Ukraine Year 4 displacement, food security crisis. Plain English, for a general audience.`,
+    geopolitical: `Write a clear geopolitical analysis (250 words) of how 4 simultaneous wars are reshaping the global order. US overextension, China's Taiwan positioning, NATO fractures, Global South neutrality, nuclear risk. Plain English.`,
+    advisories: `Write practical advice (250 words) for Indian citizens during the current global conflict situation. Cover: financial safety steps, travel advisories, what sectors to invest/avoid, how to verify war news, what border-state residents should know. Practical, actionable guidance.`
+  };
+  if (!prompts[type]) return res.status(400).json({ error: 'Invalid type.' });
+  try {
+    const text = await ask(prompts[type], { maxTokens: 900 });
+    res.json({ text, type, generatedAt: new Date().toISOString() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── MANUAL UPDATE TRIGGER ──────────────────────────────────────────────────────
+app.post('/api/admin/update', async (req, res) => {
+  const adminKey = req.headers['x-admin-key'];
+  if (process.env.ADMIN_KEY && adminKey !== process.env.ADMIN_KEY)
+    return res.status(403).json({ error: 'Unauthorized.' });
+  res.json({ message: 'Update started. Check /api/update-log in ~60 seconds.' });
+  runUpdate({ verbose: true }).catch(err => console.error('[manual update]', err));
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+  const log = load('update-log.json');
+  res.json({
+    status: 'ok',
+    uptime: Math.floor(process.uptime()),
+    lastUpdate: log?.lastUpdate || 'Never',
+    nextUpdate: log?.nextUpdate || 'Unknown',
+    dataReady: !!load('conflicts.json'),
+    updateIntervalMinutes: UPDATE_MINS
+  });
+});
+
+// ── SPA ROUTING — serve index.html for all non-API routes ─────────────────────
+app.get('/conflict/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'conflict.html'));
+});
+
+// ── CRON SCHEDULER ────────────────────────────────────────────────────────────
+// Convert minutes interval to cron expression
+function minutesToCron(mins) {
+  if (mins >= 60) {
+    const hours = Math.floor(mins / 60);
+    return `0 */${hours} * * *`;  // every N hours
+  }
+  return `*/${mins} * * * *`;  // every N minutes
+}
+
+const cronExpr = minutesToCron(UPDATE_MINS);
+console.log(`[scheduler] Auto-update every ${UPDATE_MINS} minutes (cron: ${cronExpr})`);
+
+cron.schedule(cronExpr, async () => {
+  console.log(`[scheduler] ═══ Hourly update triggered at ${new Date().toISOString()} ═══`);
+  try {
+    await runUpdate({ verbose: true });
+  } catch (err) {
+    console.error('[scheduler] Update failed:', err.message);
+  }
+}, { timezone: 'Asia/Kolkata' });
+
+// ── START ──────────────────────────────────────────────────────────────────────
+app.listen(PORT, () => {
+  console.log('');
+  console.log('╔══════════════════════════════════════════════╗');
+  console.log('║  WORLD WAR WATCH v2 — Server Online          ║');
+  console.log(`║  http://localhost:${PORT}                        ║`);
+  console.log('╚══════════════════════════════════════════════╝');
+  console.log('');
+  const _k = process.env.GEMINI_API_KEY || '';
+  const _masked = _k && _k !== 'your-gemini-api-key-here' ? `✓ Key set (${_k.slice(0,4)}...${_k.slice(-4)})` : '✗ Not set — see .env.example';
+  console.log(`Gemini API:     ${_masked}`);
+  console.log(`Data ready:     ${load('conflicts.json') ? '✓ Yes' : '✗ Run: npm run update'}`);
+  console.log(`Auto-update:    Every ${UPDATE_MINS} minutes`);
+  console.log(`Schedule:       ${cronExpr} (Asia/Kolkata)`);
+  console.log('');
+});
+
+module.exports = app;

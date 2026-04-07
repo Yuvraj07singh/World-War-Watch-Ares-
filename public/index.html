@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>World War Watch — Global Conflict Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070a;--bg2:#0e0e12;--bg3:#15151a;--bg4:#1c1c22;
+  --b1:#22222a;--b2:#2e2e38;--b3:#3a3a46;
+  --red:#e02010;--red2:#901408;--red3:#1e0604;
+  --amber:#d08000;--amb2:#6a4000;
+  --blue:#2878c8;--blue2:#0e2848;
+  --green:#28883a;
+  --t1:#f0e8cc;--t2:#c0b490;--t3:#807060;--t4:#484038;
+  --inter:'Inter',sans-serif;
+  --head:'Bebas Neue',sans-serif;
+  --mono:'Share Tech Mono',monospace;
+  --radius:3px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--t1);font-family:var(--inter);font-size:14px;line-height:1.6;overflow-x:hidden;min-height:100vh;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+
+/* GRAIN */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+
+.wrap{max-width:1400px;margin:0 auto;padding:0 18px 80px;}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;gap:14px;padding:14px 0 12px;border-bottom:2px solid var(--red2);flex-wrap:wrap;}
+.hdr-mark{background:var(--red);font-family:var(--head);font-size:14px;letter-spacing:.1em;color:#fff;padding:5px 11px;flex-shrink:0;}
+.hdr-title{font-family:var(--head);font-size:clamp(22px,3.5vw,36px);letter-spacing:.07em;color:var(--t1);text-transform:uppercase;line-height:1;white-space:nowrap;}
+.hdr-sep{width:1px;height:28px;background:var(--b2);flex-shrink:0;}
+.hdr-meta{flex:1;min-width:0;}
+.hdr-sub{font-size:9px;letter-spacing:.2em;color:var(--t4);text-transform:uppercase;font-weight:500;}
+.hdr-ts{font-size:12px;color:var(--t3);font-weight:400;margin-top:1px;}
+.hdr-right{display:flex;align-items:center;gap:12px;margin-left:auto;flex-shrink:0;}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(224,32,16,.12);border:1px solid var(--red2);padding:5px 10px;border-radius:var(--radius);}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(224,32,16,.5)}50%{opacity:.3;box-shadow:0 0 0 5px rgba(224,32,16,0)}}
+.live-txt{font-size:10px;letter-spacing:.16em;color:var(--red);text-transform:uppercase;font-weight:600;}
+.war-counter{text-align:right;}
+.wc-num{font-family:var(--head);font-size:28px;color:var(--red);line-height:1;}
+.wc-lbl{font-size:9px;letter-spacing:.15em;color:var(--t4);text-transform:uppercase;font-weight:500;}
+
+/* ── ALERT ── */
+.alert{background:linear-gradient(90deg,#140300,#0a0100);border-top:1px solid #380a00;border-bottom:1px solid #1c0500;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.a-badge{font-size:9px;letter-spacing:.2em;color:var(--red);text-transform:uppercase;font-weight:700;background:rgba(224,32,16,.1);padding:3px 9px;border:1px solid var(--red2);white-space:nowrap;}
+.a-msg{font-size:12px;color:#d84030;flex:1;min-width:160px;font-weight:400;}
+.a-time{font-family:var(--head);font-size:17px;color:var(--red);margin-left:auto;white-space:nowrap;}
+
+/* ── TICKER ── */
+.ticker{background:var(--bg2);border-bottom:1px solid var(--b1);overflow:hidden;padding:7px 0;cursor:pointer;}
+.ticker:hover .t-inner{animation-play-state:paused;}
+.t-inner{display:flex;gap:60px;animation:ticker 80s linear infinite;white-space:nowrap;width:max-content;}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{font-size:11px;letter-spacing:.05em;color:var(--t3);text-transform:uppercase;font-weight:500;}
+.ti.hot{color:var(--red);font-weight:600;}
+.t-div{color:var(--red2);}
+
+/* ── UPDATE BAR ── */
+.ubar{background:var(--bg2);border-bottom:1px solid var(--b1);padding:6px 0;display:flex;align-items:center;gap:12px;font-size:10px;color:var(--t4);letter-spacing:.12em;text-transform:uppercase;font-weight:400;}
+.ubar-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+.ubar-text{flex:1;}
+.ubar-btn{background:none;border:1px solid var(--b2);color:var(--t4);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;cursor:pointer;border-radius:var(--radius);font-weight:500;transition:all .15s;}
+.ubar-btn:hover{color:var(--t2);border-color:var(--t3);}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;gap:12px;padding:20px 0 12px;}
+.sh-label{font-size:10px;letter-spacing:.25em;color:var(--t4);text-transform:uppercase;font-weight:600;white-space:nowrap;}
+.sh-line{flex:1;height:1px;background:var(--b1);}
+.sh-right{font-size:10px;color:var(--t4);letter-spacing:.08em;white-space:nowrap;font-weight:500;}
+
+/* ── CONFLICT CARDS ── */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px;background:var(--b1);}
+.ccard{background:var(--bg2);padding:20px;position:relative;overflow:hidden;cursor:pointer;transition:background .2s,transform .15s;text-decoration:none;display:block;color:inherit;}
+.ccard:hover{background:var(--bg3);transform:translateY(-1px);}
+.ccard:focus{outline:2px solid var(--red2);outline-offset:2px;}
+.ccard::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;}
+.ccard.lv-crit::before{background:var(--red);}
+.ccard.lv-high::before{background:var(--amber);}
+.ccard.lv-elev::before{background:var(--blue);}
+.cc-wm{position:absolute;bottom:-8px;right:-4px;font-family:var(--head);font-size:90px;color:rgba(255,255,255,.012);pointer-events:none;line-height:1;user-select:none;}
+.cc-theater{font-size:9px;letter-spacing:.2em;color:var(--t4);text-transform:uppercase;margin-bottom:5px;font-weight:500;}
+.cc-name{font-family:var(--head);font-size:27px;letter-spacing:.05em;color:var(--t1);text-transform:uppercase;line-height:1.05;}
+.cc-op{font-size:11px;color:var(--t3);margin-top:3px;font-weight:400;}
+.cc-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;letter-spacing:.15em;font-weight:700;padding:3px 9px;text-transform:uppercase;margin-top:10px;border-radius:2px;}
+.cc-badge.r{background:rgba(224,32,16,.1);color:var(--red);border:1px solid var(--red2);}
+.cc-badge.a{background:rgba(208,128,0,.1);color:var(--amber);border:1px solid var(--amb2);}
+.cc-badge.b{background:rgba(40,120,200,.1);color:var(--blue);border:1px solid var(--blue2);}
+.cc-stats{display:flex;gap:18px;margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);flex-wrap:wrap;}
+.cc-sv{font-family:var(--head);font-size:22px;color:var(--t1);line-height:1;}
+.cc-sl{font-size:9px;letter-spacing:.1em;color:var(--t4);text-transform:uppercase;margin-top:2px;font-weight:500;}
+.cc-summary{font-size:12px;color:var(--t2);line-height:1.7;margin-top:12px;padding-top:10px;border-top:1px dashed var(--b1);}
+.cc-last{font-size:10px;color:var(--t4);margin-top:8px;font-weight:400;}
+.cc-arrow{font-size:11px;color:var(--t4);margin-top:10px;letter-spacing:.1em;font-weight:500;opacity:0;transition:opacity .2s;text-transform:uppercase;}
+.ccard:hover .cc-arrow{opacity:1;}
+.cc-headlines{margin-top:10px;padding-top:8px;border-top:1px solid var(--b1);}
+.cc-hl{font-size:10px;color:var(--t3);line-height:1.5;margin-bottom:3px;padding-left:10px;position:relative;font-weight:400;}
+.cc-hl::before{content:'';position:absolute;left:0;top:6px;width:4px;height:4px;border-radius:50%;background:var(--b3);}
+
+/* ── SKELETON ── */
+.skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200%;animation:shimmer 1.5s infinite;border-radius:2px;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── DOOMSDAY ── */
+.doom-strip{background:var(--bg2);border:1px solid var(--b1);border-left:4px solid var(--red);padding:18px 20px;cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.doom-strip:hover{background:var(--bg3);}
+.doom-clock{width:68px;height:68px;flex-shrink:0;}
+.doom-clock svg{width:100%;height:100%;}
+.doom-info{flex:1;min-width:180px;}
+.doom-time{font-family:var(--head);font-size:36px;color:var(--red);line-height:1;}
+.doom-lbl{font-size:11px;color:var(--t3);margin-top:2px;font-weight:400;}
+.doom-desc{font-size:12px;color:var(--t2);margin-top:8px;line-height:1.6;}
+.doom-cta{font-size:10px;letter-spacing:.12em;color:var(--t4);text-transform:uppercase;margin-top:8px;font-weight:500;}
+
+/* ── TENSION ── */
+.tension-box{background:var(--bg2);border:1px solid var(--b1);padding:20px;}
+.t-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.t-row:last-of-type{margin-bottom:0;}
+.t-lbl{font-size:12px;color:var(--t2);min-width:210px;font-weight:400;}
+.t-bar{flex:1;height:5px;background:var(--b1);border-radius:3px;overflow:hidden;}
+.t-fill{height:100%;border-radius:3px;transition:width 1.2s ease;}
+.t-pct{font-family:var(--head);font-size:16px;color:var(--t2);min-width:46px;text-align:right;}
+.t-note{font-size:10px;color:var(--t4);letter-spacing:.12em;text-transform:uppercase;margin-top:14px;font-weight:400;}
+
+/* ── EVENTS ── */
+.events-box{background:var(--bg2);border:1px solid var(--b1);overflow:hidden;}
+.ev-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--b1);transition:background .15s;}
+.ev-row:last-child{border-bottom:none;}
+.ev-row:hover{background:var(--bg3);}
+.ev-date-box{text-align:center;min-width:50px;}
+.ev-d{font-family:var(--head);font-size:24px;color:var(--t3);line-height:1;}
+.ev-m{font-size:9px;letter-spacing:.15em;color:var(--t4);text-transform:uppercase;font-weight:500;}
+.ev-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.ev-dot.r{background:var(--red);}
+.ev-dot.a{background:var(--amber);}
+.ev-dot.b{background:var(--blue);}
+.ev-info{flex:1;}
+.ev-title{font-size:13px;color:var(--t1);font-weight:600;}
+.ev-desc{font-size:11px;color:var(--t2);margin-top:2px;}
+.ev-tag{font-size:9px;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;padding:3px 8px;border:1px solid var(--b2);white-space:nowrap;border-radius:2px;font-weight:500;}
+
+/* ── NUCLEAR ── */
+.nuke-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px;background:var(--b1);}
+.ncell{background:var(--bg2);padding:18px;}
+.nc-country{font-size:10px;letter-spacing:.18em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:4px;}
+.nc-risk{font-family:var(--head);font-size:21px;letter-spacing:.04em;}
+.nc-risk.r{color:var(--red);}
+.nc-risk.a{color:var(--amber);}
+.nc-risk.b{color:var(--blue);}
+.nc-wh{font-size:11px;color:var(--t3);margin-top:4px;font-weight:400;}
+.nc-note{font-size:11px;color:var(--t3);margin-top:8px;line-height:1.55;}
+
+/* ── ECO ── */
+.eco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:2px;background:var(--b1);}
+.ecell{background:var(--bg2);padding:14px 16px;transition:background .15s;}
+.ecell:hover{background:var(--bg3);}
+.e-lbl{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:5px;}
+.e-val{font-family:var(--head);font-size:21px;letter-spacing:.04em;line-height:1;}
+.e-val.r{color:var(--red);}
+.e-val.a{color:var(--amber);}
+.e-val.g{color:var(--green);}
+.e-note{font-size:10px;color:var(--t4);margin-top:4px;font-weight:400;}
+
+/* ── IMPACT TABS ── */
+.tabs-header{display:flex;gap:2px;background:var(--b1);border:1px solid var(--b1);border-bottom:none;overflow-x:auto;}
+.tab-btn{flex:1;min-width:fit-content;background:var(--bg2);padding:11px 16px;font-size:11px;letter-spacing:.12em;color:var(--t4);text-transform:uppercase;cursor:pointer;border:none;white-space:nowrap;font-weight:600;transition:all .15s;font-family:var(--inter);}
+.tab-btn.on{background:var(--bg3);color:var(--t1);border-bottom:2px solid var(--red);}
+.tab-btn:hover:not(.on){background:var(--bg3);color:var(--t2);}
+.tab-panel{display:none;background:var(--bg2);border:1px solid var(--b1);padding:20px;}
+.tab-panel.on{display:block;}
+.tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:16px;}
+.tpcell{background:var(--bg);padding:14px;}
+.tpc-lbl{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:5px;}
+.tpc-val{font-family:var(--head);font-size:23px;line-height:1;}
+.tpc-val.r{color:var(--red);}
+.tpc-val.a{color:var(--amber);}
+.tpc-val.g{color:var(--green);}
+.tpc-note{font-size:9px;color:var(--t4);margin-top:3px;font-weight:400;}
+.tp-text{font-size:12.5px;color:var(--t2);line-height:1.85;}
+.tp-text strong{color:var(--t1);font-weight:600;}
+.ai-btn{background:var(--bg);border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 16px;cursor:pointer;border-radius:var(--radius);font-weight:600;transition:all .15s;margin-top:14px;font-family:var(--inter);}
+.ai-btn:hover:not(:disabled){background:var(--bg3);color:var(--t1);border-color:var(--t3);}
+.ai-btn:disabled{opacity:.35;cursor:not-allowed;}
+.ai-out{display:none;font-size:12.5px;color:var(--t2);line-height:1.85;margin-top:14px;padding-top:12px;border-top:1px dashed var(--b1);}
+.ai-out.on{display:block;}
+
+/* ── BRIEFING ── */
+.brief-wrap{background:var(--bg2);border:1px solid var(--b1);padding:22px;}
+.brief-note{font-size:10px;color:var(--t4);letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;font-weight:500;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{font-size:11px;letter-spacing:.06em;color:var(--t3);border:1px solid var(--b2);padding:6px 12px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:500;transition:all .15s;}
+.chip:hover{color:var(--t1);border-color:var(--b3);}
+.q-row{display:flex;gap:0;margin-bottom:14px;}
+.q-input{flex:1;background:var(--bg);border:1px solid var(--b2);border-right:none;color:var(--t1);font-family:var(--inter);font-size:13px;padding:11px 15px;outline:none;font-weight:400;border-radius:var(--radius) 0 0 var(--radius);}
+.q-input::placeholder{color:var(--t4);}
+.q-input:focus{border-color:var(--t3);}
+.q-btn{background:var(--bg);border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:11px 16px;cursor:pointer;font-weight:600;white-space:nowrap;border-radius:0 var(--radius) var(--radius) 0;font-family:var(--inter);transition:all .15s;}
+.q-btn:hover:not(:disabled){background:var(--bg3);color:var(--t1);}
+.q-btn:disabled{opacity:.35;cursor:not-allowed;}
+.b-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.b-btn{background:var(--bg);border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:10px 16px;cursor:pointer;font-weight:600;border-radius:var(--radius);font-family:var(--inter);transition:all .15s;}
+.b-btn:hover:not(:disabled){background:var(--bg3);color:var(--t1);}
+.b-btn:disabled{opacity:.35;cursor:not-allowed;}
+.b-btn.prim{border-color:var(--red2);color:var(--red);}
+.b-btn.prim:hover:not(:disabled){background:rgba(224,32,16,.08);border-color:var(--red);}
+.b-out{display:none;background:var(--bg);border:1px solid var(--b1);border-left:3px solid var(--t3);padding:18px;border-radius:0 var(--radius) var(--radius) var(--radius);}
+.b-out.on{display:block;}
+.b-hdr{font-size:9px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--b1);font-weight:600;}
+.b-txt{font-size:13px;color:var(--t2);line-height:1.9;white-space:pre-wrap;}
+.b-loading{font-size:10px;color:var(--t4);letter-spacing:.16em;text-transform:uppercase;margin-top:6px;animation:blink 1s step-end infinite;display:none;font-weight:500;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* ── NEWS FEED ── */
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2px;background:var(--b1);}
+.news-card{background:var(--bg2);padding:16px;transition:background .15s;text-decoration:none;display:block;color:inherit;}
+.news-card:hover{background:var(--bg3);}
+.nc-source{font-size:9px;letter-spacing:.15em;color:var(--red);text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+.nc-title{font-size:13px;color:var(--t1);font-weight:600;line-height:1.5;}
+.nc-snippet{font-size:11px;color:var(--t3);margin-top:6px;line-height:1.6;}
+.nc-date{font-size:10px;color:var(--t4);margin-top:8px;font-weight:400;}
+.nc-conflict{display:inline-block;font-size:8px;letter-spacing:.12em;color:var(--t4);border:1px solid var(--b2);padding:2px 7px;margin-top:6px;text-transform:uppercase;font-weight:500;border-radius:2px;}
+
+/* ── PIPELINE ── */
+.pipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);}
+.pcell{background:var(--bg);padding:18px;}
+.pc-num{font-family:var(--head);font-size:36px;color:var(--t4);line-height:1;}
+.pc-title{font-size:12px;letter-spacing:.15em;color:var(--t1);text-transform:uppercase;margin-top:5px;font-weight:700;}
+.pc-desc{font-size:12px;color:var(--t2);line-height:1.7;margin-top:8px;}
+.pc-tag{display:inline-block;font-size:9px;letter-spacing:.1em;color:var(--t4);border:1px solid var(--b2);padding:2px 7px;text-transform:uppercase;margin-top:8px;border-radius:2px;font-weight:500;}
+
+/* ── FOOTER ── */
+.footer{display:flex;justify-content:space-between;align-items:flex-end;padding-top:22px;margin-top:26px;border-top:1px solid var(--b1);flex-wrap:wrap;gap:12px;}
+.f-copy{font-size:11px;color:var(--t4);font-weight:400;}
+.f-coord{font-family:var(--mono);font-size:10px;color:var(--t4);text-align:right;line-height:1.8;}
+
+/* ── DOOM MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9000;display:none;overflow-y:auto;padding:20px 14px;}
+.modal-overlay.on{display:block;}
+.doom-modal{background:var(--bg);border:1px solid var(--b2);border-top:3px solid var(--red);max-width:840px;margin:0 auto;}
+.dm-hdr{background:var(--bg2);padding:20px 22px;border-bottom:1px solid var(--b1);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;}
+.dm-title{font-family:var(--head);font-size:30px;letter-spacing:.06em;color:var(--red);}
+.dm-sub{font-size:10px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;margin-top:3px;font-weight:500;}
+.m-close{background:none;border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;padding:7px 13px;cursor:pointer;border-radius:var(--radius);font-weight:600;font-family:var(--inter);transition:all .15s;flex-shrink:0;}
+.m-close:hover{border-color:var(--red);color:var(--red);}
+.dm-body{padding:24px 22px;}
+.dm-clock-row{display:flex;align-items:center;gap:30px;flex-wrap:wrap;margin-bottom:28px;}
+.dm-svg{width:185px;height:185px;flex-shrink:0;}
+.dm-info{flex:1;min-width:200px;}
+.dm-big-time{font-family:var(--head);font-size:56px;color:var(--red);line-height:1;}
+.dm-time-lbl{font-size:13px;color:var(--t2);letter-spacing:.12em;text-transform:uppercase;font-weight:500;margin-top:3px;}
+.dm-reason{font-size:13px;color:var(--t3);margin-top:12px;line-height:1.7;}
+.dm-reason strong{color:var(--t2);font-weight:600;}
+.dm-factors{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:24px;}
+.df{background:var(--bg2);padding:16px;}
+.df-lbl{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:5px;}
+.df-val{font-family:var(--head);font-size:20px;line-height:1;}
+.df-val.r{color:var(--red);}
+.df-val.a{color:var(--amber);}
+.df-note{font-size:11px;color:var(--t4);margin-top:4px;}
+.dm-sec-title{font-size:10px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:12px;}
+.dm-timeline{position:relative;padding-left:90px;margin-bottom:22px;}
+.dm-timeline::before{content:'';position:absolute;left:82px;top:0;bottom:0;width:1px;background:var(--b2);}
+.dtl{display:flex;gap:14px;margin-bottom:12px;position:relative;}
+.dtl-yr{font-family:var(--head);font-size:14px;color:var(--t4);position:absolute;left:-90px;line-height:1;padding-top:3px;}
+.dtl-dot{width:8px;height:8px;border-radius:50%;background:var(--b2);flex-shrink:0;margin-top:3px;position:relative;z-index:1;}
+.dtl-dot.key{background:var(--red);}
+.dtl-t{font-family:var(--head);font-size:18px;color:var(--t1);line-height:1;}
+.dtl-d{font-size:11px;color:var(--t3);margin-top:2px;}
+.dm-midnight{background:rgba(224,32,16,.06);border:1px solid var(--red2);padding:18px;border-radius:var(--radius);}
+.dm-mt{font-size:11px;letter-spacing:.18em;color:var(--red);text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.dm-md{font-size:13px;color:var(--t2);line-height:1.85;}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  .hdr{gap:8px;padding:10px 0 8px;}
+  .hdr-sep{display:none;}
+  .dm-big-time{font-size:42px;}
+  .dm-svg{width:130px;height:130px;}
+  .t-lbl{min-width:130px;}
+  .tabs-header{flex-wrap:nowrap;overflow-x:auto;}
+}
+@media(max-width:420px){
+  .wrap{padding:0 10px 60px;}
+  .hdr{flex-direction:column;align-items:flex-start;}
+  .hdr-right{margin-left:0;width:100%;flex-direction:row;justify-content:space-between;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-mark">WWW</div>
+  <div class="hdr-title">World War Watch</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-meta">
+    <div class="hdr-sub">Global Geopolitics & Conflict Intelligence</div>
+    <div class="hdr-ts" id="hdrTs">Loading...</div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="ldot"></div><span class="live-txt">Live</span></div>
+    <div class="war-counter"><div class="wc-num">04</div><div class="wc-lbl">Active wars</div></div>
+  </div>
+</div>
+
+<!-- ALERT -->
+<div class="alert">
+  <span class="ldot"></span>
+  <span class="a-badge">Critical</span>
+  <span class="a-msg" id="alertMsg">Loading latest intelligence...</span>
+  <span class="a-time" id="alertTime"></span>
+</div>
+
+<!-- TICKER -->
+<div class="ticker" title="Hover to pause">
+  <div class="t-inner" id="tickerEl">
+    <span class="ti hot">// World War Watch — Loading live news feed</span>
+    <span class="t-div"> /// </span>
+    <span class="ti">Fetching RSS feeds from 12 global sources</span>
+    <span class="t-div"> /// </span>
+    <span class="ti hot">// World War Watch — Loading live news feed</span>
+    <span class="t-div"> /// </span>
+    <span class="ti">Fetching RSS feeds from 12 global sources</span>
+  </div>
+</div>
+
+<!-- UPDATE BAR -->
+<div class="ubar">
+  <div class="ubar-dot"></div>
+  <span class="ubar-text" id="ubarText">Loading...</span>
+  <button class="ubar-btn" onclick="init()">↻ Refresh</button>
+</div>
+
+<!-- CONFLICT CARDS -->
+<div class="sh">
+  <span class="sh-label">// Active Conflicts — Click any card for full history, leader statements & analysis</span>
+  <div class="sh-line"></div>
+  <span class="sh-right">04 Active</span>
+</div>
+<div class="cgrid" id="conflictGrid">
+  <div class="ccard lv-crit"><div style="height:220px" class="skeleton"></div></div>
+  <div class="ccard lv-high"><div style="height:220px" class="skeleton"></div></div>
+  <div class="ccard lv-high"><div style="height:220px" class="skeleton"></div></div>
+  <div class="ccard lv-elev"><div style="height:220px" class="skeleton"></div></div>
+</div>
+
+<!-- DOOMSDAY -->
+<div class="sh">
+  <span class="sh-label">// Doomsday Clock · Bulletin of Atomic Scientists</span>
+  <div class="sh-line"></div>
+  <span class="sh-right" id="doomBadge">Set Jan 2026</span>
+</div>
+<div class="doom-strip" onclick="openDoom()" role="button" tabindex="0">
+  <div class="doom-clock">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="46" fill="#0a0808" stroke="#2a1818" stroke-width="1.5"/>
+      <rect x="47" y="7" width="6" height="3" fill="#c01000"/>
+      <line x1="50" y1="50" x2="51.3" y2="14" stroke="#d42000" stroke-width="2.5" stroke-linecap="round" transform="rotate(2.5,50,50)">
+        <animateTransform attributeName="transform" type="rotate" from="2.5 50 50" to="362.5 50 50" dur="60s" repeatCount="indefinite"/>
+      </line>
+      <circle cx="50" cy="50" r="3" fill="#d42000"/>
+    </svg>
+  </div>
+  <div class="doom-info">
+    <div class="doom-time" id="doomTime">89 sec</div>
+    <div class="doom-lbl" id="doomLbl">to midnight · set January 2026 · Closest ever in 79-year history</div>
+    <div class="doom-desc">Set by the Bulletin of Atomic Scientists reflecting 4 simultaneous active wars, Iranian nuclear escalation, Pakistan two-front nuclear risk, and the Hormuz crisis. Previous record: 90 seconds (2023–2025).</div>
+    <div class="doom-cta">→ Click for full Doomsday Clock interface, historical timeline & risk breakdown</div>
+  </div>
+</div>
+
+<!-- TENSION METERS -->
+<div class="sh"><span class="sh-label">// Conflict Tension Index</span><div class="sh-line"></div></div>
+<div class="tension-box">
+  <div class="t-row"><span class="t-lbl">US + Israel vs Iran</span><div class="t-bar"><div class="t-fill" id="tf0" style="width:0%;background:linear-gradient(90deg,var(--amber),var(--red))"></div></div><span class="t-pct" id="tp0">--</span></div>
+  <div class="t-row"><span class="t-lbl">India vs Pakistan</span><div class="t-bar"><div class="t-fill" id="tf1" style="width:0%;background:linear-gradient(90deg,#6a3000,var(--amber))"></div></div><span class="t-pct" id="tp1">--</span></div>
+  <div class="t-row"><span class="t-lbl">Pakistan vs Afghanistan</span><div class="t-bar"><div class="t-fill" id="tf2" style="width:0%;background:linear-gradient(90deg,#6a3000,var(--amber))"></div></div><span class="t-pct" id="tp2">--</span></div>
+  <div class="t-row"><span class="t-lbl">Russia vs Ukraine</span><div class="t-bar"><div class="t-fill" id="tf3" style="width:0%;background:linear-gradient(90deg,var(--blue2),var(--blue))"></div></div><span class="t-pct" id="tp3">--</span></div>
+  <div class="t-row"><span class="t-lbl">US–India Trade War</span><div class="t-bar"><div class="t-fill" id="tf4" style="width:48%;background:linear-gradient(90deg,#6a3000,#a06000)"></div></div><span class="t-pct" id="tp4">48%</span></div>
+  <div class="t-note">Tension = (active_hostilities×0.4) + (escalation_rhetoric×0.25) + (casualty_rate×0.2) + (nuclear_risk×0.15) — scored hourly from live news</div>
+</div>
+
+<!-- KEY DATES -->
+<div class="sh"><span class="sh-label">// Critical Upcoming Dates — Flashpoint Calendar</span><div class="sh-line"></div></div>
+<div class="events-box" id="eventsList"><div style="padding:18px" class="skeleton" style="height:60px"></div></div>
+
+<!-- NUCLEAR RISK -->
+<div class="sh"><span class="sh-label">// Nuclear Risk Tracker — Active Nuclear States in Conflict Zones</span><div class="sh-line"></div></div>
+<div class="nuke-grid">
+  <div class="ncell"><div class="nc-country">Pakistan</div><div class="nc-risk r">Extreme</div><div class="nc-wh">~165 warheads · Active</div><div class="nc-note">Fighting two-front war (India + Afghanistan). Nuclear use threatened if existentially threatened.</div></div>
+  <div class="ncell"><div class="nc-country">Iran</div><div class="nc-risk r">Extreme</div><div class="nc-wh">~84% enriched · No warhead confirmed</div><div class="nc-note">One step from weapons-grade uranium. Under direct US-Israel attack. "Gates of hell" rhetoric.</div></div>
+  <div class="ncell"><div class="nc-country">India</div><div class="nc-risk a">High</div><div class="nc-wh">~170 warheads · No-first-use</div><div class="nc-note">No-first-use policy. Pakistan's Kolkata threat and two-front pressure may force doctrine review.</div></div>
+  <div class="ncell"><div class="nc-country">Russia</div><div class="nc-risk a">High</div><div class="nc-wh">~6,255 warheads · Tactical use threatened</div><div class="nc-note">Year 4 Ukraine war. Repeated signals on tactical nuclear use if NATO crosses red lines.</div></div>
+  <div class="ncell"><div class="nc-country">USA</div><div class="nc-risk b">Moderate</div><div class="nc-wh">~5,550 warheads · Active Middle East</div><div class="nc-note">Directly engaged vs Iran. No nuclear signaling yet. Escalation ladder remains unpredictable.</div></div>
+  <div class="ncell"><div class="nc-country">Israel</div><div class="nc-risk a">High</div><div class="nc-wh">~90 warheads (undeclared)</div><div class="nc-note">Ambiguous doctrine. If Iran achieves weapon capability, Israeli nuclear posture could shift.</div></div>
+</div>
+
+<!-- ECO STRIP -->
+<div class="sh"><span class="sh-label">// Economic War Indicators — Updated Hourly</span><div class="sh-line"></div></div>
+<div class="eco-grid" id="ecoGrid">
+  <div class="ecell"><div class="e-lbl">Loading...</div><div class="e-val skeleton" style="height:21px;width:60px;"></div></div>
+</div>
+
+<!-- GLOBAL IMPACTS -->
+<div class="sh"><span class="sh-label">// Global Impacts — What These Wars Are Doing To The World</span><div class="sh-line"></div></div>
+<div class="tabs-header">
+  <button class="tab-btn on" onclick="switchTab(this,'economic')">Economic</button>
+  <button class="tab-btn" onclick="switchTab(this,'india')">India Impact</button>
+  <button class="tab-btn" onclick="switchTab(this,'humanitarian')">Humanitarian</button>
+  <button class="tab-btn" onclick="switchTab(this,'geopolitical')">Geopolitical</button>
+  <button class="tab-btn" onclick="switchTab(this,'advisories')">What To Do</button>
+</div>
+<div class="tab-panel on" id="tab-economic">
+  <div class="tp-grid">
+    <div class="tpcell"><div class="tpc-lbl">Global GDP</div><div class="tpc-val a">−2.4%</div><div class="tpc-note">IMF estimate</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Oil surge</div><div class="tpc-val r">+40%</div><div class="tpc-note">Since Feb 28</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Shipping</div><div class="tpc-val a">+35%</div><div class="tpc-note">Cape route</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Inflation</div><div class="tpc-val r">Rising</div><div class="tpc-note">Food + energy</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Gold</div><div class="tpc-val g">+28%</div><div class="tpc-note">Safe haven</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Trade disruption</div><div class="tpc-val r">Critical</div><div class="tpc-note">Hormuz + Red Sea</div></div>
+  </div>
+  <div class="tp-text">The simultaneous closure of the Strait of Hormuz and disruption of the Red Sea has created the worst global shipping crisis since World War II. Roughly 30% of global seaborne trade now faces disruption. Energy prices are cascading into every sector — food production, manufacturing, and transport. The IMF has already revised global growth down. Emerging markets are most exposed.</div>
+  <button class="ai-btn" id="ibtn-economic" onclick="fetchImpact('economic')">▶ Get live AI analysis</button>
+  <div class="ai-out" id="iout-economic"></div>
+</div>
+<div class="tab-panel" id="tab-india">
+  <div class="tp-grid">
+    <div class="tpcell"><div class="tpc-lbl">Oil import cost</div><div class="tpc-val r">+40%</div><div class="tpc-note">Hormuz closed</div></div>
+    <div class="tpcell"><div class="tpc-lbl">US tariff</div><div class="tpc-val a">~50%</div><div class="tpc-note">IT, textiles, pharma</div></div>
+    <div class="tpcell"><div class="tpc-lbl">INR vs USD</div><div class="tpc-val a">Weak</div><div class="tpc-note">Capital flight</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Defense spend</div><div class="tpc-val r">Surging</div><div class="tpc-note">Pak border</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Pak border</div><div class="tpc-val r">Fragile</div><div class="tpc-note">Kolkata threat</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Gulf workers</div><div class="tpc-val a">At risk</div><div class="tpc-note">8M+ Indians</div></div>
+  </div>
+  <div class="tp-text">India faces four overlapping crises. The Hormuz blockade directly hits India's oil supply — India imports ~87% of its crude via sea. The 50% US tariff hits India's largest export market. Pakistan ceasefire is fragile with an anniversary flashpoint approaching. And 8+ million Indian workers in Gulf nations are in an active war zone.</div>
+  <button class="ai-btn" id="ibtn-india" onclick="fetchImpact('india')">▶ Get live AI analysis</button>
+  <div class="ai-out" id="iout-india"></div>
+</div>
+<div class="tab-panel" id="tab-humanitarian">
+  <div class="tp-grid">
+    <div class="tpcell"><div class="tpc-lbl">Iran — KIA</div><div class="tpc-val r">2,076+</div><div class="tpc-note">Confirmed</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Iran — Wounded</div><div class="tpc-val a">26,500+</div><div class="tpc-note">Confirmed</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Ukraine displaced</div><div class="tpc-val a">6M+</div><div class="tpc-note">Year 4</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Afghan civilians</div><div class="tpc-val r">Unknown</div><div class="tpc-note">Media blackout</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Food crisis</div><div class="tpc-val r">High</div><div class="tpc-note">Ukraine + oil</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Refugee flows</div><div class="tpc-val a">Rising</div><div class="tpc-note">All 4 theaters</div></div>
+  </div>
+  <div class="tp-text">The multi-front humanitarian crisis is the largest since the Cold War. Iran's civilian infrastructure — hospitals, water, power — is under sustained attack. Afghanistan's media blackout makes casualties unverifiable. Ukraine enters Year 4 with millions displaced. The compounding effect on food security is acute: Iran controls Hormuz, Ukraine supplies wheat.</div>
+  <button class="ai-btn" id="ibtn-humanitarian" onclick="fetchImpact('humanitarian')">▶ Get live AI analysis</button>
+  <div class="ai-out" id="iout-humanitarian"></div>
+</div>
+<div class="tab-panel" id="tab-geopolitical">
+  <div class="tp-grid">
+    <div class="tpcell"><div class="tpc-lbl">US posture</div><div class="tpc-val a">Overextended</div><div class="tpc-note">4 theaters</div></div>
+    <div class="tpcell"><div class="tpc-lbl">China</div><div class="tpc-val a">Watching</div><div class="tpc-note">Taiwan window</div></div>
+    <div class="tpcell"><div class="tpc-lbl">NATO</div><div class="tpc-val a">Strained</div><div class="tpc-note">Trump pressure</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Global South</div><div class="tpc-val a">Neutral</div><div class="tpc-note">India, Brazil, SA</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Nuclear risk</div><div class="tpc-val r">Elevated</div><div class="tpc-note">Iran, Pakistan</div></div>
+    <div class="tpcell"><div class="tpc-lbl">UN effectiveness</div><div class="tpc-val r">Near zero</div><div class="tpc-note">SC deadlocked</div></div>
+  </div>
+  <div class="tp-text">The post-1945 world order is under maximum simultaneous stress. The US is engaged in the Middle East while applying economic pressure on allies. China is strategically waiting — US overextension in Iran is the Taiwan opportunity Beijing has been watching for. The Global South is maintaining strict neutrality across all four conflicts.</div>
+  <button class="ai-btn" id="ibtn-geopolitical" onclick="fetchImpact('geopolitical')">▶ Get live AI analysis</button>
+  <div class="ai-out" id="iout-geopolitical"></div>
+</div>
+<div class="tab-panel" id="tab-advisories">
+  <div class="tp-text" style="margin-bottom:16px;"><strong>For Indians — Financial safety:</strong> Consider moving savings to gold or fixed deposits. The INR is under pressure. Sectors to watch: defense stocks (up), energy (up), IT exports (down due to tariffs), pharma (volatile).<br><br><strong>Travel:</strong> Avoid Middle East, Afghanistan, and Pakistan border regions. If you're working in Gulf, register with Indian embassy and have an emergency plan.<br><br><strong>Information safety:</strong> Verify all war-related claims through Reuters, AP, or All India Radio before sharing. Spreading misinformation during active conflict is a legal risk in India.<br><br><strong>Border-state residents (Punjab, Rajasthan, J&K, Gujarat):</strong> Know your district emergency alert system. Keep 72 hours of essential supplies as a precaution — not panic.</div>
+  <button class="ai-btn" id="ibtn-advisories" onclick="fetchImpact('advisories')">▶ Get latest official advisories</button>
+  <div class="ai-out" id="iout-advisories"></div>
+</div>
+
+<!-- AI BRIEFING -->
+<div class="sh"><span class="sh-label">// Intelligence Briefing — Ask Anything · Powered by Gemini AI + Live RSS News</span><div class="sh-line"></div></div>
+<div class="brief-wrap">
+  <div class="brief-note">// All answers use latest RSS news headlines from the past hour · AI-powered by Google Gemini (free)</div>
+  <div class="chips">
+    <div class="chip" onclick="ask('What is happening right now with the Strait of Hormuz and the Iran war?')">Hormuz now</div>
+    <div class="chip" onclick="ask('Current India-Pakistan ceasefire status and latest developments')">India-Pak today</div>
+    <div class="chip" onclick="ask('How does the Iran war affect India — oil, economy, what should Indians do?')">India impact</div>
+    <div class="chip" onclick="ask('Latest Pakistan-Afghanistan war updates — airstrikes and Taliban response')">Pak-Afghan</div>
+    <div class="chip" onclick="ask('What should Indian investors do right now given all 4 active wars?')">Investor guide</div>
+    <div class="chip" onclick="ask('Is there real nuclear escalation risk in India-Pakistan or Iran war?')">Nuclear risk</div>
+    <div class="chip" onclick="ask('What is China doing during the US-Israel vs Iran war?')">China watch</div>
+    <div class="chip" onclick="ask('Russia-Ukraine latest — ceasefire negotiations and front line status')">Russia-Ukraine</div>
+    <div class="chip" onclick="ask('What are realistic peace or ceasefire scenarios for any of the 4 wars?')">Peace scenarios</div>
+  </div>
+  <div class="q-row">
+    <input class="q-input" id="qInput" type="text" placeholder="Ask any geopolitics question — uses latest news to answer..." />
+    <button class="q-btn" id="qBtn" onclick="ask()">Ask ↗</button>
+  </div>
+  <div class="b-ctrl">
+    <button class="b-btn prim" id="briefBtn" onclick="getLiveBrief()">▶ Generate live briefing</button>
+    <button class="b-btn" onclick="clearBrief()">✕ Clear</button>
+  </div>
+  <div class="b-out" id="bOut">
+    <div class="b-hdr" id="bHdr">// Intelligence Briefing</div>
+    <div class="b-txt" id="bTxt"></div>
+    <div class="b-loading" id="bLoading">// Analyzing latest news...</div>
+  </div>
+</div>
+
+<!-- LIVE NEWS FEED -->
+<div class="sh"><span class="sh-label">// Live News Feed — Last 12 Hours</span><div class="sh-line"></div><span class="sh-right" id="newsCount">Loading...</span></div>
+<div class="news-grid" id="newsGrid">
+  <div class="news-card"><div style="height:100px" class="skeleton"></div></div>
+  <div class="news-card"><div style="height:100px" class="skeleton"></div></div>
+  <div class="news-card"><div style="height:100px" class="skeleton"></div></div>
+</div>
+
+<!-- DATA PIPELINE -->
+<div class="sh"><span class="sh-label">// How This Works — Data Pipeline & Sources</span><div class="sh-line"></div></div>
+<div style="background:var(--bg2);border:1px solid var(--b1);padding:20px;">
+  <div class="pipe-grid">
+    <div class="pcell"><div class="pc-num">01</div><div class="pc-title">12 RSS Feeds</div><div class="pc-desc">BBC World, Al Jazeera, Reuters, Guardian, AP News, NDTV, Times of India, The Hindu, Defense News, Foreign Policy and more. Fetched every hour. No API key needed — completely free.</div><div class="pc-tag">Free · No API key</div></div>
+    <div class="pcell"><div class="pc-num">02</div><div class="pc-title">Gemini AI Analysis</div><div class="pc-desc">Google Gemini 1.5 Flash analyzes the RSS articles and produces structured conflict data, economic indicators, summaries, and daily briefings. Free tier: 15 requests/min, 1M tokens/day — more than enough.</div><div class="pc-tag">Free · 1M tokens/day</div></div>
+    <div class="pcell"><div class="pc-num">03</div><div class="pc-title">Hourly Auto-Update</div><div class="pc-desc">A cron scheduler runs every 60 minutes: fetches RSS → analyzes with Gemini → saves 6 JSON files. Conflict detail pages regenerate every 6 hours (more expensive to generate). Zero human intervention needed.</div><div class="pc-tag">Cron · Every hour</div></div>
+    <div class="pcell"><div class="pc-num">04</div><div class="pc-title">Cached + Live</div><div class="pc-desc">Dashboard loads cached JSON on startup (instant). AI briefings and user queries run live against Gemini using cached news context. Single server + static files. Deploy free on Railway or Render.</div><div class="pc-tag">Node.js · Express</div></div>
+  </div>
+  <div style="font-size:11px;color:var(--t4);margin-top:14px;line-height:1.9;font-weight:400;">
+    Sources: BBC · Al Jazeera · Reuters · AP · The Guardian · NDTV · Times of India · The Hindu · Defense News · Foreign Policy<br>
+    AI: Google Gemini 1.5 Flash (free tier) · News: RSS feeds (free, no API key) · Updates: Every 60 minutes
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="f-copy">© 2026 World War Watch · Free APIs · Auto-updated every hour · Built for truth in wartime</div>
+  <div class="f-coord" id="fCoord">18.6279°N 73.8060°E // Loading...</div>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- DOOMSDAY MODAL -->
+<div class="modal-overlay" id="doomOverlay" onclick="closeDoom(event)">
+  <div class="doom-modal" onclick="event.stopPropagation()">
+    <div class="dm-hdr">
+      <div><div class="dm-title">☢ Doomsday Clock</div><div class="dm-sub">Bulletin of Atomic Scientists · Global nuclear & existential risk indicator</div></div>
+      <button class="m-close" onclick="closeDoomDirect()">✕ Close</button>
+    </div>
+    <div class="dm-body">
+      <div class="dm-clock-row">
+        <svg class="dm-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="cg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#1a0808"/><stop offset="100%" stop-color="#0a0606"/></radialGradient></defs>
+          <circle cx="100" cy="100" r="95" fill="url(#cg)" stroke="#2a1a18" stroke-width="2"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#1a1210" stroke-width="1"/>
+          <line x1="100" y1="14" x2="100" y2="26" stroke="#6a4a44" stroke-width="2.5"/>
+          <line x1="186" y1="100" x2="174" y2="100" stroke="#4a3030" stroke-width="2"/>
+          <line x1="100" y1="186" x2="100" y2="174" stroke="#4a3030" stroke-width="2"/>
+          <line x1="14" y1="100" x2="26" y2="100" stroke="#4a3030" stroke-width="2"/>
+          <rect x="93" y="14" width="14" height="6" fill="#c01000" rx="1"/>
+          <text x="100" y="11" text-anchor="middle" font-family="monospace" font-size="8" fill="#8a3030">MIDNIGHT</text>
+          <line x1="100" y1="100" x2="103" y2="18" stroke="#e01a00" stroke-width="4.5" stroke-linecap="round" transform="rotate(2.5 100 100)">
+            <animateTransform attributeName="transform" type="rotate" from="2.5 100 100" to="362.5 100 100" dur="60s" repeatCount="indefinite"/>
+          </line>
+          <line x1="100" y1="100" x2="100" y2="42" stroke="#a08070" stroke-width="3.5" stroke-linecap="round" transform="rotate(355 100 100)"/>
+          <circle cx="100" cy="100" r="6" fill="#e01a00"/>
+          <circle cx="100" cy="100" r="2.5" fill="#fff" opacity=".35"/>
+        </svg>
+        <div class="dm-info">
+          <div class="dm-big-time">89 seconds</div>
+          <div class="dm-time-lbl">to midnight · set January 2026</div>
+          <div class="dm-reason">
+            <strong>Current setting:</strong> 89 seconds — the closest in the clock's 79-year history.<br>
+            <strong>Previous record:</strong> 90 seconds (Jan 2023 – Jan 2025).<br>
+            <strong>Why it moved:</strong> Operation Epic Fury (US-Israel vs Iran), Pakistan two-front nuclear war risk, renewed Russian nuclear rhetoric in Ukraine Year 4, and the Hormuz crisis disrupting global stability simultaneously.
+          </div>
+        </div>
+      </div>
+      <div class="dm-sec-title">// Why 89 Seconds — Risk Factor Breakdown</div>
+      <div class="dm-factors">
+        <div class="df"><div class="df-lbl">Nuclear risk</div><div class="df-val r">Extreme</div><div class="df-note">Iran 84% enriched, Pakistan two-front, Russia tactical threat</div></div>
+        <div class="df"><div class="df-lbl">Climate disruption</div><div class="df-val a">High</div><div class="df-note">Wars accelerating fossil fuel use, pledges abandoned</div></div>
+        <div class="df"><div class="df-lbl">Disruptive tech</div><div class="df-val a">High</div><div class="df-note">AI-guided munitions, cyberwarfare all theaters</div></div>
+        <div class="df"><div class="df-lbl">Biosecurity</div><div class="df-val a">Elevated</div><div class="df-note">Healthcare collapse in Iran, Yemen, Afghanistan</div></div>
+        <div class="df"><div class="df-lbl">Information war</div><div class="df-val r">Critical</div><div class="df-note">Mass disinformation across all 4 conflict theaters</div></div>
+        <div class="df"><div class="df-lbl">Leadership failure</div><div class="df-val r">Extreme</div><div class="df-note">4 simultaneous wars, no credible multilateral de-escalation</div></div>
+      </div>
+      <div class="dm-sec-title">// Historical Timeline — Doomsday Clock Since 1947</div>
+      <div class="dm-timeline">
+        <div class="dtl"><div class="dtl-yr">1947</div><div class="dtl-dot"></div><div><div class="dtl-t">7 min</div><div class="dtl-d">Clock created. Cold War begins. US nuclear monopoly.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">1953</div><div class="dtl-dot key"></div><div><div class="dtl-t">2 min</div><div class="dtl-d">First Soviet H-bomb test. Nuclear war seemed imminent.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">1963</div><div class="dtl-dot"></div><div><div class="dtl-t">12 min</div><div class="dtl-d">Partial Test Ban Treaty. Tension reduces after Cuba crisis.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">1984</div><div class="dtl-dot key"></div><div><div class="dtl-t">3 min</div><div class="dtl-d">Reagan arms buildup. US-USSR worst since 1950s.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">1991</div><div class="dtl-dot"></div><div><div class="dtl-t">17 min</div><div class="dtl-d">Furthest ever. USSR dissolved. Cold War ends.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">2018</div><div class="dtl-dot key"></div><div><div class="dtl-t">2 min</div><div class="dtl-d">Trump exits Iran deal. North Korea tests. Matched 1953.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">2020</div><div class="dtl-dot key"></div><div><div class="dtl-t">100 sec</div><div class="dtl-d">First time in seconds. COVID + nuclear modernization.</div></div></div>
+        <div class="dtl"><div class="dtl-yr">2023</div><div class="dtl-dot key"></div><div><div class="dtl-t">90 sec</div><div class="dtl-d">New record. Russia invades Ukraine. Nuclear threats explicit.</div></div></div>
+        <div class="dtl" style="background:rgba(224,32,16,.05);padding:8px;margin-left:-8px;">
+          <div class="dtl-yr" style="color:var(--red)">2026</div>
+          <div class="dtl-dot key" style="box-shadow:0 0 0 4px rgba(224,32,16,.25)"></div>
+          <div><div class="dtl-t" style="color:var(--red)">89 sec</div><div class="dtl-d" style="color:var(--t1)">New record. 4 simultaneous wars. Iran nuclear escalation. Pakistan two-front. Hormuz crisis. Operation Epic Fury.</div></div>
+        </div>
+      </div>
+      <div class="dm-midnight">
+        <div class="dm-mt">What Midnight Means</div>
+        <div class="dm-md">Midnight on the Doomsday Clock does not mean a specific event. It represents the point at which global catastrophe — nuclear exchange, civilizational collapse, irreversible climate breakdown — becomes unavoidable. The clock is maintained by the Bulletin of Atomic Scientists, including Nobel laureates. At 89 seconds, they are saying: humanity has never been closer to self-destruction than right now.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const API = '';  // Same origin. Change to 'http://localhost:3000' in dev outside the server
+
+// ── TIME ────────────────────────────────────────────────
+function updateTime(){
+  const now=new Date();
+  const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ds=`${String(now.getDate()).padStart(2,'0')} ${ms[now.getMonth()]} ${now.getFullYear()}`;
+  const ts=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} IST`;
+  const el=document.getElementById('hdrTs'); if(el) el.textContent=`${ds} · ${ts}`;
+  const fc=document.getElementById('fCoord'); if(fc) fc.textContent=`18.6279°N 73.8060°E // ${ds}`;
+  const at=document.getElementById('alertTime'); if(at) at.textContent=ds.toUpperCase();
+}
+updateTime(); setInterval(updateTime, 30000);
+
+// ── INIT ────────────────────────────────────────────────
+async function init(){
+  document.getElementById('ubarText').textContent='Refreshing...';
+  try{
+    const r = await fetch(API+'/api/all');
+    if(!r.ok) throw new Error('Backend data not ready');
+    const d = await r.json();
+    if(d.meta)          renderMeta(d.meta);
+    if(d.conflicts)     renderConflicts(d.conflicts);
+    if(d.economic)      renderEco(d.economic);
+    if(d.upcomingEvents)renderEvents(d.upcomingEvents);
+    if(d.conflicts)     renderTensions(d.conflicts);
+    if(d.updateLog)     renderUpdateBar(d.updateLog);
+    if(d.dailyBriefing){
+      document.getElementById('bOut').classList.add('on');
+      document.getElementById('bHdr').textContent='// Daily Briefing · Updated '+fmtDate(d.dailyBriefing._updatedAt);
+      document.getElementById('bTxt').textContent=d.dailyBriefing.text||'';
+    }
+  }catch(e){
+    document.getElementById('ubarText').textContent='Error: '+e.message+' — Run: npm run update';
+    document.getElementById('conflictGrid').innerHTML=`<div style="grid-column:1/-1;padding:22px;color:var(--amber);font-size:12px;">Backend not ready. Run: <strong>npm run update</strong> then <strong>npm start</strong><br>Error: ${e.message}</div>`;
+  }
+  // Load news separately
+  loadNews();
+}
+
+function fmtDate(iso){
+  if(!iso)return'Unknown';
+  const d=new Date(iso);
+  const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return`${String(d.getDate()).padStart(2,'0')} ${ms[d.getMonth()]} ${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+// ── RENDER META (TICKER + ALERT) ─────────────────────────
+function renderMeta(meta){
+  if(meta.topAlert) document.getElementById('alertMsg').textContent=meta.topAlert;
+  if(meta.tickerItems?.length){
+    const items=[...meta.tickerItems,...meta.tickerItems];
+    document.getElementById('tickerEl').innerHTML=items.map(t=>`<span class="ti${t.hot?' hot':''}">${t.hot?'// ':''}${t.text}</span><span class="t-div"> /// </span>`).join('');
+  }
+}
+
+// ── RENDER CONFLICTS ──────────────────────────────────────
+function renderConflicts(data){
+  const order=['iran','india-pakistan','pakistan-afghanistan','russia-ukraine'];
+  const stamps={iran:['Classified','r'],['india-pakistan']:['High risk','a'],['pakistan-afghanistan']:['Active war','a'],['russia-ukraine']:['Monitoring','b']};
+  const wms={iran:'IRN',['india-pakistan']:'PAK',['pakistan-afghanistan']:'AFG',['russia-ukraine']:'UKR'};
+  document.getElementById('conflictGrid').innerHTML=order.map(id=>{
+    const c=data[id]; if(!c) return '';
+    const [stamp,sc]=stamps[id]||['','r'];
+    const badgeCls=c.level==='crit'?'r':c.level==='high'?'a':'b';
+    const hl=(c.topHeadlines||[]).slice(0,2).map(h=>`<div class="cc-hl">${h}</div>`).join('');
+    return `<a class="ccard lv-${c.level}" href="/conflict/${id}" onclick="return navConflict(event,'${id}')">
+      <div class="cc-wm">${wms[id]||''}</div>
+      <div class="cc-theater">${c.theater}</div>
+      <div class="cc-name">${c.name}</div>
+      <div class="cc-op">${c.operation}${c.dayCount?` · Day ${c.dayCount}`:''}</div>
+      <span class="cc-badge ${badgeCls}">● ${c.badge}</span>
+      <div class="cc-stats">${(c.stats||[]).map(s=>`<div><div class="cc-sv">${s.val}</div><div class="cc-sl">${s.label}</div></div>`).join('')}</div>
+      <div class="cc-summary">${c.summary||''}</div>
+      ${c.lastEvent?`<div class="cc-last">Latest: ${c.lastEvent} ${c.lastEventDate?`(${c.lastEventDate})`:''}</div>`:''}
+      ${hl?`<div class="cc-headlines">${hl}</div>`:''}
+      <div class="cc-arrow">→ Full history, timeline & leader statements</div>
+    </a>`;
+  }).join('');
+}
+
+function navConflict(e, id){
+  e.preventDefault();
+  window.location.href=`/conflict.html?id=${id}`;
+  return false;
+}
+
+// ── RENDER TENSIONS ──────────────────────────────────────
+function renderTensions(data){
+  const order=['iran','india-pakistan','pakistan-afghanistan','russia-ukraine'];
+  order.forEach((id,i)=>{
+    const c=data[id]; if(!c)return;
+    const pct=c.tensionPct||0;
+    setTimeout(()=>{ const f=document.getElementById('tf'+i); if(f)f.style.width=pct+'%'; },200);
+    const tp=document.getElementById('tp'+i); if(tp)tp.textContent=pct+'%';
+  });
+}
+
+// ── RENDER ECO ───────────────────────────────────────────
+function renderEco(data){
+  const indicators=Array.isArray(data)?data:data.indicators;
+  if(!indicators?.length)return;
+  document.getElementById('ecoGrid').innerHTML=indicators.map(i=>`
+    <div class="ecell">
+      <div class="e-lbl">${i.label}</div>
+      <div class="e-val ${i.color||'a'}">${i.val}</div>
+      <div class="e-note">${i.note||''}</div>
+    </div>`).join('');
+}
+
+// ── RENDER EVENTS ────────────────────────────────────────
+function renderEvents(data){
+  if(!Array.isArray(data))return;
+  document.getElementById('eventsList').innerHTML=data.map(e=>`
+    <div class="ev-row">
+      <div class="ev-date-box"><div class="ev-d">${e.date}</div><div class="ev-m">${e.month}</div></div>
+      <div class="ev-dot ${e.severity||'a'}"></div>
+      <div class="ev-info"><div class="ev-title">${e.title}</div><div class="ev-desc">${e.desc}</div></div>
+      <span class="ev-tag">${e.tag}</span>
+    </div>`).join('');
+}
+
+// ── UPDATE BAR ───────────────────────────────────────────
+function renderUpdateBar(log){
+  if(!log)return;
+  document.getElementById('ubarText').textContent=`Last updated: ${fmtDate(log.lastUpdate)} · Next: ${fmtDate(log.nextUpdate)} · ${log.articlesProcessed||0} articles processed · ${log.success?'✓ All data fresh':'⚠ Some errors'}`;
+}
+
+// ── NEWS FEED ────────────────────────────────────────────
+async function loadNews(){
+  try{
+    const r=await fetch(API+'/api/news?limit=12');
+    if(!r.ok)return;
+    const d=await r.json();
+    document.getElementById('newsCount').textContent=`${d.total} articles · Updated ${fmtDate(d._updatedAt)}`;
+    document.getElementById('newsGrid').innerHTML=(d.articles||[]).map(a=>{
+      const ago=timeSince(new Date(a.pubDate));
+      return `<a class="news-card" href="${a.link}" target="_blank" rel="noopener">
+        <div class="nc-source">${a.source.replace(/_/g,' ')}</div>
+        <div class="nc-title">${a.title}</div>
+        ${a.snippet?`<div class="nc-snippet">${a.snippet.substring(0,160)}...</div>`:''}
+        <div class="nc-date">${ago}</div>
+      </a>`;
+    }).join('');
+  }catch{}
+}
+function timeSince(d){
+  const s=Math.floor((Date.now()-d)/1000);
+  if(s<3600)return`${Math.floor(s/60)}m ago`;
+  if(s<86400)return`${Math.floor(s/3600)}h ago`;
+  return`${Math.floor(s/86400)}d ago`;
+}
+
+// ── IMPACT TABS ──────────────────────────────────────────
+function switchTab(el,name){
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('tab-'+name).classList.add('on');
+}
+
+async function fetchImpact(type){
+  const btn=document.getElementById('ibtn-'+type);
+  const out=document.getElementById('iout-'+type);
+  if(btn.disabled)return;
+  btn.disabled=true; btn.textContent='Analyzing...';
+  out.classList.add('on'); out.textContent='Fetching live AI analysis...';
+  try{
+    const r=await fetch(API+'/api/impact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type})});
+    const d=await r.json();
+    out.textContent=d.text||d.error; btn.textContent='▶ Refresh analysis';
+  }catch(e){ out.textContent='Error: '+e.message; btn.textContent='▶ Retry'; }
+  btn.disabled=false;
+}
+
+// ── BRIEFING ────────────────────────────────────────────
+let busy=false;
+async function getLiveBrief(){
+  if(busy)return; busy=true;
+  const btn=document.getElementById('briefBtn'),qb=document.getElementById('qBtn');
+  btn.disabled=qb.disabled=true;
+  document.getElementById('bOut').classList.add('on');
+  document.getElementById('bHdr').textContent='// Live Briefing · '+new Date().toDateString();
+  document.getElementById('bTxt').textContent='';
+  document.getElementById('bLoading').style.display='block';
+  try{
+    const r=await fetch(API+'/api/briefing');
+    const d=await r.json();
+    document.getElementById('bLoading').style.display='none';
+    document.getElementById('bTxt').textContent=d.text||d.error;
+  }catch(e){
+    document.getElementById('bLoading').style.display='none';
+    document.getElementById('bTxt').textContent='Error: '+e.message;
+  }
+  busy=false; btn.disabled=qb.disabled=false;
+}
+
+async function ask(preset){
+  if(busy)return; busy=true;
+  const inp=document.getElementById('qInput');
+  const q=preset||inp.value.trim();
+  if(!q){busy=false;return;}
+  const btn=document.getElementById('briefBtn'),qb=document.getElementById('qBtn');
+  btn.disabled=qb.disabled=true;
+  document.getElementById('bOut').classList.add('on');
+  document.getElementById('bHdr').textContent='// Query: '+q.substring(0,55)+(q.length>55?'...':'');
+  document.getElementById('bTxt').textContent='';
+  document.getElementById('bLoading').style.display='block';
+  try{
+    const r=await fetch(API+'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});
+    const d=await r.json();
+    document.getElementById('bLoading').style.display='none';
+    document.getElementById('bTxt').textContent=d.text||d.error;
+  }catch(e){
+    document.getElementById('bLoading').style.display='none';
+    document.getElementById('bTxt').textContent='Error: '+e.message;
+  }
+  busy=false; btn.disabled=qb.disabled=false;
+  if(!preset)inp.value='';
+}
+function clearBrief(){
+  document.getElementById('bOut').classList.remove('on');
+  document.getElementById('bTxt').textContent='';
+}
+document.getElementById('qInput').addEventListener('keydown',e=>{if(e.key==='Enter')ask();});
+
+// ── DOOM MODAL ───────────────────────────────────────────
+function openDoom(){document.getElementById('doomOverlay').classList.add('on');document.body.style.overflow='hidden';}
+function closeDoom(e){if(e.target===document.getElementById('doomOverlay'))closeDoomDirect();}
+function closeDoomDirect(){document.getElementById('doomOverlay').classList.remove('on');document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDoomDirect();});
+
+// ── START ────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

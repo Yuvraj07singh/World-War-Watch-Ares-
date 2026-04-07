@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Conflict Detail — World War Watch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070a;--bg2:#0e0e12;--bg3:#15151a;--bg4:#1c1c22;--b1:#22222a;--b2:#2e2e38;--b3:#3a3a46;--red:#e02010;--red2:#901408;--amber:#d08000;--amb2:#6a4000;--blue:#2878c8;--blue2:#0e2848;--green:#28883a;--t1:#f0e8cc;--t2:#c0b490;--t3:#807060;--t4:#484038;--inter:'Inter',sans-serif;--head:'Bebas Neue',sans-serif;--mono:'Share Tech Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--t1);font-family:var(--inter);font-size:14px;line-height:1.6;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--b2);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px 80px;}
+
+/* TOP NAV */
+.topnav{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid var(--red2);flex-wrap:wrap;}
+.back-btn{background:none;border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;cursor:pointer;border-radius:3px;font-weight:600;font-family:var(--inter);transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.back-btn:hover{border-color:var(--t3);color:var(--t1);}
+.nav-title{font-family:var(--head);font-size:clamp(18px,3vw,26px);letter-spacing:.07em;color:var(--t1);}
+.nav-badge{font-size:9px;letter-spacing:.15em;color:var(--red);text-transform:uppercase;font-weight:700;background:rgba(224,32,16,.1);padding:3px 9px;border:1px solid var(--red2);margin-left:auto;}
+
+/* HERO */
+.hero{padding:30px 0 24px;border-bottom:1px solid var(--b1);}
+.hero-theater{font-size:10px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:8px;}
+.hero-name{font-family:var(--head);font-size:clamp(36px,7vw,68px);letter-spacing:.04em;color:var(--t1);text-transform:uppercase;line-height:1;}
+.hero-op{font-size:14px;color:var(--t3);margin-top:6px;font-weight:400;}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.hbadge{font-size:10px;letter-spacing:.12em;font-weight:700;padding:4px 12px;text-transform:uppercase;border-radius:2px;}
+.hbadge.r{background:rgba(224,32,16,.1);color:var(--red);border:1px solid var(--red2);}
+.hbadge.a{background:rgba(208,128,0,.1);color:var(--amber);border:1px solid var(--amb2);}
+.hbadge.b{background:rgba(40,120,200,.1);color:var(--blue);border:1px solid var(--blue2);}
+.hero-stats{display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;}
+.hs{border-left:3px solid var(--b2);padding-left:14px;}
+.hs-val{font-family:var(--head);font-size:28px;color:var(--t1);line-height:1;}
+.hs-lbl{font-size:10px;color:var(--t4);margin-top:2px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--b1);margin:24px 0 0;overflow-x:auto;}
+.tab{flex:1;min-width:fit-content;background:var(--bg2);padding:13px 18px;font-size:11px;letter-spacing:.12em;color:var(--t4);text-transform:uppercase;cursor:pointer;border:none;font-weight:700;font-family:var(--inter);transition:all .15s;white-space:nowrap;}
+.tab.on{background:var(--bg3);color:var(--t1);border-bottom:2px solid var(--red);}
+.tab:hover:not(.on){background:var(--bg3);color:var(--t2);}
+
+/* PANEL */
+.panel{display:none;padding:26px 0;}
+.panel.on{display:block;}
+.p-loading{font-size:12px;color:var(--t4);letter-spacing:.16em;text-transform:uppercase;font-weight:500;animation:blink 1s step-end infinite;text-align:center;padding:40px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.p-err{font-size:13px;color:var(--amber);padding:20px;background:rgba(208,128,0,.06);border:1px solid var(--amb2);}
+
+/* HISTORY */
+.origin{font-size:14px;color:var(--t2);line-height:1.85;margin-bottom:28px;}
+.origin p{margin-bottom:14px;}
+.sec-title{font-size:10px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b1);}
+.timeline{position:relative;padding-left:110px;margin-bottom:28px;}
+.timeline::before{content:'';position:absolute;left:100px;top:0;bottom:0;width:2px;background:var(--b2);}
+.tl-item{display:flex;gap:16px;margin-bottom:16px;position:relative;}
+.tl-date{font-family:var(--mono);font-size:10px;color:var(--t4);position:absolute;left:-110px;width:94px;text-align:right;padding-top:3px;line-height:1.3;}
+.tl-dot{width:10px;height:10px;border-radius:50%;background:var(--b3);flex-shrink:0;margin-top:4px;position:relative;z-index:1;border:2px solid var(--bg2);}
+.tl-dot.high{background:var(--red);}
+.tl-dot.medium{background:var(--amber);}
+.tl-dot.low{background:var(--b3);}
+.tl-text{font-size:13px;color:var(--t2);line-height:1.6;}
+
+/* CURRENT STATUS */
+.cur-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:22px;}
+.cur-cell{background:var(--bg2);padding:16px;}
+.cc-lbl{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:5px;}
+.cc-val{font-family:var(--head);font-size:20px;color:var(--t1);line-height:1;}
+.cc-note{font-size:11px;color:var(--t3);margin-top:4px;}
+.cur-text{font-size:14px;color:var(--t2);line-height:1.85;margin-bottom:18px;}
+.cur-text p{margin-bottom:12px;}
+.key-dev-list{display:flex;flex-direction:column;gap:8px;}
+.kd-item{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:var(--bg2);border:1px solid var(--b1);}
+.kd-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:5px;}
+.kd-text{font-size:13px;color:var(--t2);line-height:1.5;}
+
+/* LEADER STATEMENTS */
+.leaders-intro{font-size:13px;color:var(--t3);margin-bottom:20px;font-weight:400;}
+.ls-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.ls-filter-btn{font-size:10px;letter-spacing:.1em;color:var(--t4);border:1px solid var(--b2);padding:5px 11px;cursor:pointer;border-radius:2px;font-weight:600;transition:all .15s;background:var(--bg);text-transform:uppercase;font-family:var(--inter);}
+.ls-filter-btn.on{color:var(--t1);border-color:var(--t3);background:var(--bg3);}
+.quote-grid{display:flex;flex-direction:column;gap:14px;}
+.qcard{background:var(--bg2);border:1px solid var(--b1);border-left:4px solid var(--b3);padding:18px 20px;transition:border-color .15s;}
+.qcard.escalatory{border-left-color:var(--red2);}
+.qcard.threatening{border-left-color:var(--red);}
+.qcard.de-escalatory{border-left-color:var(--green);}
+.qcard.neutral{border-left-color:var(--b3);}
+.q-name{font-size:13px;color:var(--t1);font-weight:700;}
+.q-role{font-size:11px;color:var(--t3);font-weight:400;}
+.q-country{display:inline-block;font-size:8px;letter-spacing:.12em;color:var(--t4);border:1px solid var(--b2);padding:2px 7px;margin-left:8px;text-transform:uppercase;font-weight:600;vertical-align:middle;border-radius:2px;}
+.q-statement{font-size:13px;color:var(--t2);line-height:1.75;margin:12px 0;font-style:italic;}
+.q-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.q-date{font-size:10px;color:var(--t4);font-weight:400;}
+.q-source{font-size:10px;color:var(--t4);font-weight:500;letter-spacing:.06em;}
+.q-sentiment{font-size:8px;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:2px;font-weight:700;}
+.q-sentiment.escalatory,.q-sentiment.threatening{background:rgba(224,32,16,.1);color:var(--red);}
+.q-sentiment.de-escalatory{background:rgba(40,136,58,.1);color:var(--green);}
+.q-sentiment.neutral{background:rgba(72,64,56,.2);color:var(--t3);}
+
+/* SCENARIOS */
+.scenarios{display:flex;flex-direction:column;gap:16px;}
+.sc-card{background:var(--bg2);border:1px solid var(--b1);padding:20px;}
+.sc-title{font-family:var(--head);font-size:24px;color:var(--t1);letter-spacing:.04em;}
+.sc-badge{display:inline-block;font-size:9px;letter-spacing:.12em;padding:3px 9px;margin:8px 0;font-weight:700;text-transform:uppercase;border-radius:2px;}
+.sc-badge.best{background:rgba(40,136,58,.1);color:var(--green);border:1px solid #1a5a28;}
+.sc-badge.likely{background:rgba(208,128,0,.1);color:var(--amber);border:1px solid var(--amb2);}
+.sc-badge.worst{background:rgba(224,32,16,.1);color:var(--red);border:1px solid var(--red2);}
+.sc-text{font-size:13px;color:var(--t2);line-height:1.8;margin-top:10px;}
+.sc-timeline{font-size:11px;color:var(--t4);margin-top:8px;font-weight:500;letter-spacing:.06em;}
+
+/* IMPACT */
+.impact-sec{margin-bottom:22px;}
+.impact-lbl{font-size:11px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.impact-text{font-size:13px;color:var(--t2);line-height:1.8;}
+
+/* ASK AI */
+.ask-box{background:var(--bg2);border:1px solid var(--b1);padding:20px;margin-top:28px;}
+.ask-label{font-size:10px;letter-spacing:.18em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:12px;}
+.ask-row{display:flex;gap:0;margin-bottom:0;}
+.ask-input{flex:1;background:var(--bg);border:1px solid var(--b2);border-right:none;color:var(--t1);font-family:var(--inter);font-size:13px;padding:11px 15px;outline:none;border-radius:3px 0 0 3px;}
+.ask-input::placeholder{color:var(--t4);}
+.ask-input:focus{border-color:var(--t3);}
+.ask-btn{background:var(--bg);border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:11px 16px;cursor:pointer;font-weight:700;border-radius:0 3px 3px 0;font-family:var(--inter);transition:all .15s;}
+.ask-btn:hover:not(:disabled){background:var(--bg3);color:var(--t1);}
+.ask-btn:disabled{opacity:.4;cursor:not-allowed;}
+.ask-out{display:none;font-size:13px;color:var(--t2);line-height:1.85;margin-top:14px;padding-top:12px;border-top:1px dashed var(--b1);}
+.ask-out.on{display:block;}
+
+/* UPDATED */
+.updated-bar{background:var(--bg2);border:1px solid var(--b1);border-bottom:none;padding:8px 14px;font-size:10px;color:var(--t4);letter-spacing:.1em;text-transform:uppercase;font-weight:500;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.refresh-btn{background:none;border:1px solid var(--b2);color:var(--t4);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;cursor:pointer;border-radius:2px;font-weight:600;font-family:var(--inter);transition:all .15s;}
+.refresh-btn:hover{color:var(--t2);border-color:var(--t3);}
+
+/* MOBILE */
+@media(max-width:640px){
+  .timeline{padding-left:0;}
+  .timeline::before{display:none;}
+  .tl-date{position:static;width:auto;text-align:left;margin-bottom:2px;font-size:9px;}
+  .tl-item{flex-direction:column;gap:4px;}
+  .tl-dot{display:none;}
+  .hero-stats{gap:16px;}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <a class="back-btn" href="/">← Back to dashboard</a>
+  <div class="nav-title">Conflict Intelligence</div>
+  <div class="nav-badge" id="navBadge">Loading...</div>
+</div>
+
+<!-- LOADING STATE -->
+<div id="loadingState" style="padding:60px;text-align:center;color:var(--t4);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;animation:blink 1s step-end infinite;">
+  // Loading conflict intelligence from server...
+</div>
+
+<!-- CONFLICT CONTENT (hidden until loaded) -->
+<div id="conflictContent" style="display:none;">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-theater" id="heroTheater"></div>
+  <div class="hero-name" id="heroName"></div>
+  <div class="hero-op" id="heroOp"></div>
+  <div class="hero-badges" id="heroBadges"></div>
+  <div class="hero-stats" id="heroStats"></div>
+</div>
+
+<!-- UPDATED BAR -->
+<div class="updated-bar">
+  <span id="updatedAt">Data loading...</span>
+  <button class="refresh-btn" onclick="loadConflict()">↻ Refresh</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="switchTab(this,'history')">📜 History</button>
+  <button class="tab" onclick="switchTab(this,'current')">⚡ Current Status</button>
+  <button class="tab" onclick="switchTab(this,'leaders')">🎤 Leader Statements</button>
+  <button class="tab" onclick="switchTab(this,'scenarios')">🔭 Future Scenarios</button>
+  <button class="tab" onclick="switchTab(this,'impact')">🌍 Global Impact</button>
+</div>
+
+<!-- HISTORY -->
+<div class="panel on" id="panel-history">
+  <div class="sec-title">Origin & Root Causes</div>
+  <div class="origin" id="historyOrigin"><div class="p-loading">Loading history...</div></div>
+  <div class="sec-title">Key Events Timeline</div>
+  <div class="timeline" id="historyTimeline"></div>
+</div>
+
+<!-- CURRENT -->
+<div class="panel" id="panel-current">
+  <div class="cur-grid" id="currentGrid"></div>
+  <div class="sec-title">Situation Summary</div>
+  <div class="cur-text" id="currentSummary"></div>
+  <div class="sec-title">Key Developments</div>
+  <div class="key-dev-list" id="currentDevs"></div>
+</div>
+
+<!-- LEADERS -->
+<div class="panel" id="panel-leaders">
+  <div class="leaders-intro">Statements, tweets, interviews and speeches from leaders on all sides of this conflict — sourced from verified news articles.</div>
+  <div class="ls-filter" id="lsFilter">
+    <button class="ls-filter-btn on" onclick="filterLeaders('all',this)">All</button>
+    <button class="ls-filter-btn" onclick="filterLeaders('escalatory',this)">Escalatory</button>
+    <button class="ls-filter-btn" onclick="filterLeaders('threatening',this)">Threatening</button>
+    <button class="ls-filter-btn" onclick="filterLeaders('de-escalatory',this)">De-escalatory</button>
+    <button class="ls-filter-btn" onclick="filterLeaders('neutral',this)">Neutral</button>
+  </div>
+  <div class="quote-grid" id="quotesGrid"></div>
+</div>
+
+<!-- SCENARIOS -->
+<div class="panel" id="panel-scenarios">
+  <div class="scenarios" id="scenariosGrid"></div>
+</div>
+
+<!-- IMPACT -->
+<div class="panel" id="panel-impact">
+  <div class="impact-sec"><div class="impact-lbl">Economic Impact</div><div class="impact-text" id="impactEco"></div></div>
+  <div class="impact-sec"><div class="impact-lbl">Humanitarian Impact</div><div class="impact-text" id="impactHum"></div></div>
+  <div class="impact-sec"><div class="impact-lbl">Geopolitical Impact</div><div class="impact-text" id="impactGeo"></div></div>
+</div>
+
+<!-- ASK AI -->
+<div class="ask-box">
+  <div class="ask-label">// Ask anything about this conflict — Gemini AI answers using latest news</div>
+  <div class="ask-row">
+    <input class="ask-input" id="askInput" type="text" placeholder="e.g. What did Biden say about this? What happens if escalation continues?" />
+    <button class="ask-btn" id="askBtn" onclick="askAI()">Ask ↗</button>
+  </div>
+  <div class="ask-out" id="askOut"></div>
+</div>
+
+</div><!-- /conflictContent -->
+
+</div><!-- /wrap -->
+
+<script>
+const API='';
+let conflictId=null, conflictData=null, allLeaders=[];
+
+// Get conflict ID from URL query param
+function getConflictId(){
+  const p=new URLSearchParams(window.location.search);
+  return p.get('id')||'iran';
+}
+
+const CONFLICT_META={
+  iran:{name:'US + Israel vs Iran',theater:'Theater 01 · Middle East',op:'Operation Epic Fury',level:'r'},
+  'india-pakistan':{name:'India vs Pakistan',theater:'Theater 02 · South Asia',op:'Post-Operation Sindoor · Ceasefire Fragile',level:'a'},
+  'pakistan-afghanistan':{name:'Pakistan vs Afghanistan',theater:'Theater 03 · Af-Pak Border',op:'Open War Declared February 2026',level:'a'},
+  'russia-ukraine':{name:'Russia vs Ukraine',theater:'Theater 04 · Eastern Europe',op:'Year 4 of Full-Scale Invasion',level:'b'}
+};
+
+const LEVEL_LABELS={r:'Critical',a:'High',b:'Elevated'};
+
+async function loadConflict(){
+  conflictId=getConflictId();
+  const meta=CONFLICT_META[conflictId];
+  if(!meta){ document.getElementById('loadingState').textContent='Unknown conflict ID: '+conflictId; return; }
+
+  // Update page title and nav
+  document.title=meta.name+' — World War Watch';
+  document.getElementById('navBadge').textContent=LEVEL_LABELS[meta.level]||'';
+
+  try{
+    const r=await fetch(API+'/api/conflict/'+conflictId);
+    if(!r.ok) throw new Error('Data not ready — run: npm run update');
+    conflictData=await r.json();
+
+    document.getElementById('loadingState').style.display='none';
+    document.getElementById('conflictContent').style.display='block';
+
+    renderHero(meta, conflictData);
+    renderHistory(conflictData.history);
+    renderCurrent(conflictData.current);
+    renderLeaders(conflictData.leaderStatements||[]);
+    renderScenarios(conflictData.futureScenarios||[]);
+    renderImpact(conflictData.globalImpact||{});
+
+    const upd=document.getElementById('updatedAt');
+    if(upd&&conflictData._updatedAt) upd.textContent='Last updated: '+fmtDate(conflictData._updatedAt)+' · Refreshes every 6 hours';
+
+  }catch(e){
+    document.getElementById('loadingState').innerHTML=`<span style="color:var(--amber)">Error: ${e.message}</span><br><br><span style="font-size:11px;">Make sure the server is running: npm run update → npm start</span>`;
+  }
+}
+
+function fmtDate(iso){
+  if(!iso)return'Unknown';
+  const d=new Date(iso);
+  const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return`${String(d.getDate()).padStart(2,'0')} ${ms[d.getMonth()]} ${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderHero(meta, data){
+  document.getElementById('heroTheater').textContent=meta.theater;
+  document.getElementById('heroName').textContent=meta.name;
+  document.getElementById('heroOp').textContent=meta.op;
+
+  const lv=meta.level;
+  const badge=`<span class="hbadge ${lv}">● ${LEVEL_LABELS[lv]||''}</span>`;
+  document.getElementById('heroBadges').innerHTML=badge;
+
+  // Stats from conflict data
+  const stats=data?.current?.casualties?[
+    {val:data.current.casualties,lbl:'Casualties'},
+    {val:data.current.diplomaticSituation?.substring(0,20)||'Ongoing',lbl:'Diplomacy'},
+    {val:data.current.militarySituation?.substring(0,20)||'Active',lbl:'Military'}
+  ]:[];
+
+  document.getElementById('heroStats').innerHTML=stats.map(s=>`<div class="hs"><div class="hs-val">${s.val}</div><div class="hs-lbl">${s.lbl}</div></div>`).join('');
+}
+
+function renderHistory(history){
+  if(!history){
+    document.getElementById('historyOrigin').textContent='History data not available. Try refreshing.';
+    return;
+  }
+  const origin=document.getElementById('historyOrigin');
+  const text=history.origin||'';
+  origin.innerHTML=text.split('\n\n').filter(p=>p.trim()).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+
+  const tl=document.getElementById('historyTimeline');
+  const events=history.timeline||[];
+  tl.innerHTML=events.map(e=>`
+    <div class="tl-item">
+      <div class="tl-date">${e.date||''}</div>
+      <div class="tl-dot ${e.significance||'low'}"></div>
+      <div class="tl-text">${e.event||''}</div>
+    </div>`).join('');
+}
+
+function renderCurrent(cur){
+  if(!cur)return;
+  const grid=document.getElementById('currentGrid');
+  grid.innerHTML=`
+    <div class="cur-cell"><div class="cc-lbl">Military Status</div><div class="cc-val" style="font-size:14px;line-height:1.4;">${cur.militarySituation||'Ongoing'}</div></div>
+    <div class="cur-cell"><div class="cc-lbl">Diplomatic Status</div><div class="cc-val" style="font-size:14px;line-height:1.4;">${cur.diplomaticSituation||'Ongoing'}</div></div>
+    <div class="cur-cell"><div class="cc-lbl">Casualties</div><div class="cc-val">${cur.casualties||'Ongoing'}</div></div>`;
+
+  const summary=document.getElementById('currentSummary');
+  summary.innerHTML=(cur.summary||'').split('\n\n').filter(p=>p.trim()).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+
+  const devs=document.getElementById('currentDevs');
+  devs.innerHTML=(cur.keyDevelopments||[]).map(d=>`<div class="kd-item"><div class="kd-dot"></div><div class="kd-text">${d}</div></div>`).join('');
+}
+
+function renderLeaders(statements){
+  allLeaders=statements;
+  renderFilteredLeaders('all');
+}
+
+function renderFilteredLeaders(filter){
+  const grid=document.getElementById('quotesGrid');
+  const items=filter==='all'?allLeaders:allLeaders.filter(s=>s.sentiment===filter);
+  if(!items.length){
+    grid.innerHTML='<div style="font-size:13px;color:var(--t4);padding:20px;">No statements found for this filter.</div>';
+    return;
+  }
+  grid.innerHTML=items.map(s=>`
+    <div class="qcard ${s.sentiment||'neutral'}">
+      <div>
+        <span class="q-name">${s.name||'Unknown'}</span>
+        <span class="q-role">, ${s.role||''}</span>
+        <span class="q-country">${s.country||''}</span>
+      </div>
+      <div class="q-statement">"${s.statement||''}"</div>
+      <div class="q-meta">
+        <span class="q-date">${s.date||''}</span>
+        <span class="q-source">via ${s.source||'statement'}</span>
+        <span class="q-sentiment ${s.sentiment||'neutral'}">${s.sentiment||'neutral'}</span>
+      </div>
+    </div>`).join('');
+}
+
+function filterLeaders(filter, btn){
+  document.querySelectorAll('.ls-filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderFilteredLeaders(filter);
+}
+
+function renderScenarios(scenarios){
+  const cls=['best','likely','worst'];
+  document.getElementById('scenariosGrid').innerHTML=scenarios.map((s,i)=>`
+    <div class="sc-card">
+      <div class="sc-title">${s.title||'Scenario '+(i+1)}</div>
+      <span class="sc-badge ${cls[i]||'likely'}">${s.probability||''} probability</span>
+      <div class="sc-text">${s.description||''}</div>
+      <div class="sc-timeline">Timeline: ${s.timeline||'Unknown'}</div>
+    </div>`).join('');
+}
+
+function renderImpact(impact){
+  document.getElementById('impactEco').textContent=impact.economic||'Data not available.';
+  document.getElementById('impactHum').textContent=impact.humanitarian||'Data not available.';
+  document.getElementById('impactGeo').textContent=impact.geopolitical||'Data not available.';
+}
+
+// Tab switching
+function switchTab(el, name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('panel-'+name).classList.add('on');
+}
+
+// Ask AI
+async function askAI(){
+  const inp=document.getElementById('askInput');
+  const q=inp.value.trim(); if(!q)return;
+  const btn=document.getElementById('askBtn');
+  const out=document.getElementById('askOut');
+  btn.disabled=true; btn.textContent='Thinking...';
+  out.classList.add('on'); out.textContent='Analyzing...';
+  try{
+    const context=conflictData?JSON.stringify({
+      history:conflictData.history?.origin?.substring(0,500),
+      current:conflictData.current?.summary?.substring(0,400)
+    }):'{}';
+    const r=await fetch(API+'/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query:`Regarding the ${CONFLICT_META[conflictId]?.name} conflict: ${q}`})});
+    const d=await r.json();
+    out.textContent=d.text||d.error;
+  }catch(e){out.textContent='Error: '+e.message;}
+  btn.disabled=false; btn.textContent='Ask ↗';
+  inp.value='';
+}
+document.getElementById('askInput').addEventListener('keydown',e=>{if(e.key==='Enter')askAI();});
+
+// START
+loadConflict();
+</script>
+</body>
+</html>
