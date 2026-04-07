@@ -514,20 +514,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div class="news-card"><div style="height:100px" class="skeleton"></div></div>
 </div>
 
-<!-- DATA PIPELINE -->
-<div class="sh"><span class="sh-label">// How This Works — Data Pipeline & Sources</span><div class="sh-line"></div></div>
-<div style="background:var(--bg2);border:1px solid var(--b1);padding:20px;">
-  <div class="pipe-grid">
-    <div class="pcell"><div class="pc-num">01</div><div class="pc-title">12 RSS Feeds</div><div class="pc-desc">BBC World, Al Jazeera, Reuters, Guardian, AP News, NDTV, Times of India, The Hindu, Defense News, Foreign Policy and more. Fetched every hour. No API key needed — completely free.</div><div class="pc-tag">Free · No API key</div></div>
-    <div class="pcell"><div class="pc-num">02</div><div class="pc-title">Gemini AI Analysis</div><div class="pc-desc">Google Gemini 1.5 Flash analyzes the RSS articles and produces structured conflict data, economic indicators, summaries, and daily briefings. Free tier: 15 requests/min, 1M tokens/day — more than enough.</div><div class="pc-tag">Free · 1M tokens/day</div></div>
-    <div class="pcell"><div class="pc-num">03</div><div class="pc-title">Hourly Auto-Update</div><div class="pc-desc">A cron scheduler runs every 60 minutes: fetches RSS → analyzes with Gemini → saves 6 JSON files. Conflict detail pages regenerate every 6 hours (more expensive to generate). Zero human intervention needed.</div><div class="pc-tag">Cron · Every hour</div></div>
-    <div class="pcell"><div class="pc-num">04</div><div class="pc-title">Cached + Live</div><div class="pc-desc">Dashboard loads cached JSON on startup (instant). AI briefings and user queries run live against Gemini using cached news context. Single server + static files. Deploy free on Railway or Render.</div><div class="pc-tag">Node.js · Express</div></div>
-  </div>
-  <div style="font-size:11px;color:var(--t4);margin-top:14px;line-height:1.9;font-weight:400;">
-    Sources: BBC · Al Jazeera · Reuters · AP · The Guardian · NDTV · Times of India · The Hindu · Defense News · Foreign Policy<br>
-    AI: Google Gemini 1.5 Flash (free tier) · News: RSS feeds (free, no API key) · Updates: Every 60 minutes
-  </div>
-</div>
 
 <!-- FOOTER -->
 <div class="footer">
