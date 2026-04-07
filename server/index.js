@@ -14,7 +14,7 @@ const rateLimit   = require('express-rate-limit');
 const cron        = require('node-cron');
 const path        = require('path');
 
-const { ask }       = require('./gemini');
+const { ask }       = require('./ai');
 const { runUpdate, load } = require('./updater');
 const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
 

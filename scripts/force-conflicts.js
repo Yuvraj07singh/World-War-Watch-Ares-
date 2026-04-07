@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { ask } = require('../server/gemini');
+const { ask } = require('../server/ai');
 const { categorizeNews } = require('../server/news');
 
 const DATA_DIR = path.join(__dirname, '..', 'public', 'data');

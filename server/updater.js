@@ -9,7 +9,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { ask } = require('./gemini');
+const { ask } = require('./ai');
 const { fetchAllNews, categorizeNews } = require('./news');
 
 const DATA_DIR = path.join(__dirname, '..', 'public', 'data');
