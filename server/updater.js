@@ -118,25 +118,25 @@ Return ONLY the JSON object. No explanation. No markdown.`;
 }
 
 function makeMetaPrompt(articles) {
-  const top = articles.slice(0,15).map(a=>`- ${a.title} (${a.source})`).join('\n');
+  const top = articles.slice(0,15).map(a=>`- ${a.title} (${a.source}) [link: ${a.link}]`).join('\n');
   return `Based on these latest world news headlines, generate a JSON object (raw JSON, no markdown):
 
 {
   "topAlert": "<single most critical breaking news sentence about active wars — under 120 chars>",
   "globalThreatLevel": "CRITICAL",
   "tickerItems": [
-    {"text": "<short headline 1>", "hot": true},
-    {"text": "<short headline 2>", "hot": false},
-    {"text": "<short headline 3>", "hot": true},
-    {"text": "<short headline 4>", "hot": false},
-    {"text": "<short headline 5>", "hot": true},
-    {"text": "<short headline 6>", "hot": false},
-    {"text": "<short headline 7>", "hot": true},
-    {"text": "<short headline 8>", "hot": false}
+    {"text": "<short headline 1 — under 60 chars>", "hot": true, "link": "<actual URL from the article>"},
+    {"text": "<short headline 2>", "hot": false, "link": "<actual URL>"},
+    {"text": "<short headline 3>", "hot": true, "link": "<actual URL>"},
+    {"text": "<short headline 4>", "hot": false, "link": "<actual URL>"},
+    {"text": "<short headline 5>", "hot": true, "link": "<actual URL>"},
+    {"text": "<short headline 6>", "hot": false, "link": "<actual URL>"},
+    {"text": "<short headline 7>", "hot": true, "link": "<actual URL>"},
+    {"text": "<short headline 8>", "hot": false, "link": "<actual URL>"}
   ]
 }
 
-hot:true = urgent/breaking. hot:false = regular update. Keep each text under 100 chars.
+hot:true = urgent/breaking. hot:false = regular update. Keep each text under 60 chars. Use the EXACT link URL from the articles provided. Do not invent links.
 
 HEADLINES:
 ${top}
@@ -194,7 +194,14 @@ ${headlines}`;
 }
 
 function makeUpcomingPrompt() {
-  return `List 6-8 critical upcoming geopolitical events/dates in the next 60 days (from April 2026) related to active wars. Return a JSON array (raw JSON only):
+  const now = new Date();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const currentDate = `${monthNames[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+  return `Today is ${currentDate}. List 6-8 critical upcoming geopolitical events, deadlines, or anniversary dates in the next 60 days related to the 4 active wars (US-Israel vs Iran, India-Pakistan, Pakistan-Afghanistan, Russia-Ukraine) and the US-India trade war.
+
+Include REAL upcoming events such as: UN sessions, treaty deadlines, attack anniversaries, election dates, ceasefire expirations, scheduled military exercises, summit meetings, sanctions deadlines, IMF/World Bank meetings.
+
+Return a JSON array (raw JSON only):
 [
   {
     "date": "22",
@@ -202,11 +209,10 @@ function makeUpcomingPrompt() {
     "title": "Pahalgam Attack Anniversary — India-Pakistan Flashpoint",
     "desc": "One year since attack that triggered Operation Sindoor. High provocation risk.",
     "severity": "r",
-    "tag": "Critical"
-  },
-  ...more events...
+    "tag": "India-Pakistan"
+  }
 ]
-severity: r=red, a=amber, b=blue. Return ONLY JSON array.`;
+severity: r=red(critical), a=amber(important), b=blue(watch). tag should be the related conflict or topic name. Return ONLY JSON array.`;
 }
 
 function makeConflictDetailPrompt(conflictId, articles) {

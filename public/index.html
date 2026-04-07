@@ -59,8 +59,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .ticker:hover .t-inner{animation-play-state:paused;}
 .t-inner{display:flex;gap:60px;animation:ticker 80s linear infinite;white-space:nowrap;width:max-content;}
 @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.ti{font-size:11px;letter-spacing:.05em;color:var(--t3);text-transform:uppercase;font-weight:500;}
+.ti{font-size:11px;letter-spacing:.05em;color:var(--t3);text-transform:uppercase;font-weight:500;text-decoration:none;cursor:pointer;transition:color .15s;}
+.ti:hover{color:var(--t1);}
 .ti.hot{color:var(--red);font-weight:600;}
+.ti.hot:hover{color:#ff4030;}
 .t-div{color:var(--red2);}
 
 /* ── UPDATE BAR ── */
@@ -678,6 +680,31 @@ function updateTime(){
 }
 updateTime(); setInterval(updateTime, 30000);
 
+// ── FALLBACK DATA (used when AI-generated data is missing) ──
+const FALLBACK_EVENTS = [
+  {date:"22",month:"APR",title:"Pahalgam Attack Anniversary — India-Pakistan Flashpoint",desc:"One year since the attack that triggered Operation Sindoor. High provocation risk on both sides of the border.",severity:"r",tag:"India-Pakistan"},
+  {date:"24",month:"APR",title:"Armenian Genocide Remembrance Day",desc:"Sensitive diplomatic date. US recognition continues to strain US-Turkey relations amid NATO stress.",severity:"b",tag:"Geopolitics"},
+  {date:"01",month:"MAY",title:"May Day — Global Labor Protests",desc:"Heightened protest risk in Iran, Pakistan, and economically stressed nations due to war-driven inflation.",severity:"a",tag:"Global"},
+  {date:"09",month:"MAY",title:"Russia Victory Day — Military Escalation Risk",desc:"Putin traditionally uses Victory Day for major military announcements. Nuclear rhetoric historically peaks.",severity:"r",tag:"Russia-Ukraine"},
+  {date:"14",month:"MAY",title:"Israel Independence Day / Nakba Day",desc:"Dual anniversary historically triggers regional tensions. Active US-Israel vs Iran war adds volatility.",severity:"r",tag:"Iran-Israel"},
+  {date:"28",month:"MAY",title:"Pakistan Day of Remembrance — Nuclear Tests Anniversary",desc:"Anniversary of 1998 nuclear tests. Pakistan military may use for posturing given two-front war pressure.",severity:"a",tag:"Pakistan"},
+  {date:"12",month:"JUN",title:"IAEA Board of Governors Meeting",desc:"Critical session on Iran's enrichment status. Could trigger new sanctions or diplomatic breakthroughs.",severity:"a",tag:"Iran Nuclear"},
+  {date:"15",month:"JUN",title:"US Tariff Review Deadline — India Trade War",desc:"Scheduled review of 50% tariffs on Indian exports. IT, pharma, and textile sectors watching closely.",severity:"a",tag:"US-India Trade"}
+];
+
+const FALLBACK_ECO = [
+  {label:"Hormuz Strait",val:"Blocked",color:"r",note:"Iran naval mines + US Navy standoff"},
+  {label:"Red Sea",val:"Disrupted",color:"r",note:"Houthi attacks continue — Cape route rerouting"},
+  {label:"Crude Oil",val:"+38%",color:"r",note:"Brent above $120 — supply fears"},
+  {label:"Shipping Cost",val:"+35%",color:"a",note:"Global freight rates surging"},
+  {label:"India Tariff (US)",val:"~50%",color:"a",note:"IT, textiles, pharma exports hit"},
+  {label:"Gold (XAU)",val:"$3,400+",color:"g",note:"Record high — safe haven demand"},
+  {label:"INR / USD",val:"₹87.5",color:"a",note:"Under pressure — capital outflows"},
+  {label:"Global GDP",val:"−2.1%",color:"a",note:"IMF revised down — war impact"},
+  {label:"India Oil Import",val:"+40%",color:"r",note:"87% via sea — Hormuz closed"},
+  {label:"Food Security",val:"Critical",color:"r",note:"Ukraine wheat + oil-driven inflation"}
+];
+
 // ── INIT ────────────────────────────────────────────────
 async function init(){
   document.getElementById('ubarText').textContent='Refreshing...';
@@ -688,7 +715,9 @@ async function init(){
     if(d.meta)          renderMeta(d.meta);
     if(d.conflicts)     renderConflicts(d.conflicts);
     if(d.economic)      renderEco(d.economic);
-    if(d.upcomingEvents)renderEvents(d.upcomingEvents);
+    else                renderEco(FALLBACK_ECO);
+    if(d.upcomingEvents && Array.isArray(d.upcomingEvents) && d.upcomingEvents.length > 0) renderEvents(d.upcomingEvents);
+    else                renderEvents(FALLBACK_EVENTS);
     if(d.conflicts)     renderTensions(d.conflicts);
     if(d.updateLog)     renderUpdateBar(d.updateLog);
     if(d.dailyBriefing){
@@ -716,7 +745,12 @@ function renderMeta(meta){
   if(meta.topAlert) document.getElementById('alertMsg').textContent=meta.topAlert;
   if(meta.tickerItems?.length){
     const items=[...meta.tickerItems,...meta.tickerItems];
-    document.getElementById('tickerEl').innerHTML=items.map(t=>`<span class="ti${t.hot?' hot':''}">${t.hot?'// ':''}${t.text}</span><span class="t-div"> /// </span>`).join('');
+    document.getElementById('tickerEl').innerHTML=items.map(t=>{
+      if(t.link && t.link.startsWith('http')){
+        return `<a class="ti${t.hot?' hot':''}" href="${t.link}" target="_blank" rel="noopener">${t.hot?'// ':''}${t.text}</a><span class="t-div"> /// </span>`;
+      }
+      return `<span class="ti${t.hot?' hot':''}">${t.hot?'// ':''}${t.text}</span><span class="t-div"> /// </span>`;
+    }).join('');
   }
 }
 
