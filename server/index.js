@@ -23,6 +23,7 @@ const PORT = process.env.PORT || 3000;
 const UPDATE_MINS = parseInt(process.env.UPDATE_INTERVAL_MINUTES || '60');
 
 // ── MIDDLEWARE ─────────────────────────────────────────────────────────────────
+app.set('trust proxy', 1); // Fixes Render's X-Forwarded-For warning for rate-limit
 app.use(compression());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
