@@ -453,80 +453,7 @@ img,svg{content-visibility:auto;}
   <button class="ubar-btn" onclick="init()">↻ Refresh</button>
 </div>
 
-<!-- GLOBAL CONFLICT MAP -->
-<div class="sh"><span class="sh-label">// Global Conflict Theater Map — Live Zones</span><div class="sh-line"></div></div>
-<div class="cmap-wrap" id="cmapWrap">
-  <div class="cmap-tooltip" id="cmapTip">
-    <div class="cmap-tt-name" id="cmapTipName"></div>
-    <div class="cmap-tt-level" id="cmapTipLevel"></div>
-  </div>
-  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
-    </defs>
-    <!-- Ocean background -->
-    <rect width="1000" height="500" fill="#08080e"/>
-    <!-- Simplified continent outlines -->
-    <!-- Europe -->
-    <path d="M480,120 L500,110 L520,108 L540,115 L555,120 L560,135 L540,150 L530,165 L520,170 L510,180 L505,195 L495,200 L490,195 L480,190 L470,180 L465,165 L470,150 L475,135 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- Russia/Central Asia -->
-    <path d="M555,90 L600,80 L650,78 L700,80 L750,85 L800,90 L820,100 L810,120 L790,130 L760,135 L720,140 L680,138 L640,130 L600,120 L570,115 L555,105 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- Middle East -->
-    <path d="M540,180 L560,175 L580,180 L590,195 L585,210 L575,220 L560,225 L545,230 L535,220 L530,210 L528,195 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- Africa -->
-    <path d="M470,220 L490,215 L510,218 L530,230 L535,250 L540,280 L535,310 L525,340 L510,360 L495,370 L480,360 L470,340 L465,310 L460,280 L458,250 L462,230 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- South Asia -->
-    <path d="M620,170 L660,160 L690,170 L700,185 L695,200 L685,220 L670,240 L655,250 L640,245 L630,230 L625,210 L618,195 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- East Asia / China -->
-    <path d="M700,120 L740,110 L780,115 L810,125 L830,140 L825,160 L810,175 L785,185 L760,180 L740,170 L720,160 L710,145 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- North America -->
-    <path d="M120,80 L180,70 L240,80 L280,100 L300,130 L290,160 L270,180 L250,200 L220,210 L190,205 L160,190 L140,170 L125,145 L115,120 L118,95 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
-    <!-- South America -->
-    <path d="M240,260 L270,250 L290,265 L300,290 L305,320 L300,350 L290,380 L275,400 L260,410 L245,400 L235,380 L228,350 L225,320 L228,290 Z" fill="#12121a" stroke="#1e1e28" stroke-width=".5"/>
 
-    <!-- Grid lines -->
-    <line x1="0" y1="250" x2="1000" y2="250" stroke="#15151e" stroke-width=".3" stroke-dasharray="4,8"/>
-    <line x1="500" y1="0" x2="500" y2="500" stroke="#15151e" stroke-width=".3" stroke-dasharray="4,8"/>
-
-    <!-- CONFLICT ZONE 1: Iran / Middle East (approx 52°E, 32°N) -->
-    <a href="/conflict.html?id=iran" class="cmap-dot" onmouseenter="showMapTip(event,'US + Israel vs Iran','● CRITICAL — Active War','r')" onmouseleave="hideMapTip()">
-      <circle cx="565" cy="195" r="30" fill="url(#gRed)" opacity=".6"><animate attributeName="r" values="25;35;25" dur="2.5s" repeatCount="indefinite"/></circle>
-      <circle cx="565" cy="195" r="5" fill="#e02010"><animate attributeName="opacity" values="1;.4;1" dur="1.5s" repeatCount="indefinite"/></circle>
-      <text x="565" y="175" class="cmap-label" fill="#e02010">Iran</text>
-    </a>
-
-    <!-- CONFLICT ZONE 2: India-Pakistan border (approx 74°E, 33°N) -->
-    <a href="/conflict.html?id=india-pakistan" class="cmap-dot" onmouseenter="showMapTip(event,'India vs Pakistan','● HIGH — Ceasefire Fragile','a')" onmouseleave="hideMapTip()">
-      <circle cx="645" cy="190" r="25" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="20;30;20" dur="3s" repeatCount="indefinite"/></circle>
-      <circle cx="645" cy="190" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/></circle>
-      <text x="645" y="172" class="cmap-label" fill="#d08000">India-Pak</text>
-    </a>
-
-    <!-- CONFLICT ZONE 3: Af-Pak border (approx 70°E, 34°N) -->
-    <a href="/conflict.html?id=pakistan-afghanistan" class="cmap-dot" onmouseenter="showMapTip(event,'Pakistan vs Afghanistan','● HIGH — Active War','a')" onmouseleave="hideMapTip()">
-      <circle cx="625" cy="180" r="22" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="18;26;18" dur="2.8s" repeatCount="indefinite"/></circle>
-      <circle cx="625" cy="180" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2.2s" repeatCount="indefinite"/></circle>
-      <text x="610" y="165" class="cmap-label" fill="#d08000">Af-Pak</text>
-    </a>
-
-    <!-- CONFLICT ZONE 4: Russia-Ukraine (approx 36°E, 49°N) -->
-    <a href="/conflict.html?id=russia-ukraine" class="cmap-dot" onmouseenter="showMapTip(event,'Russia vs Ukraine','● ELEVATED — Year 4','b')" onmouseleave="hideMapTip()">
-      <circle cx="545" cy="140" r="24" fill="url(#gBlue)" opacity=".5"><animate attributeName="r" values="19;28;19" dur="3.2s" repeatCount="indefinite"/></circle>
-      <circle cx="545" cy="140" r="4" fill="#2878c8"><animate attributeName="opacity" values="1;.3;1" dur="2.5s" repeatCount="indefinite"/></circle>
-      <text x="545" y="123" class="cmap-label" fill="#2878c8">Ukraine</text>
-    </a>
-
-    <!-- US-India trade route indicator -->
-    <line x1="250" y1="170" x2="640" y2="210" stroke="#6a4000" stroke-width=".8" stroke-dasharray="6,4" opacity=".35"/>
-    <text x="420" y="185" class="cmap-label" fill="#6a4000" font-size="6">US–India Trade Route</text>
-
-    <!-- Coordinates -->
-    <text x="10" y="495" fill="#1e1e28" font-size="6" font-family="monospace">MERCATOR PROJECTION · REAL-TIME CONFLICT OVERLAY</text>
-    <text x="990" y="495" fill="#1e1e28" font-size="6" font-family="monospace" text-anchor="end">WORLD WAR WATCH — THEATER MAP</text>
-  </svg>
-</div>
 
 <!-- CONFLICT CARDS -->
 <div class="sh">
@@ -564,6 +491,68 @@ img,svg{content-visibility:auto;}
     <div class="doom-desc">Set by the Bulletin of Atomic Scientists reflecting 4 simultaneous active wars, Iranian nuclear escalation, Pakistan two-front nuclear risk, and the Hormuz crisis. Previous record: 90 seconds (2023–2025).</div>
     <div class="doom-cta">→ Click for full Doomsday Clock interface, historical timeline & risk breakdown</div>
   </div>
+</div>
+
+<!-- GLOBAL CONFLICT MAP -->
+<div class="sh"><span class="sh-label">// Global Conflict Theater Map — Live Zones</span><div class="sh-line"></div></div>
+<div class="cmap-wrap" id="cmapWrap">
+  <div class="cmap-tooltip" id="cmapTip">
+    <div class="cmap-tt-name" id="cmapTipName"></div>
+    <div class="cmap-tt-level" id="cmapTipLevel"></div>
+  </div>
+  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 6px rgba(0, 170, 255, 0.4)) drop-shadow(0 0 2px rgba(0, 170, 255, 0.8));">
+    <defs>
+      <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
+    </defs>
+    <!-- Dark deep blue/black background -->
+    <rect width="1000" height="500" fill="#03060a"/>
+    
+    <!-- Glowing blue continent outlines (NO FILL) -->
+    <g fill="none" stroke="#00aaff" stroke-width="1.5" stroke-linejoin="round">
+      <path d="M480,120 L500,110 L520,108 L540,115 L555,120 L560,135 L540,150 L530,165 L520,170 L510,180 L505,195 L495,200 L490,195 L480,190 L470,180 L465,165 L470,150 L475,135 Z"/>
+      <path d="M555,90 L600,80 L650,78 L700,80 L750,85 L800,90 L820,100 L810,120 L790,130 L760,135 L720,140 L680,138 L640,130 L600,120 L570,115 L555,105 Z"/>
+      <path d="M540,180 L560,175 L580,180 L590,195 L585,210 L575,220 L560,225 L545,230 L535,220 L530,210 L528,195 Z"/>
+      <path d="M470,220 L490,215 L510,218 L530,230 L535,250 L540,280 L535,310 L525,340 L510,360 L495,370 L480,360 L470,340 L465,310 L460,280 L458,250 L462,230 Z"/>
+      <path d="M620,170 L660,160 L690,170 L700,185 L695,200 L685,220 L670,240 L655,250 L640,245 L630,230 L625,210 L618,195 Z"/>
+      <path d="M700,120 L740,110 L780,115 L810,125 L830,140 L825,160 L810,175 L785,185 L760,180 L740,170 L720,160 L710,145 Z"/>
+      <path d="M120,80 L180,70 L240,80 L280,100 L300,130 L290,160 L270,180 L250,200 L220,210 L190,205 L160,190 L140,170 L125,145 L115,120 L118,95 Z"/>
+      <path d="M240,260 L270,250 L290,265 L300,290 L305,320 L300,350 L290,380 L275,400 L260,410 L245,400 L235,380 L228,350 L225,320 L228,290 Z"/>
+    </g>
+
+    <!-- Faint Grid lines matching the reference -->
+    <line x1="0" y1="250" x2="1000" y2="250" stroke="#003366" stroke-width=".3" stroke-dasharray="4,8" opacity="0.5"/>
+    <line x1="500" y1="0" x2="500" y2="500" stroke="#003366" stroke-width=".3" stroke-dasharray="4,8" opacity="0.5"/>
+
+    <!-- CONFLICT ZONE 1: Iran / Middle East -->
+    <a href="/conflict.html?id=iran" class="cmap-dot" onmouseenter="showMapTip(event,'US + Israel vs Iran','● CRITICAL — Active War','r')" onmouseleave="hideMapTip()">
+      <circle cx="565" cy="195" r="30" fill="url(#gRed)" opacity=".6"><animate attributeName="r" values="25;35;25" dur="2.5s" repeatCount="indefinite"/></circle>
+      <circle cx="565" cy="195" r="5" fill="#e02010"><animate attributeName="opacity" values="1;.4;1" dur="1.5s" repeatCount="indefinite"/></circle>
+    </a>
+
+    <!-- CONFLICT ZONE 2: India-Pakistan border -->
+    <a href="/conflict.html?id=india-pakistan" class="cmap-dot" onmouseenter="showMapTip(event,'India vs Pakistan','● HIGH — Ceasefire Fragile','a')" onmouseleave="hideMapTip()">
+      <circle cx="645" cy="190" r="25" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="20;30;20" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="645" cy="190" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/></circle>
+    </a>
+
+    <!-- CONFLICT ZONE 3: Af-Pak border -->
+    <a href="/conflict.html?id=pakistan-afghanistan" class="cmap-dot" onmouseenter="showMapTip(event,'Pakistan vs Afghanistan','● HIGH — Active War','a')" onmouseleave="hideMapTip()">
+      <circle cx="625" cy="180" r="22" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="18;26;18" dur="2.8s" repeatCount="indefinite"/></circle>
+      <circle cx="625" cy="180" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2.2s" repeatCount="indefinite"/></circle>
+    </a>
+
+    <!-- CONFLICT ZONE 4: Russia-Ukraine -->
+    <a href="/conflict.html?id=russia-ukraine" class="cmap-dot" onmouseenter="showMapTip(event,'Russia vs Ukraine','● ELEVATED — Year 4','b')" onmouseleave="hideMapTip()">
+      <circle cx="545" cy="140" r="24" fill="url(#gBlue)" opacity=".5"><animate attributeName="r" values="19;28;19" dur="3.2s" repeatCount="indefinite"/></circle>
+      <circle cx="545" cy="140" r="4" fill="#2878c8"><animate attributeName="opacity" values="1;.3;1" dur="2.5s" repeatCount="indefinite"/></circle>
+    </a>
+
+    <!-- Coordinates -->
+    <text x="10" y="495" fill="#00aaff" font-size="6" font-family="monospace" opacity="0.6">MERCATOR PROJECTION · REAL-TIME CONFLICT OVERLAY</text>
+    <text x="990" y="495" fill="#00aaff" font-size="6" font-family="monospace" text-anchor="end" opacity="0.6">WORLD WAR WATCH — THEATER MAP</text>
+  </svg>
 </div>
 
 <!-- TENSION METERS -->
