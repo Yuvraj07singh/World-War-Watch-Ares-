@@ -6,6 +6,7 @@
 
 const { ask: askGemini } = require('./gemini');
 const { askGroq } = require('./groq');
+const { askPollinations } = require('./pollinations');
 
 async function ask(prompt, opts = {}) {
   try {
@@ -22,17 +23,26 @@ async function ask(prompt, opts = {}) {
         // Fallback to Groq (Llama-3-70B)
         return await askGroq(prompt, { ...opts, model: 'llama-3.3-70b-versatile' });
       } catch (groqErr) {
-        console.error('[ai] Groq fallback failed:', groqErr.message);
-        throw new Error(`AI pipeline failed: Both Gemini and Groq are unavailable.`);
+        console.warn(`[ai] Groq failed (${groqErr.message.substring(0, 40)}...). Falling back to Pollinations...`);
+        try {
+          return await askPollinations(prompt, opts);
+        } catch (polyErr) {
+          throw new Error(`AI pipeline failed: Gemini, Groq, AND Pollinations are unavailable.`);
+        }
       }
     }
     
-    // If we want to be hyper-resilient, any Gemini failure could trigger Groq
+    // If we want to be hyper-resilient, any Gemini failure could trigger Fallback cascade
     console.warn(`[ai] Gemini failed with unexpected error. Falling back to Groq...`);
     try {
         return await askGroq(prompt, { ...opts, model: 'llama-3.3-70b-versatile' });
     } catch(groqErr) {
-        throw new Error(`AI pipeline failed completely. Gemini Err: ${e.message}. Groq Err: ${groqErr.message}`);
+        console.warn(`[ai] Groq failed with unexpected error. Falling back to Pollinations...`);
+        try {
+          return await askPollinations(prompt, opts);
+        } catch(polyErr) {
+          throw new Error(`AI pipeline failed completely. Gemini: ${e.message}. Groq: ${groqErr.message}`);
+        }
     }
   }
 }
