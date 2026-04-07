@@ -77,6 +77,7 @@ app.get('/api/news', apiLimiter, (req, res) => {
 
 // Combined all-data endpoint
 app.get('/api/all', apiLimiter, (req, res) => {
+  const files = ['meta.json', 'conflicts.json', 'economic.json', 'daily-briefing.json', 'upcoming-events.json', 'update-log.json'];
   const coreFiles = ['meta.json', 'conflicts.json'];
   const result = {};
   for (const f of files) {
