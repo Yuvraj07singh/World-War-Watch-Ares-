@@ -969,10 +969,30 @@ const FALLBACK_ECO = [
 // ── INIT ────────────────────────────────────────────────
 async function init(){
   document.getElementById('ubarText').textContent='Refreshing...';
+
+  // 1. INSTANT LOCAL CACHE LOAD (Eliminates Render cold-start wait)
+  try {
+    const cached = localStorage.getItem('wwwatch_db');
+    if (cached) {
+      const d = JSON.parse(cached);
+      if(d.meta) renderMeta(d.meta);
+      if(d.conflicts) { renderConflicts(d.conflicts); renderTensions(d.conflicts); }
+      if(d.economic) renderEco(d.economic);
+      if(d.upcomingEvents && d.upcomingEvents.length>0) renderEvents(d.upcomingEvents);
+      if(d.updateLog) renderUpdateBar(d.updateLog);
+      if(d.tensionHistory) renderTrendChart(d.tensionHistory);
+    }
+  } catch(e) {}
+
+  // 2. FETCH LIVE DATA (In background)
   try{
     const r = await fetch(API+'/api/all');
     if(!r.ok) throw new Error('Backend data not ready');
     const d = await r.json();
+    
+    // Save fresh data to local cache for next visit
+    localStorage.setItem('wwwatch_db', JSON.stringify(d));
+
     if(d.meta)          renderMeta(d.meta);
     if(d.conflicts)     renderConflicts(d.conflicts);
     if(d.economic)      renderEco(d.economic);
@@ -989,7 +1009,6 @@ async function init(){
     }
   }catch(e){
     document.getElementById('ubarText').textContent='Error: '+e.message+' — Run: npm run update';
-    document.getElementById('conflictGrid').innerHTML=`<div style="grid-column:1/-1;padding:22px;color:var(--amber);font-size:12px;">Backend not ready. Run: <strong>npm run update</strong> then <strong>npm start</strong><br>Error: ${e.message}</div>`;
   }
   // Load news separately
   loadNews();
