@@ -220,6 +220,14 @@ app.listen(PORT, () => {
   } else {
     console.log('Self-Ping:      Inactive (Local Environment)');
   }
+
+  // ── FORCE INITIAL UPDATE IF DATA MISSING ──────────────────────────────────
+  if (!load('meta.json')) {
+    console.log('\n[!] Data missing — Triggering initial news fetch...');
+    const { updateNow } = require('./updater');
+    updateNow().catch(e => console.error('[!] Initial fetch failed:', e.message));
+  }
+
   console.log('');
 });
 
