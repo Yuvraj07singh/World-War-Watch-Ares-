@@ -500,14 +500,14 @@ img,svg{content-visibility:auto;}
     <div class="cmap-tt-name" id="cmapTipName"></div>
     <div class="cmap-tt-level" id="cmapTipLevel"></div>
   </div>
-  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 6px rgba(0, 170, 255, 0.4)) drop-shadow(0 0 2px rgba(0, 170, 255, 0.8));">
+  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));">
     <defs>
       <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
       <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
       <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
     </defs>
     <!-- Image Background -->
-    <image href="map_bg.png" width="1000" height="500" x="0" y="0" preserveAspectRatio="xMidYMid slice" opacity="0.8"/>
+    <image href="map_bg.png" width="1000" height="500" x="0" y="0" preserveAspectRatio="xMidYMid meet" opacity="0.95"/>
     
     <!-- Faint Grid lines matching the reference -->
     <line x1="0" y1="250" x2="1000" y2="250" stroke="#003366" stroke-width=".3" stroke-dasharray="4,8" opacity="0.3"/>
