@@ -20,7 +20,7 @@ async function ask(prompt, opts = {}) {
       
       try {
         // Fallback to Groq (Llama-3-70B)
-        return await askGroq(prompt, { ...opts, model: 'llama3-70b-8192' });
+        return await askGroq(prompt, { ...opts, model: 'llama-3.3-70b-versatile' });
       } catch (groqErr) {
         console.error('[ai] Groq fallback failed:', groqErr.message);
         throw new Error(`AI pipeline failed: Both Gemini and Groq are unavailable.`);
@@ -30,7 +30,7 @@ async function ask(prompt, opts = {}) {
     // If we want to be hyper-resilient, any Gemini failure could trigger Groq
     console.warn(`[ai] Gemini failed with unexpected error. Falling back to Groq...`);
     try {
-        return await askGroq(prompt, { ...opts, model: 'llama3-70b-8192' });
+        return await askGroq(prompt, { ...opts, model: 'llama-3.3-70b-versatile' });
     } catch(groqErr) {
         throw new Error(`AI pipeline failed completely. Gemini Err: ${e.message}. Groq Err: ${groqErr.message}`);
     }
