@@ -19,7 +19,7 @@ async function askGroq(prompt, opts = {}) {
   }
 
   const url = 'https://api.groq.com/openai/v1/chat/completions';
-  const model = opts.model || 'llama-3.1-70b-versatile';
+  const model = opts.model || 'llama3-70b-8192';
 
   const body = {
     model: model,
