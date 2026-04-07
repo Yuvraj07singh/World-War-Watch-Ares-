@@ -51,9 +51,19 @@ async function ask(prompt, opts = {}) {
   const result = await model.generateContent(prompt);
   const text = result.response.text().trim();
 
+  if (!text || text.length === 0) {
+    throw new Error('Gemini returned empty response');
+  }
+
   if (opts.json) {
-    // Strip any accidental markdown fences
-    const clean = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    // Aggressive cleanup: strip ALL markdown fences, leading text, BOM
+    let clean = text.replace(/^\uFEFF/, '');
+    clean = clean.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
+    // If leading non-JSON text exists (e.g. "Here is the JSON:\n{...}")
+    const firstBrace = clean.search(/[\[{]/);
+    if (firstBrace > 0) clean = clean.substring(firstBrace);
+    const lastBrace = Math.max(clean.lastIndexOf('}'), clean.lastIndexOf(']'));
+    if (lastBrace > 0) clean = clean.substring(0, lastBrace + 1);
     return JSON.parse(clean);
   }
 

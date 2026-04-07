@@ -23,31 +23,48 @@ async function askPollinations(prompt, opts = {}) {
     temperature: opts.temperature || 0.3
   };
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
+  // Add 30s timeout to prevent hanging
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const text = await response.text();
 
   if (!response.ok) {
-    throw new Error(`Pollinations API Error: ${response.statusText} - ${text}`);
+    throw new Error(`Pollinations API Error: ${response.statusText} - ${text.substring(0, 200)}`);
+  }
+
+  if (!text || text.trim().length === 0) {
+    throw new Error('Pollinations returned empty response');
   }
 
   if (opts.json) {
     try {
-      // Sometimes it returns markdown wrapped json even with jsonMode
-      let cleanText = text.trim();
-      if (cleanText.startsWith('```json')) {
-         cleanText = cleanText.substring(7);
-         if (cleanText.endsWith('```')) cleanText = cleanText.substring(0, cleanText.length - 3);
-      }
+      // Aggressive cleanup: strip ALL markdown fences, leading text, BOM
+      let cleanText = text.trim().replace(/^\uFEFF/, '');
+      // Remove any wrapping markdown code fences (```json ... ``` or ``` ... ```)
+      cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/g, '').trim();
+      // If the JSON still has leading non-JSON text (e.g. "Here is the JSON:\n{...}")
+      const firstBrace = cleanText.search(/[\[{]/);
+      if (firstBrace > 0) cleanText = cleanText.substring(firstBrace);
+      // Find the last closing brace/bracket
+      const lastBrace = Math.max(cleanText.lastIndexOf('}'), cleanText.lastIndexOf(']'));
+      if (lastBrace > 0) cleanText = cleanText.substring(0, lastBrace + 1);
+      
       return JSON.parse(cleanText);
     } catch (e) {
-      console.error('[pollinations] Failed to parse JSON response:', text);
+      console.error('[pollinations] Failed to parse JSON response:', text.substring(0, 300));
       throw new Error('Pollinations returned invalid JSON');
     }
   }

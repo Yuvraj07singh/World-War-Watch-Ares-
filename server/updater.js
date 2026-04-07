@@ -323,6 +323,28 @@ async function runUpdate(opts = {}) {
         const prompt = typeof promptFn === 'function' ? promptFn() : promptFn;
         const result = await ask(prompt, { json: isJSON, maxTokens: maxTok || 8192 });
         const data = isJSON ? result : { text: result };
+
+        // ── VALIDATION GATE: Never save empty/broken data ──
+        if (data === null || data === undefined) {
+          throw new Error('AI returned null/undefined — retrying');
+        }
+        if (isJSON && typeof data === 'string') {
+          throw new Error('AI returned raw string instead of JSON — retrying');
+        }
+
+        // For conflicts.json: validate it has at least one required key
+        if (file === 'conflicts.json' && typeof data === 'object' && !Array.isArray(data)) {
+          const hasConflicts = data.iran || data['india-pakistan'] || data['russia-ukraine'] || data.conflicts;
+          if (!hasConflicts) {
+            throw new Error('conflicts.json missing all conflict keys — AI output is malformed');
+          }
+        }
+
+        // For economic data: validate it's a non-empty array
+        if (file === 'economic.json' && Array.isArray(data) && data.length === 0) {
+          throw new Error('economic.json is empty array — retrying');
+        }
+
         // Arrays (economic, events) must not be spread into objects
         if (Array.isArray(data)) {
           save(file, data);
@@ -332,7 +354,7 @@ async function runUpdate(opts = {}) {
         log(`✓ ${file}`);
         return;
       } catch (e) {
-        log(`✗ ${key} attempt ${attempt}: ${e.message.substring(0, 100)}`);
+        log(`✗ ${key} attempt ${attempt}: ${e.message.substring(0, 120)}`);
         
         // If rate limited (429), parse retry delay and wait
         if (e.message.includes('429') || e.message.includes('quota')) {

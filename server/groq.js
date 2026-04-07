@@ -46,13 +46,28 @@ async function askGroq(prompt, opts = {}) {
     throw new Error(`Groq API Error: ${data.error?.message || response.statusText}`);
   }
 
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error('Groq returned malformed response — no choices');
+  }
+
   const content = data.choices[0].message.content;
+
+  if (!content || content.trim().length === 0) {
+    throw new Error('Groq returned empty content');
+  }
 
   if (opts.json) {
     try {
-      return JSON.parse(content);
+      // Aggressive cleanup: strip markdown fences, leading text, BOM
+      let cleanText = content.trim().replace(/^\uFEFF/, '');
+      cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/g, '').trim();
+      const firstBrace = cleanText.search(/[\[{]/);
+      if (firstBrace > 0) cleanText = cleanText.substring(firstBrace);
+      const lastBrace = Math.max(cleanText.lastIndexOf('}'), cleanText.lastIndexOf(']'));
+      if (lastBrace > 0) cleanText = cleanText.substring(0, lastBrace + 1);
+      return JSON.parse(cleanText);
     } catch (e) {
-      console.error('[groq] Failed to parse JSON response:', content);
+      console.error('[groq] Failed to parse JSON response:', content.substring(0, 300));
       throw new Error('Groq returned invalid JSON');
     }
   }

@@ -984,31 +984,41 @@ async function init(){
     }
   } catch(e) {}
 
-  // 2. FETCH LIVE DATA (In background)
+  // 2. FETCH LIVE DATA (with 45s timeout for Render cold starts)
   try{
-    const r = await fetch(API+'/api/all');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
+    const r = await fetch(API+'/api/all', { signal: controller.signal });
+    clearTimeout(timeout);
     if(!r.ok) throw new Error('Backend data not ready');
     const d = await r.json();
     
-    // Save fresh data to local cache for next visit
-    localStorage.setItem('wwwatch_db', JSON.stringify(d));
+    // Save fresh data to local cache for next visit (safe for private browsing)
+    try { localStorage.setItem('wwwatch_db', JSON.stringify(d)); } catch(e) {}
 
     if(d.meta)          renderMeta(d.meta);
     if(d.conflicts)     renderConflicts(d.conflicts);
     if(d.economic)      renderEco(d.economic);
     else                renderEco(FALLBACK_ECO);
-    if(d.upcomingEvents && Array.isArray(d.upcomingEvents) && d.upcomingEvents.length > 0) renderEvents(d.upcomingEvents);
+    // AI may return upcomingEvents as array or {events:[...]}
+    const evData = d.upcomingEvents || d.events;
+    if(evData)          renderEvents(evData);
     else                renderEvents(FALLBACK_EVENTS);
     if(d.conflicts)     renderTensions(d.conflicts);
     if(d.updateLog)     renderUpdateBar(d.updateLog);
     if(d.tensionHistory) renderTrendChart(d.tensionHistory);
-    if(d.dailyBriefing){
+    if(d.dailyBriefing && (d.dailyBriefing.text || d.dailyBriefing._updatedAt)){
       document.getElementById('bOut').classList.add('on');
       document.getElementById('bHdr').textContent='// Daily Briefing · Updated '+fmtDate(d.dailyBriefing._updatedAt);
       document.getElementById('bTxt').textContent=d.dailyBriefing.text||'';
     }
   }catch(e){
-    document.getElementById('ubarText').textContent='Error: '+e.message+' — Run: npm run update';
+    // Only show error if we had no cached data either
+    const hasCached = document.querySelector('.ccard');
+    if(!hasCached) {
+      document.getElementById('ubarText').textContent='Connecting to server... (may take 30s on first load)';
+    }
+    console.warn('[init] Fetch failed:', e.message);
   }
   // Load news separately
   loadNews();
@@ -1023,10 +1033,13 @@ function fmtDate(iso){
 
 // ── RENDER META (TICKER + ALERT) ─────────────────────────
 function renderMeta(meta){
+  if(!meta || typeof meta !== 'object') return;
   if(meta.topAlert) document.getElementById('alertMsg').textContent=meta.topAlert;
-  if(meta.tickerItems?.length){
-    const items=[...meta.tickerItems,...meta.tickerItems];
+  const tItems = meta.tickerItems || meta.ticker || [];
+  if(Array.isArray(tItems) && tItems.length){
+    const items=[...tItems,...tItems];
     document.getElementById('tickerEl').innerHTML=items.map(t=>{
+      if(!t || !t.text) return '';
       if(t.link && t.link.startsWith('http')){
         return `<a class="ti${t.hot?' hot':''}" href="${t.link}" target="_blank" rel="noopener">${t.hot?'// ':''}${t.text}</a><span class="t-div"> /// </span>`;
       }
@@ -1096,25 +1109,33 @@ function renderTensions(data){
 
 // ── RENDER ECO ───────────────────────────────────────────
 function renderEco(data){
-  const indicators=Array.isArray(data)?data:data.indicators;
-  if(!indicators?.length)return;
+  if(!data) return;
+  // AI returns data as: array directly, {indicators:[...]}, {economic:[...]}, or nested
+  let indicators = Array.isArray(data) ? data : (data.indicators || data.economic || data.data || []);
+  if (!Array.isArray(indicators) || !indicators.length) return;
+  indicators = indicators.filter(i => i && (i.label || i.name));
+  if (!indicators.length) return;
   document.getElementById('ecoGrid').innerHTML=indicators.map(i=>`
     <div class="ecell">
-      <div class="e-lbl">${i.label}</div>
-      <div class="e-val ${i.color||'a'}">${i.val}</div>
-      <div class="e-note">${i.note||''}</div>
+      <div class="e-lbl">${i.label || i.name || ''}</div>
+      <div class="e-val ${i.color||'a'}">${i.val || i.value || ''}</div>
+      <div class="e-note">${i.note || i.description || ''}</div>
     </div>`).join('');
 }
 
 // ── RENDER EVENTS ────────────────────────────────────────
 function renderEvents(data){
-  if(!Array.isArray(data))return;
-  document.getElementById('eventsList').innerHTML=data.map(e=>`
+  if(!data) return;
+  // AI may return {events:[...]} or an array directly
+  let events = Array.isArray(data) ? data : (data.events || data.upcomingEvents || []);
+  if(!Array.isArray(events) || !events.length) return;
+  events = events.filter(e => e && (e.title || e.event));
+  document.getElementById('eventsList').innerHTML=events.map(e=>`
     <div class="ev-row">
-      <div class="ev-date-box"><div class="ev-d">${e.date}</div><div class="ev-m">${e.month}</div></div>
+      <div class="ev-date-box"><div class="ev-d">${e.date||'?'}</div><div class="ev-m">${e.month||''}</div></div>
       <div class="ev-dot ${e.severity||'a'}"></div>
-      <div class="ev-info"><div class="ev-title">${e.title}</div><div class="ev-desc">${e.desc}</div></div>
-      <span class="ev-tag">${e.tag}</span>
+      <div class="ev-info"><div class="ev-title">${e.title||e.event||''}</div><div class="ev-desc">${e.desc||e.description||''}</div></div>
+      <span class="ev-tag">${e.tag||''}</span>
     </div>`).join('');
 }
 
