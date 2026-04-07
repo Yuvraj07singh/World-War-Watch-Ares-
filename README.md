@@ -1,4 +1,4 @@
-# 🌍 World War Watch v2 — Global Geopolitics Dashboard
+# 🌍 World War Watch  — Global Geopolitics Dashboard
 
 Real-time conflict intelligence dashboard. **100% free APIs.** Auto-updates every hour.
 
