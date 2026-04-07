@@ -179,7 +179,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tab-btn:hover:not(.on){background:var(--bg3);color:var(--t2);}
 .tab-panel{display:none;background:var(--bg2);border:1px solid var(--b1);padding:20px;}
 .tab-panel.on{display:block;}
-.tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:16px;}
+.tp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:16px;}
 .tpcell{background:var(--bg);padding:14px;}
 .tpc-lbl{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:5px;}
 .tpc-val{font-family:var(--head);font-size:23px;line-height:1;}
@@ -751,6 +751,7 @@ img, svg { max-width: 100%; height: auto; }
     <div class="tpcell"><div class="tpc-lbl">Inflation</div><div class="tpc-val r">Rising</div><div class="tpc-note">Food + energy</div></div>
     <div class="tpcell"><div class="tpc-lbl">Gold</div><div class="tpc-val g">+28%</div><div class="tpc-note">Safe haven</div></div>
     <div class="tpcell"><div class="tpc-lbl">Trade disruption</div><div class="tpc-val r">Critical</div><div class="tpc-note">Hormuz + Red Sea</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Supply chains</div><div class="tpc-val r">Broken</div><div class="tpc-note">Asia → EU halted</div></div>
   </div>
   <div class="tp-text">The simultaneous closure of the Strait of Hormuz and disruption of the Red Sea has created the worst global shipping crisis since World War II. Roughly 30% of global seaborne trade now faces disruption. Energy prices are cascading into every sector — food production, manufacturing, and transport. The IMF has already revised global growth down. Emerging markets are most exposed.</div>
   <button class="ai-btn" id="ibtn-economic" onclick="fetchImpact('economic')">▶ Get live AI analysis</button>
@@ -777,6 +778,7 @@ img, svg { max-width: 100%; height: auto; }
     <div class="tpcell"><div class="tpc-lbl">Afghan civilians</div><div class="tpc-val r">Unknown</div><div class="tpc-note">Media blackout</div></div>
     <div class="tpcell"><div class="tpc-lbl">Food crisis</div><div class="tpc-val r">High</div><div class="tpc-note">Ukraine + oil</div></div>
     <div class="tpcell"><div class="tpc-lbl">Refugee flows</div><div class="tpc-val a">Rising</div><div class="tpc-note">All 4 theaters</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Medical access</div><div class="tpc-val r">Denied</div><div class="tpc-note">Iran hospitals</div></div>
   </div>
   <div class="tp-text">The multi-front humanitarian crisis is the largest since the Cold War. Iran's civilian infrastructure — hospitals, water, power — is under sustained attack. Afghanistan's media blackout makes casualties unverifiable. Ukraine enters Year 4 with millions displaced. The compounding effect on food security is acute: Iran controls Hormuz, Ukraine supplies wheat.</div>
   <button class="ai-btn" id="ibtn-humanitarian" onclick="fetchImpact('humanitarian')">▶ Get live AI analysis</button>
@@ -790,6 +792,7 @@ img, svg { max-width: 100%; height: auto; }
     <div class="tpcell"><div class="tpc-lbl">Global South</div><div class="tpc-val a">Neutral</div><div class="tpc-note">India, Brazil, SA</div></div>
     <div class="tpcell"><div class="tpc-lbl">Nuclear risk</div><div class="tpc-val r">Elevated</div><div class="tpc-note">Iran, Pakistan</div></div>
     <div class="tpcell"><div class="tpc-lbl">UN effectiveness</div><div class="tpc-val r">Near zero</div><div class="tpc-note">SC deadlocked</div></div>
+    <div class="tpcell"><div class="tpc-lbl">Arms race</div><div class="tpc-val r">Surging</div><div class="tpc-note">Global defense ↑</div></div>
   </div>
   <div class="tp-text">The post-1945 world order is under maximum simultaneous stress. The US is engaged in the Middle East while applying economic pressure on allies. China is strategically waiting — US overextension in Iran is the Taiwan opportunity Beijing has been watching for. The Global South is maintaining strict neutrality across all four conflicts.</div>
   <button class="ai-btn" id="ibtn-geopolitical" onclick="fetchImpact('geopolitical')">▶ Get live AI analysis</button>
