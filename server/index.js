@@ -77,13 +77,15 @@ app.get('/api/news', apiLimiter, (req, res) => {
 
 // Combined all-data endpoint
 app.get('/api/all', apiLimiter, (req, res) => {
-  const files = ['meta.json', 'conflicts.json', 'economic.json', 'daily-briefing.json', 'upcoming-events.json', 'update-log.json'];
+  const coreFiles = ['meta.json', 'conflicts.json'];
   const result = {};
   for (const f of files) {
     const d = load(f);
-    if (!d) return res.status(503).json({ error: 'Data not initialized. Run: npm run update' });
+    if (!d && coreFiles.includes(f)) {
+      return res.status(503).json({ error: `Core data (${f}) not initialized.` });
+    }
     const key = f.replace('.json', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase()).replace('Daily','daily');
-    result[key] = d;
+    result[key] = d || null;
   }
   res.set('Cache-Control', 'public, max-age=120');
   res.json(result);
