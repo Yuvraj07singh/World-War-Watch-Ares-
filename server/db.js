@@ -41,7 +41,7 @@ async function dbSave(key, jsonData) {
     await Cache.findOneAndUpdate(
       { key },
       { data: jsonData, updatedAt: Date.now() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     return true;
   } catch (err) {

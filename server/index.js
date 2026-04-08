@@ -144,7 +144,7 @@ app.post('/api/subscribe', apiLimiter, async (req, res) => {
     const sub = await Subscriber.findOneAndUpdate(
       { email: email.toLowerCase().trim() },
       {},
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
     res.json({ success: true, message: 'Subscribed to Intel Briefings' });
   } catch (err) {
