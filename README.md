@@ -1,132 +1,65 @@
-# 🌍 World War Watch  — Global Geopolitics Dashboard
+# 🌍 World War Watch — AI Geopolitical Intelligence Platform
 
-Real-time conflict intelligence dashboard. **100% free APIs.** Auto-updates every hour.
+**A fully automated, self-healing, AI-driven global conflict dashboard.**
 
----
-
-## APIs Used (All Free)
-
-| What | API | Cost | Limit |
-|------|-----|------|-------|
-| AI Analysis | Google Gemini 1.5 Flash | **FREE** | 15 req/min, 1M tokens/day |
-| News | 12 RSS Feeds (BBC, Reuters, Al Jazeera, NDTV, etc.) | **FREE** | Unlimited |
-
-**No credit card needed. No paid subscription.**
+World War Watch is a premium intelligence dashboard that automatically aggregates breaking geopolitical news via 12 global RSS feeds, analyzes it using a resilient 4-layer AI architecture, and presents the data in a stunning, high-performance UI.
 
 ---
 
-## Setup in 3 Steps
+## 🚀 Key Value Propositions for Buyers
 
-### Step 1 — Get your free Gemini API key
-1. Go to: **https://aistudio.google.com/app/apikey**
-2. Sign in with Google account
-3. Click "Create API Key"
-4. Copy the key
+1. **Zero-Maintenance Automation** 
+   - Once deployed, it runs entirely on autopilot. A Node.js cron job wakes up every 60 minutes, pulls new data, processes it via AI, and caches it to MongoDB.
+   
+2. **Bulletproof 4-Layer AI Architecture**
+   - The platform uses a fallback chain to guarantee 100% uptime:
+     1. **Gemini 2.5 Flash** (Primary - Free)
+     2. **Cerebras Llama 3.1 8B** (Secondary - Free)
+     3. **OpenRouter Llama 3** (Tertiary - Free)
+     4. **Pollinations.ai** (Last Resort fallback)
+   
+3. **MongoDB Data Persistence & Fast Load Times**
+   - Unlike basic apps that re-fetch APIs on every page load, WWWatch caches all intelligence reports permanently into MongoDB Atlas. Users get sub-100ms load times.
 
-### Step 2 — Configure
-```bash
-npm install
-cp .env.example .env
-```
-Open `.env` and add:
-```
-GEMINI_API_KEY=your-key-here
-```
+4. **Built-in Audience Funnel (Monetization Ready)**
+   - The UI includes a beautiful "Classified Intelligence Newsletter" capture form. Leads are securely saved to MongoDB. You are ready to start building an email list on Day 1.
 
-### Step 3 — Run
-```bash
-# Generate first data (~60 seconds)
-npm run update
+5. **Premium, Viral UX/UI**
+   - Built with raw HTML/CSS/JS for extreme performance without framework bloat. Features interactive SVG maps, tension meters, PDF report generation, and the iconic "Doomsday Clock."
 
-# Start server
-npm start
-
-# Open browser
-http://localhost:3000
-```
+6. **SEO & Analytics Ready**
+   - Pre-configured with Google Analytics (GA4) and Open Graph tags for easy marketing and traffic tracking.
 
 ---
 
-## Auto-Update
+## 🛠 Tech Stack
 
-The server auto-updates **every 60 minutes** (configurable):
-1. Fetches all 12 RSS feeds (free, no API key)
-2. Filters news by conflict
-3. Sends to Gemini for analysis
-4. Saves 6 JSON files to `public/data/`
-
-Conflict detail pages (history, leader statements, scenarios) refresh every **6 hours**.
-
-Change interval in `.env`:
-```
-UPDATE_INTERVAL_MINUTES=60   # every hour (default)
-UPDATE_INTERVAL_MINUTES=30   # every 30 min
-UPDATE_INTERVAL_MINUTES=120  # every 2 hours
-```
+- **Backend:** Node.js, Express, node-cron
+- **Frontend:** Vanilla JS, CSS3, Chart.js, HTML2Canvas
+- **Database:** MongoDB Atlas (Mongoose)
+- **AI Integration:** Google Gemini, Cerebras, OpenRouter
+- **Hosting Compatibility:** Vercel, Render, Railway, DigitalOcean
 
 ---
 
-## Project Structure
+## 💰 Monetization Pathways
 
-```
-wwwatch/
-├── server/
-│   ├── index.js      # Express server + cron scheduler
-│   ├── updater.js    # Hourly update logic
-│   ├── gemini.js     # Gemini AI wrapper (free)
-│   └── news.js       # RSS feed fetcher (free)
-├── public/
-│   ├── index.html    # Main dashboard
-│   ├── conflict.html # Conflict detail page
-│   └── data/         # Auto-generated JSON (don't edit)
-├── scripts/
-│   └── update-now.js # Manual update trigger
-├── .env.example
-└── package.json
-```
+The heavy lifting is done. As the new owner, you can monetize this asset by:
+1. **Premium Subscriptions:** Put the "Daily Intelligence Briefing" and "PDF Report Exports" behind a $5/month Stripe subscription.
+2. **Newsletter Sponsorships:** Use the built-in email capture to grow a newsletter and sell sponsorships (geopolitical newsletters have very high CPMs).
+3. **B2B API Access:** The data the AI produces is highly structured JSON. You can sell API access to financial traders or risk-assessment firms.
 
 ---
 
-## API Endpoints
+## 📦 What You Are Buying
+- Full transfer of the codebase (frontend & backend)
+- All prompt engineering frameworks and AI extraction logic
+- The MongoDB caching implementation and newsletter architecture
+- Complete IP rights to the design and assets
 
-```
-GET  /api/all              — All data in one request
-GET  /api/conflicts        — Conflict card data
-GET  /api/economic         — Economic indicators
-GET  /api/briefing         — Today's briefing
-GET  /api/events           — Flashpoint calendar
-GET  /api/news?limit=20    — Latest news articles
-GET  /api/conflict/:id     — Full conflict detail
-GET  /api/health           — Server health
-
-POST /api/ask              — AI query { query: "..." }
-POST /api/impact           — Impact analysis { type: "india" }
-POST /api/admin/update     — Manual trigger
-```
-
----
-
-## Deploy to Production (Free)
-
-### Railway (easiest)
-```bash
-git init && git add . && git commit -m "init"
-# Push to GitHub, then connect at railway.app
-# Add GEMINI_API_KEY env var in Railway dashboard
-```
-
-### Render
-Same process — connect GitHub repo at render.com, add env var.
-
-### VPS
-```bash
-npm install -g pm2
-npm run update
-pm2 start server/index.js --name wwwatch
-pm2 save && pm2 startup
-```
-
----
-
-## News Sources
-BBC World · BBC Middle East · BBC South Asia · Al Jazeera · The Guardian · AP News · Reuters · NDTV · Times of India · The Hindu · Defense News · Foreign Policy
+## ⚙️ Quick Start for the Buyer
+1. Clone the repository.
+2. `npm install`
+3. Add your `MONGO_URI` and `GEMINI_API_KEY` to `.env`
+4. `npm run update` (to generate initial data)
+5. `npm start` (Runs on http://localhost:3000)
