@@ -1058,26 +1058,79 @@ const FALLBACK_ECO = [
   {label:"Food Security",val:"Critical",color:"r",note:"Ukraine wheat + oil-driven inflation"}
 ];
 
+// ── NEVER-BLANK CACHE HELPERS ───────────────────────────
+// Each section is cached independently so one failed section doesn't nuke others
+function cacheGet(key) {
+  try { const v = localStorage.getItem('ww_' + key); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function cacheSet(key, data) {
+  if (!data) return;
+  if (Array.isArray(data) && data.length === 0) return;
+  try { localStorage.setItem('ww_' + key, JSON.stringify(data)); } catch {}
+}
+
+// Render a section ONLY if data is valid; otherwise leave previous render intact
+function safeRender(key, data, renderFn, fallback) {
+  if (data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0)) {
+    renderFn(data);
+    cacheSet(key, data);
+  } else {
+    // Try cached version first, then hardcoded fallback
+    const cached = cacheGet(key);
+    if (cached) renderFn(cached);
+    else if (fallback) renderFn(fallback);
+  }
+}
+
+// ── FALLBACK GEOPOLITICS DATA ───────────────────────────
+const FALLBACK_GEO = {
+  alliances: [
+    {name:"NATO",type:"military",members:["USA","UK","France","Germany","Poland","Turkey","Canada","Italy","Spain","29 others"],strength:"dominant",status:"Expanded to 32 members. Increased defense spending across members.",recentMove:"Finland and Sweden accession strengthened northern flank"},
+    {name:"BRICS+",type:"economic-political",members:["China","Russia","India","Brazil","South Africa","UAE","Egypt","Ethiopia","Iran"],strength:"rising",status:"Expanding rapidly. De-dollarization agenda gaining momentum.",recentMove:"New Development Bank expanding lending in local currencies"},
+    {name:"SCO",type:"security",members:["China","Russia","India","Pakistan","Iran","Kazakhstan","Uzbekistan"],strength:"growing",status:"Central Asian security bloc gaining influence.",recentMove:"Joint military exercises expanded in scope"},
+    {name:"Quad",type:"strategic",members:["USA","India","Japan","Australia"],strength:"moderate",status:"Indo-Pacific strategy alignment deepening.",recentMove:"Maritime domain awareness initiative launched"},
+    {name:"AUKUS",type:"military-tech",members:["Australia","UK","USA"],strength:"niche",status:"Nuclear submarine program progressing.",recentMove:"Pillar 2 tech sharing expanded to AI and quantum"}
+  ],
+  rivalries: [
+    {side1:"USA",side2:"China",domain:"Trade, Tech, Military, Taiwan",intensity:"High",summary:"Ongoing tech decoupling, tariff escalation, and military posturing over Taiwan Strait."},
+    {side1:"USA",side2:"Russia",domain:"Ukraine, Nuclear, Arctic",intensity:"Critical",summary:"Proxy war in Ukraine continues. Nuclear rhetoric at highest levels since Cold War."},
+    {side1:"India",side2:"China",domain:"Border, Trade, Influence",intensity:"Elevated",summary:"LAC standoff ongoing. Both compete for influence in South Asia and Indian Ocean."},
+    {side1:"Saudi Arabia",side2:"Iran",domain:"Regional Dominance",intensity:"High",summary:"Proxy conflicts across Middle East. Recent diplomatic thaw fragile amid wider tensions."}
+  ],
+  countryDevelopments: [
+    {country:"United States",flag:"🇺🇸",developments:[{sector:"MILITARY",update:"Expanded AUKUS partnership. Record defense budget."},{sector:"ECONOMY",update:"Tariff strategy causing trade tensions globally."},{sector:"TECH",update:"AI arms race with China intensifying."}]},
+    {country:"China",flag:"🇨🇳",developments:[{sector:"MILITARY",update:"Naval expansion continues. New carrier fleet growing."},{sector:"ECONOMY",update:"Belt and Road investments expanding."},{sector:"TECH",update:"Semiconductor self-reliance push accelerating."}]},
+    {country:"India",flag:"🇮🇳",developments:[{sector:"MILITARY",update:"Operation Sindoor aftermath. Defense modernization accelerated."},{sector:"ECONOMY",update:"Navigating US tariffs and oil import pressures."},{sector:"TECH",update:"Digital infrastructure and space program advancing."}]},
+    {country:"Russia",flag:"🇷🇺",developments:[{sector:"MILITARY",update:"Ukraine operations ongoing. Force mobilization continues."},{sector:"ECONOMY",update:"Sanctions impact partially offset by energy exports."},{sector:"TECH",update:"Nuclear deterrence modernization priority."}]}
+  ],
+  geopoliticalDebates: [
+    {topic:"NATO Expansion",region:"Europe",status:"Ongoing",sides:[{position:"Pro-Expansion",argument:"Collective defense against Russian aggression requires broader alliance.",supporters:["USA","UK","Poland","Baltic States"]},{position:"Against Expansion",argument:"Provokes Russia and escalates tensions unnecessarily.",supporters:["Russia","China","Some EU members"]}]},
+    {topic:"De-Dollarization",region:"Global",status:"Accelerating",sides:[{position:"End Dollar Hegemony",argument:"BRICS nations seeking trade in local currencies to reduce US leverage.",supporters:["China","Russia","Brazil","Saudi Arabia"]},{position:"Dollar Remains King",argument:"No viable alternative exists. Dollar infrastructure too entrenched.",supporters:["USA","EU","Japan","UK"]}]}
+  ]
+};
+
 // ── INIT ────────────────────────────────────────────────
 async function init(){
   document.getElementById('ubarText').textContent='Refreshing...';
 
-  // 1. INSTANT LOCAL CACHE LOAD (Eliminates Render cold-start wait)
-  try {
-    const cached = localStorage.getItem('wwwatch_db');
-    if (cached) {
-      const d = JSON.parse(cached);
-      if(d.meta) renderMeta(d.meta);
-      if(d.conflicts) { renderConflicts(d.conflicts); renderTensions(d.conflicts); }
-      if(d.economic) renderEco(d.economic);
-      if(d.upcomingEvents && d.upcomingEvents.length>0) renderEvents(d.upcomingEvents);
-      if(d.updateLog) renderUpdateBar(d.updateLog);
-      if(d.tensionHistory) renderTrendChart(d.tensionHistory);
-      if(d.geopolitics) renderGeopolitics(d.geopolitics);
-    }
-  } catch(e) {}
+  // 1. INSTANT CACHE LOAD — render every section from last known good data immediately
+  safeRender('meta',       cacheGet('meta'),       renderMeta, null);
+  safeRender('conflicts',  cacheGet('conflicts'),  (d) => { renderConflicts(d); renderTensions(d); }, null);
+  safeRender('economic',   cacheGet('economic'),   renderEco, FALLBACK_ECO);
+  safeRender('events',     cacheGet('events'),     renderEvents, FALLBACK_EVENTS);
+  safeRender('geopolitics',cacheGet('geopolitics'),renderGeopolitics, FALLBACK_GEO);
+  const cachedLog = cacheGet('updateLog');
+  if (cachedLog) renderUpdateBar(cachedLog);
+  const cachedHistory = cacheGet('tensionHistory');
+  if (cachedHistory) renderTrendChart(cachedHistory);
+  const cachedBriefing = cacheGet('briefing');
+  if (cachedBriefing && cachedBriefing.text) {
+    document.getElementById('bOut').classList.add('on');
+    document.getElementById('bHdr').textContent='// Daily Briefing · Updated '+fmtDate(cachedBriefing._updatedAt);
+    document.getElementById('bTxt').textContent=cachedBriefing.text||'';
+  }
 
-  // 2. FETCH LIVE DATA (with 45s timeout for Render cold starts)
+  // 2. FETCH LIVE DATA — only overwrite sections where new data is BETTER
   try{
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 45000);
@@ -1085,32 +1138,34 @@ async function init(){
     clearTimeout(timeout);
     if(!r.ok) throw new Error('Backend data not ready');
     const d = await r.json();
-    
-    // Save fresh data to local cache for next visit (safe for private browsing)
-    try { localStorage.setItem('wwwatch_db', JSON.stringify(d)); } catch(e) {}
 
-    if(d.meta)          renderMeta(d.meta);
-    if(d.conflicts)     renderConflicts(d.conflicts);
-    if(d.economic)      renderEco(d.economic);
-    else                renderEco(FALLBACK_ECO);
-    // AI may return upcomingEvents as array or {events:[...]}
-    const evData = d.upcomingEvents || d.events;
-    if(evData)          renderEvents(evData);
-    else                renderEvents(FALLBACK_EVENTS);
-    if(d.conflicts)     renderTensions(d.conflicts);
-    if(d.updateLog)     renderUpdateBar(d.updateLog);
-    if(d.tensionHistory) renderTrendChart(d.tensionHistory);
-    if(d.geopolitics)    renderGeopolitics(d.geopolitics);
+    // Section-by-section safe rendering (never blank guarantee)
+    safeRender('meta',       d.meta,                     renderMeta, null);
+    safeRender('conflicts',  d.conflicts,                (c) => { renderConflicts(c); renderTensions(c); }, null);
+    safeRender('economic',   d.economic,                 renderEco, FALLBACK_ECO);
+    safeRender('events',     d.upcomingEvents || d.events,renderEvents, FALLBACK_EVENTS);
+    safeRender('geopolitics',d.geopolitics,              renderGeopolitics, FALLBACK_GEO);
+
+    if(d.updateLog) { renderUpdateBar(d.updateLog); cacheSet('updateLog', d.updateLog); }
+    if(d.tensionHistory) { renderTrendChart(d.tensionHistory); cacheSet('tensionHistory', d.tensionHistory); }
+
     if(d.dailyBriefing && (d.dailyBriefing.text || d.dailyBriefing._updatedAt)){
       document.getElementById('bOut').classList.add('on');
       document.getElementById('bHdr').textContent='// Daily Briefing · Updated '+fmtDate(d.dailyBriefing._updatedAt);
       document.getElementById('bTxt').textContent=d.dailyBriefing.text||'';
+      cacheSet('briefing', d.dailyBriefing);
     }
+
+    // Legacy bulk cache (backwards compat)
+    try { localStorage.setItem('wwwatch_db', JSON.stringify(d)); } catch(e) {}
+
   }catch(e){
-    // Only show error if we had no cached data either
+    // Data fetch failed — but cached data is already rendered above, so user sees content!
     const hasCached = document.querySelector('.ccard');
     if(!hasCached) {
       document.getElementById('ubarText').textContent='Connecting to server... (may take 30s on first load)';
+    } else {
+      document.getElementById('ubarText').textContent='Showing cached data · Live update pending...';
     }
     console.warn('[init] Fetch failed:', e.message);
   }

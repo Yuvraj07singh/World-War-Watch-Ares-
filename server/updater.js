@@ -17,6 +17,10 @@ const DATA_DIR = path.join(__dirname, '..', 'public', 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const save  = (f, d) => {
+  // NEVER-BLANK GUARD: refuse to overwrite good data with empty/null
+  if (d === null || d === undefined) return;
+  if (Array.isArray(d) && d.length === 0 && exists(f)) return; // don't overwrite with empty array
+  if (typeof d === 'object' && !Array.isArray(d) && Object.keys(d).length <= 1 && exists(f)) return; // only _updatedAt = useless
   fs.writeFileSync(path.join(DATA_DIR, f), JSON.stringify(d, null, 2));
   dbSave(f, d).catch(() => {}); // Fire and forget purely for persistence 
 };
