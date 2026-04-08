@@ -27,7 +27,10 @@ const FEEDS = {
   the_hindu:      'https://www.thehindu.com/news/international/feeder/default.rss',
   // Defense / Geopolitics
   defense_news:   'https://www.defensenews.com/arc/outboundfeeds/rss/',
-  foreign_policy: 'https://foreignpolicy.com/feed/'
+  foreign_policy: 'https://foreignpolicy.com/feed/',
+  jpost:          'https://www.jpost.com/rss/rssnews.aspx',
+  times_of_israel:'https://www.timesofisrael.com/feed/',
+  middle_east_eye:'https://www.middleeasteye.net/rss'
 };
 
 // ── CONFLICT KEYWORDS ─────────────────────────────────────────────────────────
@@ -35,7 +38,9 @@ const CONFLICT_KEYWORDS = {
   iran: [
     'iran', 'iranian', 'tehran', 'hormuz', 'strait of hormuz', 'khamenei',
     'operation epic fury', 'israel iran', 'us iran', 'irgc', 'nuclear iran',
-    'persian gulf', 'ayatollah', 'khomeini', 'raisi', 'enrichment uranium'
+    'persian gulf', 'ayatollah', 'khomeini', 'raisi', 'enrichment uranium',
+    'idf', 'netanyahu', 'tel aviv', 'jerusalem', 'israeli strike', 'iranian strike',
+    'biden iran', 'us military middle east', 'centcom'
   ],
   'india-pakistan': [
     'india pakistan', 'india-pakistan', 'kashmir', 'pahalgam', 'operation sindoor',
@@ -65,7 +70,7 @@ const CONFLICT_KEYWORDS = {
 async function fetchFeed(name, url) {
   try {
     const feed = await parser.parseURL(url);
-    return (feed.items || []).slice(0, 20).map(item => ({
+    return (feed.items || []).slice(0, 60).map(item => ({
       title:   item.title || '',
       link:    item.link  || item.guid || '',
       source:  name,
@@ -122,7 +127,7 @@ function categorizeNews(articles) {
     result[conflict] = articles.filter(article => {
       const text = `${article.title} ${article.snippet}`.toLowerCase();
       return keywords.some(kw => text.includes(kw));
-    }).slice(0, 15);
+    }).slice(0, 50);
   }
   return result;
 }

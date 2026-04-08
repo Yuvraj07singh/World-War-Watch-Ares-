@@ -1,17 +1,11 @@
 // server/groq.js
 // ─────────────────────────────────────────────
-//  Groq Cloud API wrapper (OpenAI-compatible)
-//  Targeting Llama-3-70B for intelligence
+//  Groq API wrapper (OpenAI-compatible)
+//  Extremely fast inference layer
 // ─────────────────────────────────────────────
 
-require('dotenv').config();
 const fetch = require('node-fetch');
 
-/**
- * Call Groq with a prompt
- * @param {string} prompt
- * @param {object} opts - { temperature, maxTokens, json }
- */
 async function askGroq(prompt, opts = {}) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -19,26 +13,35 @@ async function askGroq(prompt, opts = {}) {
   }
 
   const url = 'https://api.groq.com/openai/v1/chat/completions';
-  const model = opts.model || 'llama-3.3-70b-versatile';
+  const model = opts.model || process.env.GROQ_MODEL || 'llama3-70b-8192';
 
   const body = {
-    model: model,
+    model,
     messages: [
       { role: 'user', content: prompt }
     ],
     temperature: opts.temperature || 0.3,
-    max_tokens: opts.maxTokens || 4096,
-    response_format: opts.json ? { type: 'json_object' } : undefined
+    max_tokens: opts.maxTokens || 8192,
+    ...(opts.json ? { response_format: { type: 'json_object' } } : {})
   };
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const data = await response.json();
 
@@ -58,7 +61,6 @@ async function askGroq(prompt, opts = {}) {
 
   if (opts.json) {
     try {
-      // Aggressive cleanup: strip markdown fences, leading text, BOM
       let cleanText = content.trim().replace(/^\uFEFF/, '');
       cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/g, '').trim();
       const firstBrace = cleanText.search(/[\[{]/);

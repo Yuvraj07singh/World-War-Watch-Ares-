@@ -22,7 +22,7 @@ const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const UPDATE_MINS = parseInt(process.env.UPDATE_INTERVAL_MINUTES || '60');
+const UPDATE_MINS = parseInt(process.env.UPDATE_INTERVAL_MINUTES || '15');
 
 // ── MIDDLEWARE ─────────────────────────────────────────────────────────────────
 app.set('trust proxy', 1); // Fixes Render's X-Forwarded-For warning for rate-limit

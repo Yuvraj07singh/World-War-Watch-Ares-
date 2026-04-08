@@ -45,7 +45,7 @@ async function restoreFromDB() {
 
 // ── PROMPTS ───────────────────────────────────────────────────────────────────
 function makeConflictsPrompt(newsMap) {
-  const summarize = (id, articles) => articles.slice(0,8).map((a,i)=>`[${i+1}] ${a.title} (${a.source}, ${a.pubDate.substring(0,10)})\n${a.snippet}`).join('\n\n');
+  const summarize = (id, articles) => articles.slice(0,15).map((a,i)=>`[${i+1}] ${a.title} (${a.source}, ${a.pubDate.substring(0,10)})\n${a.snippet}`).join('\n\n');
 
   return `You are a geopolitical intelligence analyst. Based on the latest news articles provided, return a JSON object with EXACTLY this structure (no markdown, raw JSON only):
 
@@ -544,7 +544,7 @@ async function runUpdate(opts = {}) {
   try {
     allNews = await fetchAllNews();
     log(`Fetched ${allNews.length} articles`);
-    save('raw-news.json', { articles: allNews.slice(0, 100), _updatedAt: new Date().toISOString() });
+    save('raw-news.json', { articles: allNews.slice(0, 300), _updatedAt: new Date().toISOString() });
   } catch (e) {
     log('RSS fetch failed:', e.message);
     errors.push({ key: 'rss', error: e.message });
@@ -662,12 +662,12 @@ async function runUpdate(opts = {}) {
     const lastMod = exists(file) ? fs.statSync(path.join(DATA_DIR, file)).mtimeMs : 0;
     const hoursOld = (Date.now() - lastMod) / 3600000;
 
-    if (hoursOld >= 6) {
+    if (hoursOld >= 1) {
       await geminiSave(`conflict:${id}`, file,
         () => makeConflictDetailPrompt(id, newsMap[id] || allNews.slice(0, 10)), true, 4000);
       await new Promise(r => setTimeout(r, 6000));
     } else {
-      log(`Skipping ${file} (${hoursOld.toFixed(1)}h old, refreshes at 6h)`);
+      log(`Skipping ${file} (${hoursOld.toFixed(1)}h old, refreshes at 1h)`);
     }
   }
 

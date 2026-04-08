@@ -12,11 +12,13 @@ const { ask: askGemini } = require('./gemini');
 const { askCerebras } = require('./cerebras');
 const { askOpenRouter } = require('./openrouter');
 const { askPollinations } = require('./pollinations');
+const { askGroq } = require('./groq');
 
 // Check which providers are configured
 function getProviders() {
   const providers = [
     { name: 'Gemini', fn: askGemini, ready: !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here' },
+    { name: 'Groq', fn: askGroq, ready: !!process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your-groq-api-key-here' },
     { name: 'Cerebras', fn: askCerebras, ready: !!process.env.CEREBRAS_API_KEY },
     { name: 'OpenRouter', fn: askOpenRouter, ready: !!process.env.OPENROUTER_API_KEY },
     { name: 'Pollinations', fn: askPollinations, ready: true } // Always available (no key needed)
