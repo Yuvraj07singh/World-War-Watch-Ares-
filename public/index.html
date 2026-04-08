@@ -1115,6 +1115,14 @@ const FALLBACK_ECO = [
 
 // ── NEVER-BLANK CACHE HELPERS ───────────────────────────
 // Each section is cached independently so one failed section doesn't nuke others
+// Cache version bump: clears bad data from previous buggy safeRender
+(function(){
+  const CV = 'ww_cv'; const VER = '2';
+  if (localStorage.getItem(CV) !== VER) {
+    ['ww_events','ww_economic','ww_geopolitics','wwwatch_db'].forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(CV, VER);
+  }
+})();
 function cacheGet(key) {
   try { const v = localStorage.getItem('ww_' + key); return v ? JSON.parse(v) : null; } catch { return null; }
 }
@@ -1124,17 +1132,21 @@ function cacheSet(key, data) {
   try { localStorage.setItem('ww_' + key, JSON.stringify(data)); } catch {}
 }
 
-// Render a section ONLY if data is valid; otherwise leave previous render intact
+// Render a section ONLY if data is valid AND render succeeds; otherwise fallback
 function safeRender(key, data, renderFn, fallback) {
+  // Try fresh data first
   if (data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0)) {
-    renderFn(data);
-    cacheSet(key, data);
-  } else {
-    // Try cached version first, then hardcoded fallback
-    const cached = cacheGet(key);
-    if (cached) renderFn(cached);
-    else if (fallback) renderFn(fallback);
+    const ok = renderFn(data);
+    if (ok !== false) { cacheSet(key, data); return; }
   }
+  // Fresh data failed — try cached version
+  const cached = cacheGet(key);
+  if (cached) {
+    const ok = renderFn(cached);
+    if (ok !== false) return;
+  }
+  // Cache also failed — use hardcoded fallback (guaranteed format)
+  if (fallback) renderFn(fallback);
 }
 
 // ── FALLBACK GEOPOLITICS DATA ───────────────────────────
@@ -1313,27 +1325,29 @@ function renderTensions(data){
 
 // ── RENDER ECO ───────────────────────────────────────────
 function renderEco(data){
-  if(!data) return;
+  if(!data) return false;
   // AI returns data as: array directly, {indicators:[...]}, {economic:[...]}, or nested
   let indicators = Array.isArray(data) ? data : (data.indicators || data.economic || data.data || []);
-  if (!Array.isArray(indicators) || !indicators.length) return;
+  if (!Array.isArray(indicators) || !indicators.length) return false;
   indicators = indicators.filter(i => i && (i.label || i.name));
-  if (!indicators.length) return;
+  if (!indicators.length) return false;
   document.getElementById('ecoGrid').innerHTML=indicators.map(i=>`
     <div class="ecell">
       <div class="e-lbl">${i.label || i.name || ''}</div>
       <div class="e-val ${i.color||'a'}">${i.val || i.value || ''}</div>
       <div class="e-note">${i.note || i.description || ''}</div>
     </div>`).join('');
+  return true;
 }
 
 // ── RENDER EVENTS ────────────────────────────────────────
 function renderEvents(data){
-  if(!data) return;
+  if(!data) return false;
   // AI may return {events:[...]} or an array directly
   let events = Array.isArray(data) ? data : (data.events || data.upcomingEvents || []);
-  if(!Array.isArray(events) || !events.length) return;
+  if(!Array.isArray(events) || !events.length) return false;
   events = events.filter(e => e && (e.title || e.event));
+  if(!events.length) return false;
   document.getElementById('eventsList').innerHTML=events.map(e=>`
     <div class="ev-row">
       <div class="ev-date-box"><div class="ev-d">${e.date||'?'}</div><div class="ev-m">${e.month||''}</div></div>
@@ -1341,6 +1355,7 @@ function renderEvents(data){
       <div class="ev-info"><div class="ev-title">${e.title||e.event||''}</div><div class="ev-desc">${e.desc||e.description||''}</div></div>
       <span class="ev-tag">${e.tag||''}</span>
     </div>`).join('');
+  return true;
 }
 
 // ── UPDATE BAR ───────────────────────────────────────────
