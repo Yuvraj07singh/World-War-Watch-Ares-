@@ -597,6 +597,19 @@ async function runUpdate(opts = {}) {
           }
         }
 
+        // Force economic + events files to always be arrays (AI sometimes returns single object)
+        if ((file === 'economic.json' || file === 'upcoming-events.json') && !Array.isArray(data)) {
+          // Extract array from wrapper objects like {indicators:[...]}, {events:[...]}, etc.
+          const inner = data.indicators || data.economic || data.events || data.upcomingEvents || data.data;
+          if (Array.isArray(inner) && inner.length > 0) {
+            data = inner;
+          } else if (data.label || data.name || data.title || data.event) {
+            // Single item object → wrap in array
+            const clean = { ...data }; delete clean._updatedAt;
+            data = [clean];
+          }
+        }
+
         // Arrays (economic, events) must not be spread into objects
         if (Array.isArray(data)) {
           save(file, data);

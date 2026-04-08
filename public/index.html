@@ -1326,9 +1326,14 @@ function renderTensions(data){
 // ── RENDER ECO ───────────────────────────────────────────
 function renderEco(data){
   if(!data) return false;
-  // AI returns data as: array directly, {indicators:[...]}, {economic:[...]}, or nested
-  let indicators = Array.isArray(data) ? data : (data.indicators || data.economic || data.data || []);
-  if (!Array.isArray(indicators) || !indicators.length) return false;
+  // Normalize: single object → array, {indicators:[...]} → array, etc.
+  let indicators;
+  if (Array.isArray(data)) indicators = data;
+  else if (data.indicators && Array.isArray(data.indicators)) indicators = data.indicators;
+  else if (data.economic && Array.isArray(data.economic)) indicators = data.economic;
+  else if (data.data && Array.isArray(data.data)) indicators = data.data;
+  else if (data.label || data.name) indicators = [data]; // Single object → wrap in array
+  else indicators = [];
   indicators = indicators.filter(i => i && (i.label || i.name));
   if (!indicators.length) return false;
   document.getElementById('ecoGrid').innerHTML=indicators.map(i=>`
@@ -1343,9 +1348,13 @@ function renderEco(data){
 // ── RENDER EVENTS ────────────────────────────────────────
 function renderEvents(data){
   if(!data) return false;
-  // AI may return {events:[...]} or an array directly
-  let events = Array.isArray(data) ? data : (data.events || data.upcomingEvents || []);
-  if(!Array.isArray(events) || !events.length) return false;
+  // Normalize: single object → array, {events:[...]} → array, etc.
+  let events;
+  if (Array.isArray(data)) events = data;
+  else if (data.events && Array.isArray(data.events)) events = data.events;
+  else if (data.upcomingEvents && Array.isArray(data.upcomingEvents)) events = data.upcomingEvents;
+  else if (data.title || data.event) events = [data]; // Single event object → wrap
+  else events = [];
   events = events.filter(e => e && (e.title || e.event));
   if(!events.length) return false;
   document.getElementById('eventsList').innerHTML=events.map(e=>`
