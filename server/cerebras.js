@@ -15,7 +15,7 @@ async function askCerebras(prompt, opts = {}) {
   }
 
   const url = 'https://api.cerebras.ai/v1/chat/completions';
-  const model = opts.model || 'llama-3.3-70b';
+  const model = opts.model || process.env.CEREBRAS_MODEL || 'llama-3.3-70b';
 
   const body = {
     model,

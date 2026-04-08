@@ -15,8 +15,8 @@ async function askOpenRouter(prompt, opts = {}) {
   }
 
   const url = 'https://openrouter.ai/api/v1/chat/completions';
-  // Use free models — DeepSeek is excellent for JSON, Llama as backup
-  const model = opts.model || process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat-v3-0324:free';
+  // Use 'openrouter/free' for auto-routing to best available free model
+  const model = opts.model || process.env.OPENROUTER_MODEL || 'openrouter/free';
 
   const body = {
     model,
