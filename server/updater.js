@@ -11,13 +11,33 @@ const fs   = require('fs');
 const path = require('path');
 const { ask } = require('./ai');
 const { fetchAllNews, categorizeNews } = require('./news');
+const { dbSave, Cache } = require('./db');
 
 const DATA_DIR = path.join(__dirname, '..', 'public', 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-const save  = (f, d) => fs.writeFileSync(path.join(DATA_DIR, f), JSON.stringify(d, null, 2));
+const save  = (f, d) => {
+  fs.writeFileSync(path.join(DATA_DIR, f), JSON.stringify(d, null, 2));
+  dbSave(f, d).catch(() => {}); // Fire and forget purely for persistence 
+};
 const load  = (f) => { try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, f))); } catch { return null; } };
 const exists = (f) => fs.existsSync(path.join(DATA_DIR, f));
+
+async function restoreFromDB() {
+  try {
+    const docs = await Cache.find({});
+    let restored = 0;
+    for (const doc of docs) {
+      if (!exists(doc.key)) {
+        fs.writeFileSync(path.join(DATA_DIR, doc.key), JSON.stringify(doc.data, null, 2));
+        restored++;
+      }
+    }
+    if (restored > 0) console.log(`✓ Restored ${restored} cached files from MongoDB to local disk`);
+  } catch (err) {
+    console.error('Failed to restore from DB:', err.message);
+  }
+}
 
 // ── PROMPTS ───────────────────────────────────────────────────────────────────
 function makeConflictsPrompt(newsMap) {
@@ -460,4 +480,4 @@ async function runUpdate(opts = {}) {
   return updateLog;
 }
 
-module.exports = { runUpdate, load, save, exists, DATA_DIR };
+module.exports = { runUpdate, load, restoreFromDB, save, exists, DATA_DIR };

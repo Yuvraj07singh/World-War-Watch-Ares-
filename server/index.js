@@ -15,7 +15,8 @@ const cron        = require('node-cron');
 const path        = require('path');
 
 const { ask, logProviders } = require('./ai');
-const { runUpdate, load } = require('./updater');
+const { runUpdate, load, restoreFromDB } = require('./updater');
+const { connectDB, Subscriber } = require('./db');
 const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
 
 const app  = express();
@@ -125,6 +126,27 @@ Write in plain English. Be direct and informative. Under 250 words. If the quest
   }
 });
 
+// Newsletter Subscription
+app.post('/api/subscribe', apiLimiter, async (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ error: 'Valid email required' });
+  }
+  
+  try {
+    const sub = await Subscriber.findOneAndUpdate(
+      { email: email.toLowerCase().trim() },
+      {},
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    res.json({ success: true, message: 'Subscribed to Intel Briefings' });
+  } catch (err) {
+    console.error('Subscription error:', err.message);
+    res.status(500).json({ error: 'Failed to subscribe' });
+  }
+});
+
+
 // Live impact analysis
 app.post('/api/impact', aiLimiter, async (req, res) => {
   const { type } = req.body;
@@ -194,20 +216,27 @@ cron.schedule(cronExpr, async () => {
 }, { timezone: 'Asia/Kolkata' });
 
 // ── START ──────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+const initServer = async () => {
   console.log('');
   console.log('╔══════════════════════════════════════════════╗');
   console.log('║  WORLD WAR WATCH v2 — Server Online          ║');
   console.log(`║  http://localhost:${PORT}                        ║`);
   console.log('╚══════════════════════════════════════════════╝');
   console.log('');
+
+  // 1. Database & AI Initialization
+  const dbActive = await connectDB();
   logProviders();
+  if (dbActive) {
+    await restoreFromDB();
+  }
+
+  // 2. Data Health Check
   console.log(`Data ready:     ${load('conflicts.json') ? '✓ Yes' : '✗ Run: npm run update'}`);
   console.log(`Auto-update:    Every ${UPDATE_MINS} minutes`);
   console.log(`Schedule:       ${cronExpr} (Asia/Kolkata)`);
 
-  // ── NEVER-SLEEP SELF-PING (FOR RENDER) ─────────────────────────────────────
-  // Pings the server every 10 minutes to keep the Render Free Tier instance awake.
+  // 3. Never-sleep self ping (Render)
   const selfUrl = process.env.RENDER_EXTERNAL_URL;
   if (selfUrl) {
     console.log(`Self-Ping:      Active (Target: ${selfUrl})`);
@@ -219,19 +248,19 @@ app.listen(PORT, () => {
       } catch (e) {
         console.error('[self-ping] Heartbeat failed:', e.message);
       }
-    }, 10 * 60 * 1000); // 10 minutes
+    }, 10 * 60 * 1000);
   } else {
     console.log('Self-Ping:      Inactive (Local Environment)');
   }
 
-  // ── FORCE INITIAL UPDATE IF DATA MISSING ──────────────────────────────────
+  // 4. Force initial update if missing
   if (!load('meta.json')) {
-    console.log('\n[!] Data missing — Triggering initial news fetch...');
-    const { runUpdate } = require('./updater');
+    console.log('\n[!] Cache empty — Triggering initial intelligence fetch...');
     runUpdate().catch(e => console.error('[!] Initial fetch failed:', e.message));
   }
-
   console.log('');
-});
+};
+
+app.listen(PORT, initServer);
 
 module.exports = app;
