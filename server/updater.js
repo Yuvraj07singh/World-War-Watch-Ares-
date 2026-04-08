@@ -580,6 +580,19 @@ async function runUpdate(opts = {}) {
           throw new Error('economic.json is empty array — retrying');
         }
 
+        // For geopolitics: validate alliances is an array of objects (not flat strings)
+        if (file === 'geopolitics.json' && typeof data === 'object') {
+          const a = data.alliances;
+          if (!a || !Array.isArray(a) || a.length === 0) {
+            throw new Error('geopolitics.json missing alliances array — retrying');
+          }
+          // Check if the first 2 items are actual objects (not flat strings from broken JSON)
+          const validObjs = a.filter(x => typeof x === 'object' && x !== null && x.name);
+          if (validObjs.length < 2) {
+            throw new Error(`geopolitics.json alliances malformed (only ${validObjs.length} valid) — retrying`);
+          }
+        }
+
         // Arrays (economic, events) must not be spread into objects
         if (Array.isArray(data)) {
           save(file, data);

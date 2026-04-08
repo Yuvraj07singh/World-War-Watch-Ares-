@@ -17,6 +17,7 @@ const path        = require('path');
 const { ask, logProviders } = require('./ai');
 const { runUpdate, load, restoreFromDB } = require('./updater');
 const { connectDB, Subscriber } = require('./db');
+const mongoose    = require('mongoose');
 const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
 
 const app  = express();
@@ -134,6 +135,11 @@ app.post('/api/subscribe', apiLimiter, async (req, res) => {
     return res.status(400).json({ error: 'Valid email required' });
   }
   
+  // Check if MongoDB is actually connected
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ error: 'Database offline — try again in a few minutes' });
+  }
+
   try {
     const sub = await Subscriber.findOneAndUpdate(
       { email: email.toLowerCase().trim() },

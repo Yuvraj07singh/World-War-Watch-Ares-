@@ -64,7 +64,30 @@ async function ask(prompt, opts = {}) {
     if (firstBrace > 0) clean = clean.substring(firstBrace);
     const lastBrace = Math.max(clean.lastIndexOf('}'), clean.lastIndexOf(']'));
     if (lastBrace > 0) clean = clean.substring(0, lastBrace + 1);
-    return JSON.parse(clean);
+    
+    try {
+      return JSON.parse(clean);
+    } catch (parseErr) {
+      // Attempt to repair common AI JSON errors
+      let repaired = clean;
+      // Fix trailing commas before } or ]
+      repaired = repaired.replace(/,\s*([}\]])/g, '$1');
+      // Fix single quotes used instead of double quotes
+      repaired = repaired.replace(/'/g, '"');
+      // Fix unquoted keys
+      repaired = repaired.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+      // Fix missing commas between objects in arrays
+      repaired = repaired.replace(/}\s*{/g, '},{');
+      // Fix double commas
+      repaired = repaired.replace(/,,+/g, ',');
+      
+      try {
+        return JSON.parse(repaired);
+      } catch (repairErr) {
+        console.error('[gemini] JSON parse failed even after repair. Raw length:', clean.length);
+        throw new Error('JSON parse failed: ' + parseErr.message.substring(0, 80));
+      }
+    }
   }
 
   return text;

@@ -64,8 +64,19 @@ async function askPollinations(prompt, opts = {}) {
       
       return JSON.parse(cleanText);
     } catch (e) {
-      console.error('[pollinations] Failed to parse JSON response:', text.substring(0, 300));
-      throw new Error('Pollinations returned invalid JSON');
+      // Attempt repair
+      let repaired = cleanText;
+      repaired = repaired.replace(/,\s*([}\]])/g, '$1');
+      repaired = repaired.replace(/'/g, '"');
+      repaired = repaired.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+      repaired = repaired.replace(/}\s*{/g, '},{');
+      repaired = repaired.replace(/,,+/g, ',');
+      try {
+        return JSON.parse(repaired);
+      } catch (e2) {
+        console.error('[pollinations] Failed to parse JSON response:', text.substring(0, 300));
+        throw new Error('Pollinations returned invalid JSON');
+      }
     }
   }
 
