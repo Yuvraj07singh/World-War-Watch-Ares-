@@ -311,6 +311,221 @@ ${headlines}
 Return ONLY the JSON object.`;
 }
 
+// ── GEOPOLITICS WORLD ORDER PROMPT ─────────────────────────────────────────────
+function makeGeopoliticsPrompt(allNews) {
+  const headlines = allNews.slice(0, 15).map((a,i) => `[${i+1}] ${a.title} (${a.source})`).join('\n');
+  const now = new Date();
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const currentDate = `${monthNames[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+  return `Today is ${currentDate}. You are a world-class geopolitical intelligence analyst. Return a JSON object covering the FULL global geopolitical landscape (no markdown, raw JSON only):
+
+{
+  "alliances": [
+    {
+      "name": "NATO",
+      "type": "military",
+      "members": ["USA", "UK", "Germany", "France", "Turkey", "..."],
+      "strength": "dominant",
+      "status": "Active but strained — internal disagreements on Ukraine support levels",
+      "recentMove": "<latest significant NATO action from recent news>"
+    },
+    {
+      "name": "BRICS+",
+      "type": "economic-political",
+      "members": ["China", "Russia", "India", "Brazil", "South Africa", "UAE", "Saudi Arabia", "Egypt", "Ethiopia", "Iran"],
+      "strength": "rising",
+      "status": "<current status>",
+      "recentMove": "<latest action>"
+    },
+    {
+      "name": "SCO (Shanghai Cooperation Organisation)",
+      "type": "security",
+      "members": ["China", "Russia", "India", "Pakistan", "Iran", "..."],
+      "strength": "growing",
+      "status": "<status>",
+      "recentMove": "<latest>"
+    },
+    {
+      "name": "AUKUS",
+      "type": "military-tech",
+      "members": ["Australia", "UK", "USA"],
+      "strength": "niche",
+      "status": "<status>",
+      "recentMove": "<latest>"
+    },
+    {
+      "name": "Quad",
+      "type": "strategic",
+      "members": ["USA", "India", "Japan", "Australia"],
+      "strength": "moderate",
+      "status": "<status>",
+      "recentMove": "<latest>"
+    }
+  ],
+  "rivalries": [
+    {
+      "side1": "USA",
+      "side2": "China",
+      "domain": "Trade, Tech, Military, Taiwan",
+      "intensity": "high",
+      "summary": "<2 sentence update on current tensions>"
+    },
+    {
+      "side1": "USA",
+      "side2": "Russia",
+      "domain": "Ukraine, Nuclear, Arctic",
+      "intensity": "critical",
+      "summary": "<2 sentence update>"
+    },
+    {
+      "side1": "India",
+      "side2": "China",
+      "domain": "Border, Trade, Influence",
+      "intensity": "elevated",
+      "summary": "<2 sentence update>"
+    },
+    {
+      "side1": "Saudi Arabia",
+      "side2": "Iran",
+      "domain": "Regional Dominance, Proxy Wars",
+      "intensity": "<level>",
+      "summary": "<2 sentence update>"
+    },
+    {
+      "side1": "North Korea",
+      "side2": "South Korea + USA",
+      "domain": "Nuclear, DMZ",
+      "intensity": "<level>",
+      "summary": "<2 sentence update>"
+    }
+  ],
+  "countryDevelopments": [
+    {
+      "country": "USA",
+      "flag": "🇺🇸",
+      "developments": [
+        {"sector": "Military", "update": "<latest military move or spending>"},
+        {"sector": "Economy", "update": "<GDP/trade/tariff update>"},
+        {"sector": "Tech/AI", "update": "<latest tech development>"}
+      ]
+    },
+    {
+      "country": "China",
+      "flag": "🇨🇳",
+      "developments": [
+        {"sector": "Military", "update": "<latest>"},
+        {"sector": "Economy", "update": "<latest>"},
+        {"sector": "Space/Tech", "update": "<latest>"}
+      ]
+    },
+    {
+      "country": "India",
+      "flag": "🇮🇳",
+      "developments": [
+        {"sector": "Defense", "update": "<latest>"},
+        {"sector": "Economy", "update": "<latest>"},
+        {"sector": "Space/ISRO", "update": "<latest>"}
+      ]
+    },
+    {
+      "country": "Russia",
+      "flag": "🇷🇺",
+      "developments": [
+        {"sector": "Military", "update": "<latest>"},
+        {"sector": "Economy", "update": "<sanctions impact>"},
+        {"sector": "Energy", "update": "<oil/gas>"}
+      ]
+    },
+    {
+      "country": "Israel",
+      "flag": "🇮🇱",
+      "developments": [
+        {"sector": "Military", "update": "<latest>"},
+        {"sector": "Diplomacy", "update": "<latest>"}
+      ]
+    },
+    {
+      "country": "Iran",
+      "flag": "🇮🇷",
+      "developments": [
+        {"sector": "Nuclear", "update": "<enrichment status>"},
+        {"sector": "Military", "update": "<latest>"}
+      ]
+    },
+    {
+      "country": "Pakistan",
+      "flag": "🇵🇰",
+      "developments": [
+        {"sector": "Military", "update": "<two-front situation>"},
+        {"sector": "Economy", "update": "<IMF/crisis>"}
+      ]
+    },
+    {
+      "country": "Japan",
+      "flag": "🇯🇵",
+      "developments": [
+        {"sector": "Defense", "update": "<rearmament status>"},
+        {"sector": "Economy", "update": "<latest>"}
+      ]
+    }
+  ],
+  "geopoliticalDebates": [
+    {
+      "topic": "<e.g. Should NATO expand further?>",
+      "region": "Global",
+      "sides": [
+        {"position": "For", "argument": "<1-2 sentences>", "supporters": ["country1", "country2"]},
+        {"position": "Against", "argument": "<1-2 sentences>", "supporters": ["country1", "country2"]}
+      ],
+      "status": "Ongoing"
+    },
+    {
+      "topic": "<e.g. De-dollarization — Will BRICS replace the USD?>",
+      "region": "Global",
+      "sides": [
+        {"position": "For", "argument": "<1-2 sentences>", "supporters": ["China", "Russia"]},
+        {"position": "Against", "argument": "<1-2 sentences>", "supporters": ["USA", "EU"]}
+      ],
+      "status": "Accelerating"
+    },
+    {
+      "topic": "<e.g. Taiwan — Is invasion imminent?>",
+      "region": "Indo-Pacific",
+      "sides": [
+        {"position": "China's Claim", "argument": "<>", "supporters": ["China"]},
+        {"position": "Status Quo", "argument": "<>", "supporters": ["USA", "Japan", "Taiwan"]}
+      ],
+      "status": "<>"
+    },
+    {
+      "topic": "<another major global debate>",
+      "region": "<region>",
+      "sides": [
+        {"position": "<>", "argument": "<>", "supporters": ["<>"]},
+        {"position": "<>", "argument": "<>", "supporters": ["<>"]}
+      ],
+      "status": "<>"
+    },
+    {
+      "topic": "<another debate — small country perspective>",
+      "region": "<region>",
+      "sides": [
+        {"position": "<>", "argument": "<>", "supporters": ["<>"]},
+        {"position": "<>", "argument": "<>", "supporters": ["<>"]}
+      ],
+      "status": "<>"
+    }
+  ],
+  "_updatedAt": "${now.toISOString()}"
+}
+
+Use the following recent news as context:
+${headlines}
+
+Return ONLY valid JSON. No markdown. No commentary.`;
+}
+
 // ── MAIN UPDATE FUNCTION ───────────────────────────────────────────────────────
 async function runUpdate(opts = {}) {
   const { verbose = true } = opts;
@@ -405,6 +620,9 @@ async function runUpdate(opts = {}) {
   await new Promise(r => setTimeout(r, 6000));
 
   await geminiSave('events',   'upcoming-events.json', makeUpcomingPrompt, true, 4096);
+  await new Promise(r => setTimeout(r, 6000));
+
+  await geminiSave('geopolitics', 'geopolitics.json', () => makeGeopoliticsPrompt(allNews), true, 8192);
   await new Promise(r => setTimeout(r, 6000));
 
   // 3. Per-conflict detailed pages (cached, regenerated every 6 hours)

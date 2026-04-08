@@ -56,6 +56,7 @@ app.get('/api/briefing',        apiLimiter, serve('daily-briefing.json'));
 app.get('/api/events',          apiLimiter, serve('upcoming-events.json'));
 app.get('/api/update-log',      apiLimiter, serve('update-log.json'));
 app.get('/api/tension-history', apiLimiter, serve('tension-history.json'));
+app.get('/api/geopolitics',     apiLimiter, serve('geopolitics.json'));
 
 // Per-conflict detail page data
 app.get('/api/conflict/:id', apiLimiter, (req, res) => {
@@ -80,7 +81,7 @@ app.get('/api/news', apiLimiter, (req, res) => {
 
 // Combined all-data endpoint
 app.get('/api/all', apiLimiter, (req, res) => {
-  const files = ['meta.json', 'conflicts.json', 'economic.json', 'daily-briefing.json', 'upcoming-events.json', 'update-log.json', 'tension-history.json'];
+  const files = ['meta.json', 'conflicts.json', 'economic.json', 'daily-briefing.json', 'upcoming-events.json', 'update-log.json', 'tension-history.json', 'geopolitics.json'];
   const coreFiles = ['meta.json', 'conflicts.json'];
   const result = {};
   for (const f of files) {
