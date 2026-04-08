@@ -15,8 +15,8 @@ async function askOpenRouter(prompt, opts = {}) {
   }
 
   const url = 'https://openrouter.ai/api/v1/chat/completions';
-  // Use 'openrouter/free' for auto-routing to best available free model
-  const model = opts.model || process.env.OPENROUTER_MODEL || 'openrouter/free';
+  // Use a specific, reliable free model rather than auto-routing to avoid censorship/empty responses
+  const model = opts.model || process.env.OPENROUTER_MODEL || 'meta-llama/llama-3-8b-instruct:free';
 
   const body = {
     model,
