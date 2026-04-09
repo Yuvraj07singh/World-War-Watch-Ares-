@@ -35,6 +35,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://unpkg.com/three"></script>
+<script src="https://unpkg.com/globe.gl"></script>
 <style>
 :root{
   --bg:#07070a;--bg2:#0e0e12;--bg3:#15151a;--bg4:#1c1c22;
@@ -667,7 +669,7 @@ img, svg { max-width: 100%; height: auto; }
 /* Global theme classes */
 body.defcon-1 { --bg: #1a0505; --bg2: #240a0a; --b1: #3a1515; --b2: #4a1a1a; }
 body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
-body.defcon-3 { --bg: #100b05; --bg2: #1a120a; --b1: #2a1c12; --b2: #3a2618; }
+/* DEFCON 3, 4 & 5 use default darker themes (no override needed) */
 /* DEFCON 4 & 5 use default darker themes (no override needed) */
 
 
@@ -769,50 +771,9 @@ body.defcon-3 { --bg: #100b05; --bg2: #1a120a; --b1: #2a1c12; --b2: #3a2618; }
 </div>
 
 <!-- GLOBAL CONFLICT MAP -->
-<div class="sh"><span class="sh-label">// Global Conflict Theater Map — Live Zones</span><div class="sh-line"></div></div>
-<div class="cmap-wrap" id="cmapWrap">
-  <div class="cmap-tooltip" id="cmapTip">
-    <div class="cmap-tt-name" id="cmapTipName"></div>
-    <div class="cmap-tt-level" id="cmapTipLevel"></div>
-  </div>
-  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));">
-    <defs>
-      <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
-    </defs>
-    <!-- Image Background -->
-    <image href="map_bg.png?v=3" width="1000" height="500" x="0" y="0" preserveAspectRatio="xMidYMid slice" />
-    
-
-    <!-- CONFLICT ZONE 1: Iran / Middle East -->
-    <a href="/conflict.html?id=iran" class="cmap-dot" onmouseenter="showMapTip(event,'US + Israel vs Iran','● CRITICAL — Active War','r')" onmouseleave="hideMapTip()">
-      <circle cx="610" cy="240" r="30" fill="url(#gRed)" opacity=".6"><animate attributeName="r" values="25;35;25" dur="2.5s" repeatCount="indefinite"/></circle>
-      <circle cx="610" cy="240" r="5" fill="#e02010"><animate attributeName="opacity" values="1;.4;1" dur="1.5s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- CONFLICT ZONE 2: India-Pakistan border -->
-    <a href="/conflict.html?id=india-pakistan" class="cmap-dot" onmouseenter="showMapTip(event,'India vs Pakistan','● HIGH — Ceasefire Fragile','a')" onmouseleave="hideMapTip()">
-      <circle cx="690" cy="270" r="25" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="20;30;20" dur="3s" repeatCount="indefinite"/></circle>
-      <circle cx="690" cy="270" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- CONFLICT ZONE 3: Af-Pak border -->
-    <a href="/conflict.html?id=pakistan-afghanistan" class="cmap-dot" onmouseenter="showMapTip(event,'Pakistan vs Afghanistan','● HIGH — Active War','a')" onmouseleave="hideMapTip()">
-      <circle cx="670" cy="240" r="22" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="18;26;18" dur="2.8s" repeatCount="indefinite"/></circle>
-      <circle cx="670" cy="240" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2.2s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- CONFLICT ZONE 4: Russia-Ukraine -->
-    <a href="/conflict.html?id=russia-ukraine" class="cmap-dot" onmouseenter="showMapTip(event,'Russia vs Ukraine','● ELEVATED — Year 4','b')" onmouseleave="hideMapTip()">
-      <circle cx="560" cy="180" r="24" fill="url(#gBlue)" opacity=".5"><animate attributeName="r" values="19;28;19" dur="3.2s" repeatCount="indefinite"/></circle>
-      <circle cx="560" cy="180" r="4" fill="#2878c8"><animate attributeName="opacity" values="1;.3;1" dur="2.5s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- Coordinates -->
-    <text x="10" y="495" fill="#00aaff" font-size="6" font-family="monospace" opacity="0.6">MERCATOR PROJECTION · REAL-TIME CONFLICT OVERLAY</text>
-    <text x="990" y="495" fill="#00aaff" font-size="6" font-family="monospace" text-anchor="end" opacity="0.6">WORLD WAR WATCH — THEATER MAP</text>
-  </svg>
+<div class="sh"><span class="sh-label">// Global Conflict Theater Map — Interactive 3D Ares Engine</span><div class="sh-line"></div></div>
+<div id="globeViz" style="width:100%; height:450px; background:#000; border:1px solid var(--b2); border-radius:var(--radius); position:relative; overflow:hidden; box-shadow:inset 0 0 40px rgba(0,0,0,0.8); margin-bottom: 30px;">
+  <div style="position:absolute; bottom:10px; left:10px; color:#0f0; font-family:var(--mono); font-size:10px; pointer-events:none; z-index:10; opacity: 0.5;">ARES ENGINE V2 // LIVE WEBGL RENDER</div>
 </div>
 
 <!-- TENSION METERS -->
@@ -1132,7 +1093,7 @@ body.defcon-3 { --bg: #100b05; --bg2: #1a120a; --b1: #2a1c12; --b2: #3a2618; }
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────
-const API = window.location.port === '3000' || window.location.port === '3001' ? '' : 'http://localhost:3000'; // Auto-detect dev port if needed
+const API = ''; // Auto-routes relative to active host port to prevent failures
 
 // ── TIME ────────────────────────────────────────────────
 function updateTime(){
@@ -1296,6 +1257,9 @@ async function init(){
   }
   // Load news separately
   loadNews();
+  
+  // Initialize 3D Globe
+  setTimeout(initGlobe, 500);
 }
 
 function fmtDate(iso){
