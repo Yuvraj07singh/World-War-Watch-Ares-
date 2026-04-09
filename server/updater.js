@@ -561,7 +561,7 @@ async function runUpdate(opts = {}) {
         log(`Fetching ${key} (attempt ${attempt})...`);
         const prompt = typeof promptFn === 'function' ? promptFn() : promptFn;
         const result = await ask(prompt, { json: isJSON, maxTokens: maxTok || 8192 });
-        const data = isJSON ? result : { text: result };
+        let data = isJSON ? result : { text: result };
 
         // ── VALIDATION GATE: Never save empty/broken data ──
         if (data === null || data === undefined) {

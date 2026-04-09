@@ -268,6 +268,24 @@ const initServer = async () => {
   console.log('');
 };
 
-app.listen(PORT, initServer);
+const startServer = (port) => {
+  const server = app.listen(port, initServer)
+    .on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        if (port < Number(PORT) + 3) {
+          const nextPort = Number(port) + 1;
+          console.warn(`[server] Port ${port} in use, trying ${nextPort}...`);
+          startServer(nextPort);
+        } else {
+          console.error(`[server] Ports ${PORT} through ${port} are all in use. Please free up a port.`);
+          process.exit(1);
+        }
+      } else {
+        console.error('[server] Error:', err.message);
+      }
+    });
+};
+
+startServer(PORT);
 
 module.exports = app;
