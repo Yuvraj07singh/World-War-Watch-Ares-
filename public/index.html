@@ -637,6 +637,40 @@ img, svg { max-width: 100%; height: auto; }
   .doom-time { font-size: 28px; }
   .cmap-svg { min-height: 200px; }
 }
+
+/* ── WAR GAMES SIMULATOR ── */
+.wg-btn { background: var(--red2); color: #fff; border: 1px solid var(--red); padding: 0 16px; font-family: var(--head); font-size: 14px; letter-spacing: .05em; cursor: pointer; border-radius: var(--radius); transition: all .2s; height: 32px; display: inline-flex; align-items: center; margin-right: 12px; }
+.wg-btn:hover { background: #fff; color: var(--red); box-shadow: 0 0 10px rgba(224,32,16,0.3); }
+
+.wg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,8,0.95); z-index: 2000; display: none; padding: 20px; overflow-y: auto; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+.wg-overlay.on { display: flex; }
+.wg-modal { background: #000; border: 1px solid var(--red); max-width: 900px; width: 100%; border-radius: var(--radius); position: relative; box-shadow: 0 0 40px rgba(224,32,16,0.15); display: flex; flex-direction: column; overflow: hidden; }
+.wg-hdr { background: var(--red2); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+.wg-title { font-family: var(--head); font-size: 20px; color: #fff; letter-spacing: .1em; }
+.wg-close { color: #fff; cursor: pointer; font-family: var(--mono); font-size: 24px; opacity: 0.8; }
+.wg-close:hover { opacity: 1; }
+.wg-body { padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+.wg-prompt-box { background: #111; border: 1px solid #333; padding: 15px; border-radius: 4px; display: flex; flex-direction: column; gap: 10px; }
+.wg-input { background: transparent; border: none; color: #0f0; font-family: 'Share Tech Mono', monospace; font-size: 16px; width: 100%; outline: none; resize: none; overflow: hidden; }
+.wg-input::placeholder { color: #0f0; opacity: 0.3; }
+.wg-submit { align-self: flex-end; background: #0f0; color: #000; border: none; padding: 8px 16px; font-family: var(--head); font-size: 14px; cursor: pointer; border-radius: 2px; }
+.wg-submit:hover { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
+.wg-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.wg-terminal { background: #050505; border: 1px solid #222; padding: 20px; border-radius: 4px; min-height: 250px; font-family: 'Share Tech Mono', monospace; color: #0f0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; position: relative; overflow: hidden; }
+.wg-terminal::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; }
+.wg-scanline { width: 100%; height: 10px; background: rgba(0,255,0,0.1); position: absolute; top: 0; left: 0; animation: scanline 4s linear infinite; pointer-events: none; }
+@keyframes scanline { 0% { top: -10px; } 100% { top: 100%; } }
+
+/* ── DEFCON RATING ── */
+.defcon-badge { background: #000; border: 1px solid var(--b2); padding: 0 12px; margin-right: 12px; font-family: var(--head); font-size: 16px; letter-spacing: .05em; display: inline-flex; align-items: center; justify-content: center; height: 32px; border-radius: var(--radius); transition: all 0.5s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.defcon-badge span { margin-right: 6px; font-family: var(--mono); font-size: 12px; opacity: 0.6; }
+/* Global theme classes */
+body.defcon-1 { --bg: #1a0505; --bg2: #240a0a; --b1: #3a1515; --b2: #4a1a1a; }
+body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
+body.defcon-3 { --bg: #100b05; --bg2: #1a120a; --b1: #2a1c12; --b2: #3a2618; }
+/* DEFCON 4 & 5 use default darker themes (no override needed) */
+
+
 </style>
 </head>
 <body>
@@ -659,6 +693,8 @@ img, svg { max-width: 100%; height: auto; }
         <button class="export-opt" onclick="exportReport('clipboard')">📋 Copy to Clipboard</button>
       </div>
     </div>
+    <div class="defcon-badge" id="defconBadge"><span>THREAT LEVEL</span> EVALUATING...</div>
+    <button class="wg-btn" onclick="openWg()">⛌ WAR GAMES SIMULATOR</button>
     <div class="live-badge"><div class="ldot"></div><span class="live-txt">Live</span></div>
     <div class="war-counter"><div class="wc-num" id="hdrWarCount">04</div><div class="wc-lbl">Active wars</div></div>
   </div>
@@ -1072,6 +1108,28 @@ img, svg { max-width: 100%; height: auto; }
   </div>
 </div>
 
+<!-- ── WAR GAMES MODAL ── -->
+<div class="wg-overlay" id="wgOverlay" onclick="closeWg(event)">
+  <div class="wg-modal">
+    <div class="wg-hdr">
+      <div class="wg-title">ARES CONFLICT SIMULATION ENGINE</div>
+      <div class="wg-close" onclick="closeWgDirect()">×</div>
+    </div>
+    <div class="wg-body">
+      <div style="font-family:var(--mono); color:var(--red); font-size:12px;">// WARNING: HIGHLY CLASSIFIED. PREDICTIVE AI ENGINE. OUTPUTS ARE SIMULATIONS BASED ON LIVE DATA.</div>
+      <div class="wg-prompt-box">
+        <div style="color:#0f0; font-family:var(--mono); font-size:12px;">> INPUT HYPOTHETICAL ESCALATION SCENARIO:</div>
+        <textarea id="wgInput" class="wg-input" rows="2" placeholder="e.g. India deploys a carrier strike group to the Arabian Sea tomorrow."></textarea>
+        <button id="wgSubmit" class="wg-submit" onclick="runWg()">EXECUTE SIMULATION</button>
+      </div>
+      <div class="wg-terminal" id="wgTerminal">
+        <div>Awaiting scenario input...</div>
+        <div class="wg-scanline"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── CONFIG ──────────────────────────────────────────────
 const API = window.location.port === '3000' || window.location.port === '3001' ? '' : 'http://localhost:3000'; // Auto-detect dev port if needed
@@ -1302,13 +1360,43 @@ function renderConflicts(data){
 
   document.getElementById('conflictGrid').innerHTML = html;
   
-  // Update War Counters
+  // Update War Counters and DEFCON
   const count = Object.keys(nData).length;
   const countStr = String(count).padStart(2, '0');
   const hdrCount = document.getElementById('hdrWarCount');
   const gridCount = document.getElementById('gridWarCount');
   if(hdrCount) hdrCount.textContent = countStr;
   if(gridCount) gridCount.textContent = `${countStr} Active`;
+
+  // Calculate DEFCON engine
+  let totalTension = 0;
+  let validConflicts = 0;
+  Object.values(nData).forEach(c => {
+    if (c && c.tensionPct !== undefined) {
+      totalTension += c.tensionPct;
+      validConflicts++;
+    }
+  });
+
+  if (validConflicts > 0) {
+    const avgTension = totalTension / validConflicts;
+    let defcon = 5;
+    let color = '#fff';
+    if (avgTension > 85) { defcon = 1; color = '#ff0000'; }
+    else if (avgTension > 70) { defcon = 2; color = '#e02010'; }
+    else if (avgTension > 50) { defcon = 3; color = '#d08000'; }
+    else if (avgTension > 30) { defcon = 4; color = '#28883a'; }
+    
+    document.body.className = `defcon-${defcon}`;
+    const dbg = document.getElementById('defconBadge');
+    if (dbg) {
+      dbg.innerHTML = `<span>STATE</span> DEFCON ${defcon}`;
+      dbg.style.borderColor = color;
+      dbg.style.color = color;
+      if(defcon <= 2) dbg.style.animation = 'pulse 1s infinite alternate';
+      else dbg.style.animation = 'none';
+    }
+  }
 }
 
 function navConflict(e, id){
@@ -1485,7 +1573,48 @@ document.getElementById('qInput').addEventListener('keydown',e=>{if(e.key==='Ent
 function openDoom(){document.getElementById('doomOverlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDoom(e){if(e.target===document.getElementById('doomOverlay'))closeDoomDirect();}
 function closeDoomDirect(){document.getElementById('doomOverlay').classList.remove('on');document.body.style.overflow='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDoomDirect();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDoomDirect(); closeWgDirect();}});
+
+// ── WAR GAMES SIMULATOR ──────────────────────────────────
+function openWg() { document.getElementById('wgOverlay').classList.add('on'); document.body.style.overflow='hidden'; document.getElementById('wgInput').focus(); }
+function closeWg(e) { if(e.target === document.getElementById('wgOverlay')) closeWgDirect(); }
+function closeWgDirect() { document.getElementById('wgOverlay').classList.remove('on'); document.body.style.overflow=''; }
+
+async function runWg() {
+  const input = document.getElementById('wgInput').value.trim();
+  if(!input) return;
+  const term = document.getElementById('wgTerminal');
+  const btn = document.getElementById('wgSubmit');
+  
+  btn.disabled = true;
+  term.innerHTML = `<div style="color:#0f0;">> INITIATING SIMULATION...</div><div class="wg-scanline"></div>`;
+  
+  try {
+    const r = await fetch(API+'/api/wargames', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scenario: input }) });
+    if(!r.ok) throw new Error('API Error');
+    const d = await r.json();
+    
+    // Typewriter effect
+    term.innerHTML = `<div class="wg-scanline"></div><div id="wgTypingText"></div>`;
+    const target = document.getElementById('wgTypingText');
+    const text = d.text || d.error;
+    let i = 0;
+    
+    const typeWriter = setInterval(() => {
+      target.textContent += text.charAt(i);
+      i++;
+      if (i >= text.length) {
+        clearInterval(typeWriter);
+        btn.disabled = false;
+      }
+    }, 15);
+    
+  } catch (e) {
+    term.innerHTML = `<div style="color:#f00;">> CRITICAL ERROR: SIMULATION FAILED. CONNECTION LOST.</div><div class="wg-scanline"></div>`;
+    btn.disabled = false;
+  }
+}
+document.getElementById('wgInput').addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); runWg(); }});
 
 // ── MAP TOOLTIPS ─────────────────────────────────────────
 function showMapTip(e, name, level, cls) {

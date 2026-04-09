@@ -173,6 +173,34 @@ app.post('/api/impact', aiLimiter, async (req, res) => {
   }
 });
 
+// War Games Simulator
+app.post('/api/wargames', aiLimiter, async (req, res) => {
+  const { scenario } = req.body;
+  if (!scenario || typeof scenario !== 'string' || scenario.length > 500) {
+    return res.status(400).json({ error: 'Invalid scenario. Max 500 characters.' });
+  }
+  
+  const ctx = load('conflicts.json') || {};
+  let contextStr = 'Current Context (Brief): ';
+  ['iran', 'india-pakistan', 'pakistan-afghanistan', 'russia-ukraine'].forEach(id => {
+    if(ctx[id]) contextStr += `[${ctx[id].name}: ${ctx[id].summary}] `;
+  });
+
+  const prompt = `You are the WOPR/ARES military simulation engine. A user has inputted a hypothetical war scenario.
+${contextStr}
+
+SCENARIO: "${scenario}"
+
+Analyze this scenario and output a highly structured, visceral 3-phase simulation (Immediate, 7-Day, Global Fallout) in plain text (no markdown, use capitals for headers). Keep it under 250 words. Tone should be clinical, intelligence-styled. Focus on troop deployments, economic shock (oil/markets), and retaliation probability.`;
+
+  try {
+    const text = await ask(prompt, { maxTokens: 800, json: false });
+    res.json({ text, generatedAt: new Date().toISOString() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── MANUAL UPDATE TRIGGER ──────────────────────────────────────────────────────
 app.post('/api/admin/update', async (req, res) => {
   const adminKey = req.headers['x-admin-key'];
