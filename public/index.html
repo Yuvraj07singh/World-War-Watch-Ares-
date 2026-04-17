@@ -1191,17 +1191,43 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
 </div>
 
 <!-- 🌍 COUNTRY INTEL MODAL 🌍 -->
+<style>
+  #countryOverlay { padding: 15px; }
+  #countryOverlay .wg-modal {
+    border-color: #00aaff;
+    box-shadow: 0 0 50px rgba(0, 170, 255, 0.15);
+    animation: countryModalOpen 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  #countryOverlay.on {
+    animation: overlayFade 0.3s ease forwards;
+  }
+  @keyframes overlayFade {
+    0% { opacity: 0; backdrop-filter: blur(0px); }
+    100% { opacity: 1; backdrop-filter: blur(8px); }
+  }
+  @keyframes countryModalOpen {
+    0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  #countryTerminal {
+    border: 1px solid rgba(0, 170, 255, 0.3);
+    box-shadow: inset 0 0 20px rgba(0, 170, 255, 0.05);
+  }
+  #countryCloseBtn:hover {
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5) !important;
+  }
+</style>
 <div class="wg-overlay" id="countryOverlay" onclick="closeCountryModal(event)">
   <div class="wg-modal" onclick="event.stopPropagation()">
-    <div class="wg-hdr" style="background:#0a1525;">
+    <div class="wg-hdr" style="background: linear-gradient(90deg, #061a35 0%, #020a16 100%); border-bottom: 1px solid #00aaff;">
       <div>
-        <div class="wg-title" id="countryModalTitle">► NATIONAL INTELLIGENCE BRIEFING</div>
-        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.12em;margin-top:2px;">SECURE OSINT INTERCEPT · REAL-TIME RSS SYNDICATION</div>
+        <div class="wg-title" id="countryModalTitle" style="color: #00aaff; text-shadow: 0 0 10px rgba(0,170,255,0.4);">► NATIONAL INTELLIGENCE BRIEFING</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(0,170,255,0.6);letter-spacing:.12em;margin-top:2px;">SECURE OSINT INTERCEPT · REAL-TIME RSS SYNDICATION</div>
       </div>
-      <div class="wg-close" onclick="closeCountryModalDirect()">⨉</div>
+      <div class="wg-close" onclick="closeCountryModalDirect()" style="color: #00aaff;">⨉</div>
     </div>
     <div class="wg-body">
-      <div style="font-family:var(--mono); color:#00aaff; font-size:11px; padding:8px 12px; background:rgba(0,170,255,0.06); border:1px solid rgba(0,170,255,0.15); border-radius:3px;">
+      <div style="font-family:var(--mono); color:#00aaff; font-size:11px; padding:10px 14px; background:rgba(0,170,255,0.08); border:1px solid rgba(0,170,255,0.2); border-radius:3px; letter-spacing: .05em;">
         ℹ LIVE FEED ACTIVE · Synthesizing regional developments and localized economic/tactical news.
       </div>
       
@@ -1214,7 +1240,7 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
       <!-- Structured Phases Output -->
       <div id="countryPhases" style="display:none; margin-top: -10px;"></div>
       
-      <button id="countryCloseBtn" class="wg-submit" style="align-self:center; margin-top:10px; background:#00aaff; color:#fff;" onclick="closeCountryModalDirect()">CLOSE BRIEFING</button>
+      <button id="countryCloseBtn" class="wg-submit" style="align-self:center; margin-top:10px; background:#00aaff; color:#fff; border-radius:3px; transition: all 0.2s;" onclick="closeCountryModalDirect()">CLOSE BRIEFING</button>
     </div>
   </div>
 </div>
