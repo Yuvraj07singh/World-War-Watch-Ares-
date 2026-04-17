@@ -2162,6 +2162,13 @@ function renderCountryDev(countries) {
   const grid = document.getElementById('countryGrid');
   if (!grid || arr.length === 0) return;
   
+  const flagMap = {
+    'USA': '🇺🇸', 'United States': '🇺🇸', 'China': '🇨🇳', 'India': '🇮🇳',
+    'Russia': '🇷🇺', 'Israel': '🇮🇱', 'Iran': '🇮🇷', 'Pakistan': '🇵🇰',
+    'Japan': '🇯🇵', 'North Korea': '🇰🇵', 'South Korea': '🇰🇷',
+    'Ukraine': '🇺🇦', 'UK': '🇬🇧', 'Germany': '🇩🇪', 'France': '🇫🇷'
+  };
+
   grid.innerHTML = arr.map(c => {
     const devs = (c.developments || []).map(d => 
       `<div style="display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--b1);">
@@ -2169,9 +2176,13 @@ function renderCountryDev(countries) {
         <div style="font-size:12px;color:var(--t2);line-height:1.4;">${d.update || ''}</div>
       </div>`
     ).join('');
+    
+    // Override AI hallucinated flags with hardcoded maps based on country name
+    const displayFlag = flagMap[c.country] || '🌍';
+    
     return `<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--radius);padding:16px;transition:transform .2s;" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='none'">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b2);">
-        <span style="font-size:28px;">${c.flag || '🌍'}</span>
+        <span style="font-size:28px; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;">${displayFlag}</span>
         <div>
           <div style="font-family:var(--head);font-size:22px;letter-spacing:.04em;color:var(--t1);">${c.country || ''}</div>
           <div style="font-family:var(--mono);font-size:9px;color:var(--t4);letter-spacing:.15em;">DEVELOPMENT INTEL</div>
