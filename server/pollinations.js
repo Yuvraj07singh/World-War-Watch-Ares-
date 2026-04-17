@@ -50,18 +50,18 @@ async function askPollinations(prompt, opts = {}) {
   }
 
   if (opts.json) {
+    // Aggressive cleanup: strip ALL markdown fences, leading text, BOM
+    let cleanText = text.trim().replace(/^\uFEFF/, '');
+    // Remove any wrapping markdown code fences (```json ... ``` or ``` ... ```)
+    cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/g, '').trim();
+    // If the JSON still has leading non-JSON text (e.g. "Here is the JSON:\n{...}")
+    const firstBrace = cleanText.search(/[\[{]/);
+    if (firstBrace > 0) cleanText = cleanText.substring(firstBrace);
+    // Find the last closing brace/bracket
+    const lastBrace = Math.max(cleanText.lastIndexOf('}'), cleanText.lastIndexOf(']'));
+    if (lastBrace > 0) cleanText = cleanText.substring(0, lastBrace + 1);
+
     try {
-      // Aggressive cleanup: strip ALL markdown fences, leading text, BOM
-      let cleanText = text.trim().replace(/^\uFEFF/, '');
-      // Remove any wrapping markdown code fences (```json ... ``` or ``` ... ```)
-      cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/g, '').trim();
-      // If the JSON still has leading non-JSON text (e.g. "Here is the JSON:\n{...}")
-      const firstBrace = cleanText.search(/[\[{]/);
-      if (firstBrace > 0) cleanText = cleanText.substring(firstBrace);
-      // Find the last closing brace/bracket
-      const lastBrace = Math.max(cleanText.lastIndexOf('}'), cleanText.lastIndexOf(']'));
-      if (lastBrace > 0) cleanText = cleanText.substring(0, lastBrace + 1);
-      
       return JSON.parse(cleanText);
     } catch (e) {
       // Attempt repair
