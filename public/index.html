@@ -35,8 +35,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://unpkg.com/three"></script>
-<script src="https://unpkg.com/globe.gl"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2/dist/globe.gl.min.js"></script>
 <style>
 :root{
   --bg:#07070a;--bg2:#0e0e12;--bg3:#15151a;--bg4:#1c1c22;
@@ -287,6 +287,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cmap-tt-level.a{color:var(--amber);}
 .cmap-tt-level.b{color:var(--blue);}
 .cmap-label{font-size:7px;fill:var(--t4);text-anchor:middle;pointer-events:none;font-family:var(--inter);letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+#globeViz canvas { filter: sepia(1) hue-rotate(-10deg) saturate(2.5) brightness(0.85) contrast(1.3); cursor: grab; }
+#globeViz canvas:active { cursor: grabbing; }
+#globeViz::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(rgba(200,120,20,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,120,20,0.1) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 5; }
+#globeViz::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 100%; background: radial-gradient(circle at center, transparent 30%, rgba(20,10,0,0.85) 100%); pointer-events: none; z-index: 4; }
 
 /* ── TREND CHART ── */
 .chart-wrap{background:var(--bg2);border:1px solid var(--b1);padding:16px;}
@@ -662,6 +666,18 @@ img, svg { max-width: 100%; height: auto; }
 .wg-terminal::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; }
 .wg-scanline { width: 100%; height: 10px; background: rgba(0,255,0,0.1); position: absolute; top: 0; left: 0; animation: scanline 4s linear infinite; pointer-events: none; }
 @keyframes scanline { 0% { top: -10px; } 100% { top: 100%; } }
+.wg-preset { background: #0a0a0a; border: 1px solid #1a3a1a; color: #0f0; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; padding: 10px 8px; cursor: pointer; border-radius: 3px; transition: all .2s; text-align: center; }
+.wg-preset:hover { background: #0a1a0a; border-color: #0f0; box-shadow: 0 0 12px rgba(0,255,0,0.15); transform: translateY(-1px); }
+.wg-phase { background: #080808; border: 1px solid #1a1a1a; border-radius: 4px; padding: 16px; margin-bottom: 8px; border-left: 3px solid #333; }
+.wg-phase.immediate { border-left-color: #ff2020; }
+.wg-phase.sevenday { border-left-color: #d08000; }
+.wg-phase.global { border-left-color: #2878c8; }
+.wg-phase-title { font-family: var(--head); font-size: 16px; letter-spacing: .06em; margin-bottom: 6px; }
+.wg-phase-text { font-size: 12px; color: var(--t2); line-height: 1.7; }
+.wg-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; margin-top: 10px; }
+.wg-metric { background: #050505; border: 1px solid #1a1a1a; padding: 10px; border-radius: 3px; text-align: center; }
+.wg-metric-val { font-family: var(--head); font-size: 20px; line-height: 1; }
+.wg-metric-lbl { font-family: var(--mono); font-size: 9px; color: #666; letter-spacing: .1em; margin-top: 4px; }
 
 /* ── DEFCON RATING ── */
 .defcon-badge { background: #000; border: 1px solid var(--b2); padding: 0 12px; margin-right: 12px; font-family: var(--head); font-size: 16px; letter-spacing: .05em; display: inline-flex; align-items: center; justify-content: center; height: 32px; border-radius: var(--radius); transition: all 0.5s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
@@ -1071,22 +1087,60 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
 
 <!-- ── WAR GAMES MODAL ── -->
 <div class="wg-overlay" id="wgOverlay" onclick="closeWg(event)">
-  <div class="wg-modal">
+  <div class="wg-modal" onclick="event.stopPropagation()">
     <div class="wg-hdr">
-      <div class="wg-title">ARES CONFLICT SIMULATION ENGINE</div>
+      <div>
+        <div class="wg-title">⛌ ARES CONFLICT SIMULATION ENGINE</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.12em;margin-top:2px;">PREDICTIVE AI · POWERED BY GEMINI · REAL-TIME CONTEXT</div>
+      </div>
       <div class="wg-close" onclick="closeWgDirect()">×</div>
     </div>
     <div class="wg-body">
-      <div style="font-family:var(--mono); color:var(--red); font-size:12px;">// WARNING: HIGHLY CLASSIFIED. PREDICTIVE AI ENGINE. OUTPUTS ARE SIMULATIONS BASED ON LIVE DATA.</div>
-      <div class="wg-prompt-box">
-        <div style="color:#0f0; font-family:var(--mono); font-size:12px;">> INPUT HYPOTHETICAL ESCALATION SCENARIO:</div>
-        <textarea id="wgInput" class="wg-input" rows="2" placeholder="e.g. India deploys a carrier strike group to the Arabian Sea tomorrow."></textarea>
-        <button id="wgSubmit" class="wg-submit" onclick="runWg()">EXECUTE SIMULATION</button>
+      <div style="font-family:var(--mono); color:var(--red); font-size:11px; padding:8px 12px; background:rgba(224,32,16,0.06); border:1px solid rgba(224,32,16,0.15); border-radius:3px;">⚠ CLASSIFIED SIMULATION · All outputs are AI-generated hypothetical projections based on live intelligence data.</div>
+      
+      <!-- Scenario Presets -->
+      <div style="margin-top:14px;">
+        <div style="font-family:var(--mono);font-size:10px;color:#0f0;letter-spacing:.12em;margin-bottom:8px;">// SELECT PRESET SCENARIO OR TYPE YOUR OWN:</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;" id="wgPresets">
+          <button class="wg-preset" onclick="loadPreset('Iran detonates a nuclear device underground as a show of force')">☢ IRAN NUCLEAR TEST</button>
+          <button class="wg-preset" onclick="loadPreset('Pakistan launches tactical nuclear strike on Indian forward base')">💥 PAK NUCLEAR STRIKE</button>
+          <button class="wg-preset" onclick="loadPreset('China begins naval blockade of Taiwan Strait')">🚢 CHINA-TAIWAN BLOCKADE</button>
+          <button class="wg-preset" onclick="loadPreset('Iran sinks a US aircraft carrier in the Strait of Hormuz')">⚓ HORMUZ CARRIER SUNK</button>
+          <button class="wg-preset" onclick="loadPreset('Russia uses tactical nuclear weapon in eastern Ukraine')">☢ RUSSIA TACTICAL NUKE</button>
+          <button class="wg-preset" onclick="loadPreset('India conducts surgical strikes inside Pakistan-occupied Kashmir')">⚔ INDIA SURGICAL STRIKE</button>
+        </div>
       </div>
+
+      <div class="wg-prompt-box">
+        <div style="color:#0f0; font-family:var(--mono); font-size:11px;">> INPUT HYPOTHETICAL ESCALATION SCENARIO:</div>
+        <textarea id="wgInput" class="wg-input" rows="2" placeholder="e.g. India deploys a carrier strike group to the Arabian Sea..."></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:var(--mono);font-size:10px;color:#333;" id="wgCharCount">0/500</div>
+          <button id="wgSubmit" class="wg-submit" onclick="runWg()">▶ EXECUTE SIMULATION</button>
+        </div>
+      </div>
+      
+      <!-- Threat Gauge -->
+      <div id="wgGauge" style="display:none;background:#080808;border:1px solid #222;padding:14px;border-radius:4px;margin-top:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-family:var(--mono);font-size:10px;color:#666;letter-spacing:.12em;">THREAT ASSESSMENT</div>
+          <div style="font-family:var(--head);font-size:22px;" id="wgThreatLvl">—</div>
+        </div>
+        <div style="width:100%;height:8px;background:#111;border-radius:4px;overflow:hidden;">
+          <div id="wgThreatBar" style="height:100%;width:0%;border-radius:4px;transition:width 1.5s ease,background 1.5s ease;background:#0f0;"></div>
+        </div>
+      </div>
+
+      <!-- Output Terminal -->
       <div class="wg-terminal" id="wgTerminal">
-        <div>Awaiting scenario input...</div>
+        <div style="color:#0f0;opacity:0.4;">// ARES v2 SIMULATION ENGINE READY
+// Input a scenario or select a preset above
+// System will analyze using live conflict data</div>
         <div class="wg-scanline"></div>
       </div>
+
+      <!-- Structured Phases Output -->
+      <div id="wgPhases" style="display:none;"></div>
     </div>
   </div>
 </div>
@@ -1332,31 +1386,77 @@ function renderConflicts(data){
   if(hdrCount) hdrCount.textContent = countStr;
   if(gridCount) gridCount.textContent = `${countStr} Active`;
 
-  // Calculate DEFCON engine
-  let totalTension = 0;
+  // ═══ DEFCON ENGINE v2 — Weighted Multi-Factor Calculation ═══
+  // Real-world-calibrated nuclear risk assessment
+  const NUCLEAR_WEIGHTS = {
+    'pakistan':     { warheads: 165, doctrine: 'first-use', inWar: true,  weight: 0.95 },
+    'iran':        { warheads: 0,   doctrine: '84%-enriched', inWar: true,  weight: 0.90 },
+    'russia':      { warheads: 6255, doctrine: 'tactical-threat', inWar: true,  weight: 0.80 },
+    'india':       { warheads: 170, doctrine: 'no-first-use', inWar: true,  weight: 0.50 },
+    'israel':      { warheads: 90,  doctrine: 'undeclared', inWar: true,  weight: 0.60 },
+    'usa':         { warheads: 5550, doctrine: 'active-me', inWar: true,  weight: 0.40 },
+  };
+  const DOOMSDAY_SECONDS = 89; // Set Jan 2026 — Bulletin of Atomic Scientists
+
+  let tensions = [];
   let validConflicts = 0;
   Object.values(nData).forEach(c => {
     if (c && c.tensionPct !== undefined) {
-      totalTension += c.tensionPct;
+      tensions.push(c.tensionPct);
       validConflicts++;
     }
   });
 
-  if (validConflicts > 0) {
-    const avgTension = totalTension / validConflicts;
-    let defcon = 5;
-    let color = '#fff';
-    if (avgTension > 85) { defcon = 1; color = '#ff0000'; }
-    else if (avgTension > 70) { defcon = 2; color = '#e02010'; }
-    else if (avgTension > 50) { defcon = 3; color = '#d08000'; }
-    else if (avgTension > 30) { defcon = 4; color = '#28883a'; }
-    
+  if (tensions.length > 0) {
+    const avgTension = tensions.reduce((a,b) => a+b, 0) / tensions.length;
+    const maxTension = Math.max(...tensions);
+
+    // Factor 1: Base conflict intensity (30%)
+    const f_base = avgTension;
+
+    // Factor 2: Hottest single theater (15%)
+    const f_max = maxTension;
+
+    // Factor 3: War count scaling — more simultaneous wars = exponentially worse (15%)
+    // 1 war = 30, 2 = 50, 3 = 70, 4+ = 90
+    const f_warCount = Math.min(100, 20 + (validConflicts * 18));
+
+    // Factor 4: Nuclear factor — weighted average of nuclear-armed parties in active conflict (20%)
+    const nukeEntries = Object.values(NUCLEAR_WEIGHTS).filter(n => n.inWar);
+    const f_nuclear = nukeEntries.length > 0
+      ? (nukeEntries.reduce((sum, n) => sum + n.weight * 100, 0) / nukeEntries.length)
+      : 20;
+
+    // Factor 5: Escalation velocity — how close is max to 100? (10%)
+    const f_escalation = maxTension > 90 ? 95 : maxTension > 80 ? 80 : maxTension > 60 ? 55 : 30;
+
+    // Factor 6: Doomsday Clock proximity (10%)
+    // 89s → ~95 score, 120s → ~70, 300s → ~30
+    const f_doomsday = Math.min(100, Math.max(0, 100 - ((DOOMSDAY_SECONDS - 60) * 1.5)));
+
+    // Weighted composite
+    const defconScore = (
+      f_base       * 0.30 +
+      f_max        * 0.15 +
+      f_warCount   * 0.15 +
+      f_nuclear    * 0.20 +
+      f_escalation * 0.10 +
+      f_doomsday   * 0.10
+    );
+
+    let defcon = 5, color = '#28883a', label = 'NORMAL READINESS';
+    if      (defconScore >= 90) { defcon = 1; color = '#ff0000'; label = 'MAXIMUM FORCE READINESS'; }
+    else if (defconScore >= 75) { defcon = 2; color = '#e02010'; label = 'ARMED FORCES READY'; }
+    else if (defconScore >= 55) { defcon = 3; color = '#d08000'; label = 'INCREASE READINESS'; }
+    else if (defconScore >= 35) { defcon = 4; color = '#28883a'; label = 'ABOVE NORMAL'; }
+
     document.body.className = `defcon-${defcon}`;
     const dbg = document.getElementById('defconBadge');
     if (dbg) {
-      dbg.innerHTML = `<span>STATE</span> DEFCON ${defcon}`;
+      dbg.innerHTML = `<span>DEFCON</span> ${defcon}`;
       dbg.style.borderColor = color;
       dbg.style.color = color;
+      dbg.title = `Score: ${defconScore.toFixed(1)} | ${label}\nBase: ${f_base.toFixed(0)} | Nuclear: ${f_nuclear.toFixed(0)} | Wars: ${validConflicts} | Doomsday: ${DOOMSDAY_SECONDS}s`;
       if(defcon <= 2) dbg.style.animation = 'pulse 1s infinite alternate';
       else dbg.style.animation = 'none';
     }
@@ -1438,21 +1538,61 @@ function renderUpdateBar(log){
 // ── NEWS FEED ────────────────────────────────────────────
 async function loadNews(){
   try{
-    const r=await fetch(API+'/api/news?limit=12');
+    const r=await fetch(API+'/api/news?limit=18');
     if(!r.ok)return;
     const d=await r.json();
     document.getElementById('newsCount').textContent=`${d.total} articles · Updated ${fmtDate(d._updatedAt)}`;
     document.getElementById('newsGrid').innerHTML=(d.articles||[]).map(a=>{
       const ago=timeSince(new Date(a.pubDate));
+      const conflict = detectConflict(a.title);
+      const severity = detectSeverity(a.title);
+      const snippet = a.snippet ? summarizeSnippet(a.snippet) : '';
       return `<a class="news-card" href="${a.link}" target="_blank" rel="noopener">
-        <div class="nc-source">${a.source.replace(/_/g,' ')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div class="nc-source">${a.source.replace(/_/g,' ')}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            ${conflict.tag ? `<span style="font-size:8px;letter-spacing:.1em;color:${conflict.color};border:1px solid ${conflict.color}30;padding:2px 6px;border-radius:2px;font-family:var(--mono);text-transform:uppercase;">${conflict.tag}</span>` : ''}
+            <span style="width:6px;height:6px;border-radius:50%;background:${severity};flex-shrink:0;"></span>
+          </div>
+        </div>
         <div class="nc-title">${a.title}</div>
-        ${a.snippet?`<div class="nc-snippet">${a.snippet.substring(0,160)}...</div>`:''}
-        <div class="nc-date">${ago}</div>
+        ${snippet ? `<div class="nc-snippet">${snippet}</div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+          <div class="nc-date">${ago}</div>
+          <div style="font-size:9px;color:var(--t4);font-family:var(--mono);">→ READ</div>
+        </div>
       </a>`;
     }).join('');
   }catch{}
 }
+
+function detectConflict(title) {
+  const t = title.toLowerCase();
+  if (t.includes('iran') || t.includes('hormuz') || t.includes('tehran') || t.includes('epic fury')) return { tag: 'IRAN', color: '#e02010' };
+  if (t.includes('india') && t.includes('pakistan') || t.includes('sindoor') || t.includes('loc') || t.includes('kashmir')) return { tag: 'IND-PAK', color: '#ff6020' };
+  if (t.includes('pakistan') && t.includes('afghan') || t.includes('taliban') || t.includes('durand')) return { tag: 'PAK-AFG', color: '#d08000' };
+  if (t.includes('russia') || t.includes('ukraine') || t.includes('kyiv') || t.includes('moscow')) return { tag: 'RUS-UKR', color: '#2878c8' };
+  if (t.includes('tariff') || t.includes('trade war') || t.includes('sanctions')) return { tag: 'TRADE', color: '#c07000' };
+  if (t.includes('nuclear') || t.includes('nuke') || t.includes('warhead')) return { tag: 'NUCLEAR', color: '#ff0040' };
+  if (t.includes('china') || t.includes('taiwan') || t.includes('beijing')) return { tag: 'CHINA', color: '#d06000' };
+  return { tag: '', color: '' };
+}
+
+function detectSeverity(title) {
+  const t = title.toLowerCase();
+  if (t.includes('nuclear') || t.includes('strike') || t.includes('attack') || t.includes('killed') || t.includes('dead') || t.includes('missile')) return '#e02010';
+  if (t.includes('escalat') || t.includes('threat') || t.includes('warning') || t.includes('crisis') || t.includes('clash')) return '#d08000';
+  return '#2878c8';
+}
+
+function summarizeSnippet(snippet) {
+  // Clean and truncate to 2 strong sentences
+  const clean = snippet.replace(/<[^>]*>/g, '').trim();
+  const sentences = clean.split(/(?<=[.!?])\s+/).filter(s => s.length > 20);
+  if (sentences.length >= 2) return sentences.slice(0, 2).join(' ');
+  return clean.substring(0, 200) + (clean.length > 200 ? '...' : '');
+}
+
 function timeSince(d){
   const s=Math.floor((Date.now()-d)/1000);
   if(s<3600)return`${Math.floor(s/60)}m ago`;
@@ -1544,40 +1684,165 @@ function openWg() { document.getElementById('wgOverlay').classList.add('on'); do
 function closeWg(e) { if(e.target === document.getElementById('wgOverlay')) closeWgDirect(); }
 function closeWgDirect() { document.getElementById('wgOverlay').classList.remove('on'); document.body.style.overflow=''; }
 
+function loadPreset(text) {
+  const inp = document.getElementById('wgInput');
+  inp.value = text;
+  document.getElementById('wgCharCount').textContent = text.length + '/500';
+  inp.focus();
+}
+
+// Character counter
+document.getElementById('wgInput').addEventListener('input', function() {
+  document.getElementById('wgCharCount').textContent = this.value.length + '/500';
+  if (this.value.length > 500) this.value = this.value.substring(0, 500);
+});
+
 async function runWg() {
   const input = document.getElementById('wgInput').value.trim();
   if(!input) return;
   const term = document.getElementById('wgTerminal');
   const btn = document.getElementById('wgSubmit');
+  const gauge = document.getElementById('wgGauge');
+  const phases = document.getElementById('wgPhases');
   
   btn.disabled = true;
-  term.innerHTML = `<div style="color:#0f0;">> INITIATING SIMULATION...</div><div class="wg-scanline"></div>`;
+  btn.textContent = '⏳ SIMULATING...';
+  gauge.style.display = 'block';
+  phases.style.display = 'none';
+  phases.innerHTML = '';
+  
+  // Animated loading sequence
+  const loadingMsgs = [
+    '> PARSING SCENARIO INPUT...',
+    '> LOADING LIVE CONFLICT CONTEXT...',
+    '> INITIALIZING MONTE CARLO SIMULATION...',
+    '> CALCULATING FORCE DEPLOYMENTS...',
+    '> MODELING ECONOMIC SHOCK VECTORS...',
+    '> ASSESSING NUCLEAR ESCALATION PROBABILITY...',
+    '> COMPILING THREAT ASSESSMENT...'
+  ];
+  
+  term.innerHTML = '<div class="wg-scanline"></div>';
+  let msgIdx = 0;
+  const loadInterval = setInterval(() => {
+    if (msgIdx < loadingMsgs.length) {
+      const line = document.createElement('div');
+      line.style.color = '#0f0';
+      line.style.opacity = '0.7';
+      line.textContent = loadingMsgs[msgIdx];
+      term.insertBefore(line, term.querySelector('.wg-scanline'));
+      msgIdx++;
+    }
+  }, 400);
+  
+  // Animate threat bar during loading
+  const bar = document.getElementById('wgThreatBar');
+  const lvl = document.getElementById('wgThreatLvl');
+  bar.style.width = '0%';
+  lvl.textContent = 'ANALYZING...';
+  lvl.style.color = '#0f0';
+  setTimeout(() => { bar.style.width = '30%'; bar.style.background = '#d08000'; }, 500);
+  setTimeout(() => { bar.style.width = '60%'; bar.style.background = '#e04000'; }, 1500);
   
   try {
     const r = await fetch(API+'/api/wargames', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scenario: input }) });
-    if(!r.ok) throw new Error('API Error');
+    clearInterval(loadInterval);
+    if(!r.ok) throw new Error('Simulation engine offline');
     const d = await r.json();
     
-    // Typewriter effect
-    term.innerHTML = `<div class="wg-scanline"></div><div id="wgTypingText"></div>`;
-    const target = document.getElementById('wgTypingText');
-    const text = d.text || d.error;
-    let i = 0;
+    const text = d.text || d.error || '';
     
+    // Parse phases from text
+    const phaseData = parsePhases(text);
+    
+    // Set threat level based on content
+    const threatScore = calcThreat(text);
+    bar.style.width = threatScore + '%';
+    if (threatScore > 80) { bar.style.background = '#ff0000'; lvl.textContent = 'EXTREME'; lvl.style.color = '#ff0000'; }
+    else if (threatScore > 60) { bar.style.background = '#e02010'; lvl.textContent = 'CRITICAL'; lvl.style.color = '#e02010'; }
+    else if (threatScore > 40) { bar.style.background = '#d08000'; lvl.textContent = 'HIGH'; lvl.style.color = '#d08000'; }
+    else { bar.style.background = '#28883a'; lvl.textContent = 'MODERATE'; lvl.style.color = '#28883a'; }
+    
+    // Typewriter in terminal
+    term.innerHTML = '<div class="wg-scanline"></div><div id="wgTypingText" style="color:#0f0;"></div>';
+    const target = document.getElementById('wgTypingText');
+    let i = 0;
     const typeWriter = setInterval(() => {
-      target.textContent += text.charAt(i);
-      i++;
+      const chunk = text.substring(i, Math.min(i + 3, text.length));
+      target.textContent += chunk;
+      i += 3;
       if (i >= text.length) {
         clearInterval(typeWriter);
         btn.disabled = false;
+        btn.textContent = '▶ EXECUTE SIMULATION';
+        // Show structured phases
+        if (phaseData.length > 0) {
+          phases.style.display = 'block';
+          phases.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:#666;letter-spacing:.12em;margin-bottom:8px;margin-top:12px;">// STRUCTURED ANALYSIS</div>' +
+            phaseData.map(p => `<div class="wg-phase ${p.cls}">
+              <div class="wg-phase-title" style="color:${p.color};">${p.icon} ${p.title}</div>
+              <div class="wg-phase-text">${p.text}</div>
+            </div>`).join('');
+        }
       }
-    }, 15);
+    }, 8);
     
   } catch (e) {
-    term.innerHTML = `<div style="color:#f00;">> CRITICAL ERROR: SIMULATION FAILED. CONNECTION LOST.</div><div class="wg-scanline"></div>`;
+    clearInterval(loadInterval);
+    term.innerHTML = `<div style="color:#f00;">> CRITICAL ERROR: ${e.message.toUpperCase()}</div><div style="color:#660000;margin-top:4px;">> Retry or check server connection</div><div class="wg-scanline"></div>`;
+    bar.style.width = '100%'; bar.style.background = '#660000';
+    lvl.textContent = 'OFFLINE'; lvl.style.color = '#660000';
     btn.disabled = false;
+    btn.textContent = '▶ EXECUTE SIMULATION';
   }
 }
+
+function parsePhases(text) {
+  const phases = [];
+  const sections = [
+    { regex: /IMMEDIATE|PHASE\s*1|FIRST\s*\d+\s*HOURS?|0-24|WITHIN\s*24/i, title: 'IMMEDIATE (0-24 HRS)', cls: 'immediate', color: '#ff2020', icon: '⚡' },
+    { regex: /7.?DAY|PHASE\s*2|ONE\s*WEEK|WEEK\s*1|DAYS?\s*2-7/i, title: '7-DAY PROJECTION', cls: 'sevenday', color: '#d08000', icon: '📊' },
+    { regex: /GLOBAL|PHASE\s*3|FALLOUT|30.?DAY|LONG.?TERM|MONTH/i, title: 'GLOBAL FALLOUT (30-DAY)', cls: 'global', color: '#2878c8', icon: '🌍' },
+  ];
+  
+  const lines = text.split('\n');
+  let currentPhase = null;
+  let currentText = [];
+  
+  for (const line of lines) {
+    let matched = false;
+    for (const s of sections) {
+      if (s.regex.test(line) && !phases.find(p => p.cls === s.cls)) {
+        if (currentPhase) { currentPhase.text = currentText.join(' ').trim(); phases.push(currentPhase); }
+        currentPhase = { ...s, text: '' };
+        currentText = [];
+        matched = true;
+        break;
+      }
+    }
+    if (!matched && currentPhase) currentText.push(line.trim());
+  }
+  if (currentPhase) { currentPhase.text = currentText.join(' ').trim(); phases.push(currentPhase); }
+  
+  // If no phases found, create a single summary
+  if (phases.length === 0 && text.length > 50) {
+    phases.push({ title: 'SIMULATION ANALYSIS', cls: 'immediate', color: '#ff2020', icon: '📋', text: text.substring(0, 500) });
+  }
+  return phases;
+}
+
+function calcThreat(text) {
+  const t = text.toLowerCase();
+  let score = 40;
+  if (t.includes('nuclear')) score += 20;
+  if (t.includes('casualties') || t.includes('killed')) score += 10;
+  if (t.includes('world war') || t.includes('global')) score += 10;
+  if (t.includes('escalat')) score += 8;
+  if (t.includes('retaliat')) score += 8;
+  if (t.includes('collapse') || t.includes('crash')) score += 6;
+  return Math.min(98, score);
+}
+
 document.getElementById('wgInput').addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); runWg(); }});
 
 // ── MAP TOOLTIPS ─────────────────────────────────────────
@@ -1598,6 +1863,84 @@ function showMapTip(e, name, level, cls) {
 }
 function hideMapTip() {
   document.getElementById('cmapTip').classList.remove('on');
+}
+
+// ── 3D GLOBE — ARES ENGINE ───────────────────────────────
+function initGlobe() {
+  if (typeof Globe === 'undefined') {
+    console.warn('[globe] Globe.gl not loaded yet, retrying...');
+    setTimeout(initGlobe, 1000);
+    return;
+  }
+  const el = document.getElementById('globeViz');
+  if (!el) return;
+
+  const CONFLICTS = [
+    { id: 'iran',    name: 'US-Israel vs Iran',       lat: 32.4, lng: 53.7,  color: '#ff2020', size: 0.9, level: 'CRITICAL' },
+    { id: 'indpak',  name: 'India vs Pakistan',       lat: 33.7, lng: 73.0,  color: '#ff6020', size: 0.7, level: 'HIGH' },
+    { id: 'pakafg',  name: 'Pakistan vs Afghanistan',  lat: 33.9, lng: 67.7,  color: '#d08000', size: 0.6, level: 'HIGH' },
+    { id: 'rusukr',  name: 'Russia vs Ukraine',        lat: 48.4, lng: 31.2,  color: '#2878c8', size: 0.7, level: 'ELEVATED' },
+    { id: 'hormuz',  name: 'Strait of Hormuz',         lat: 26.5, lng: 56.3,  color: '#ff0040', size: 0.5, level: 'BLOCKED' },
+    { id: 'redsea',  name: 'Red Sea — Houthi Zone',    lat: 14.5, lng: 42.5,  color: '#d04000', size: 0.4, level: 'DISRUPTED' },
+  ];
+
+  const ARCS = [
+    { startLat: 38.9, startLng: -77.0, endLat: 32.4, endLng: 53.7,  color: '#ff2020' },  // US → Iran
+    { startLat: 31.8, startLng: 34.8,  endLat: 32.4, endLng: 53.7,  color: '#ff4040' },  // Israel → Iran
+    { startLat: 28.6, startLng: 77.2,  endLat: 33.7, endLng: 73.0,  color: '#ff6020' },  // India → LOC
+    { startLat: 33.7, startLng: 73.0,  endLat: 33.9, endLng: 67.7,  color: '#d08000' },  // Pak → Afg
+    { startLat: 55.8, startLng: 37.6,  endLat: 48.4, endLng: 31.2,  color: '#2878c8' },  // Russia → Ukraine
+    { startLat: 38.9, startLng: -77.0, endLat: 48.4, endLng: 31.2,  color: '#4090e0' },  // US → Ukraine (aid)
+  ];
+
+  const world = Globe()
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
+    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+    .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+    .showAtmosphere(true)
+    .atmosphereColor('#330808')
+    .atmosphereAltitude(0.18)
+    .pointsData(CONFLICTS)
+    .pointLat('lat')
+    .pointLng('lng')
+    .pointColor('color')
+    .pointAltitude(d => d.size * 0.06)
+    .pointRadius(d => d.size * 0.5)
+    .pointLabel(d => `<div style="background:#0a0a0e;border:1px solid ${d.color};padding:8px 12px;border-radius:3px;font-family:Inter,sans-serif;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:${d.color};letter-spacing:.04em;">${d.name}</div>
+      <div style="font-size:10px;color:#807060;letter-spacing:.12em;margin-top:2px;">${d.level}</div>
+    </div>`)
+    .ringsData(CONFLICTS)
+    .ringLat('lat')
+    .ringLng('lng')
+    .ringColor('color')
+    .ringMaxRadius(d => d.size * 4)
+    .ringPropagationSpeed(1.5)
+    .ringRepeatPeriod(d => 1200 / d.size)
+    .arcsData(ARCS)
+    .arcStartLat('startLat')
+    .arcStartLng('startLng')
+    .arcEndLat('endLat')
+    .arcEndLng('endLng')
+    .arcColor('color')
+    .arcDashLength(0.4)
+    .arcDashGap(0.2)
+    .arcDashAnimateTime(2500)
+    .arcStroke(0.4)
+    .width(el.clientWidth)
+    .height(el.clientHeight)
+    (el);
+
+  world.pointOfView({ lat: 30, lng: 55, altitude: 2.2 }, 0);
+  world.controls().autoRotate = false;
+  world.controls().enableZoom = true;
+
+  // Responsive resize
+  const ro = new ResizeObserver(() => {
+    world.width(el.clientWidth);
+    world.height(el.clientHeight);
+  });
+  ro.observe(el);
 }
 
 // ── TREND CHART ──────────────────────────────────────────
