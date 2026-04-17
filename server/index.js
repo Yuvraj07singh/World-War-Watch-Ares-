@@ -213,6 +213,42 @@ Rules: No markdown. Clinical intelligence tone. Use specific numbers for casualt
   }
 });
 
+// Country Intelligence Deep Dive
+app.post('/api/country-intel', aiLimiter, async (req, res) => {
+  const { country } = req.body;
+  if (!country || typeof country !== 'string' || country.length > 50) {
+    return res.status(400).json({ error: 'Invalid country.' });
+  }
+
+  const d = load('raw-news.json') || { articles: [] };
+  const regex = new RegExp(country, 'i');
+  const filtered = d.articles.filter(a => regex.test(a.title) || regex.test(a.snippet)).slice(0, 15);
+  const contextStr = filtered.length > 0 ? filtered.map(a => `- ${a.title}`).join('\n') : '(No direct breaking news in the last 60 minutes. Use baseline strategic intelligence and general world trends.)';
+
+  const prompt = `You are a senior OSINT analyst delivering a live, classified briefing on ${country}.
+  
+LATEST INTERCEPTED INTEL:
+${contextStr}
+
+Analyze the current geopolitical status of ${country}. Output EXACTLY this structure (use CAPS for headers, no markdown). Keep it clinical, dense, and factual:
+
+MILITARY & TACTICAL POSTURE
+[Analyze active military deployments, border tensions, ongoing conflicts, or internal security status of ${country}. 60-80 words.]
+
+ECONOMIC & STRATEGIC SHIFTS
+[Analyze recent economic sanctions, trade maneuvers, energy sector shifts, or technological breakthroughs. 60-80 words.]
+
+72-HOUR OUTLOOK
+[Outline immediate upcoming events, diplomatic pushes, or kinetic risks. 40-60 words.]`;
+
+  try {
+    const text = await ask(prompt, { maxTokens: 1000, json: false });
+    res.json({ text, generatedAt: new Date().toISOString() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── MANUAL UPDATE TRIGGER ──────────────────────────────────────────────────────
 app.post('/api/admin/update', async (req, res) => {
   const adminKey = req.headers['x-admin-key'];

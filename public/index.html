@@ -1190,6 +1190,36 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
   </div>
 </div>
 
+<!-- 🌍 COUNTRY INTEL MODAL 🌍 -->
+<div class="wg-overlay" id="countryOverlay" onclick="closeCountryModal(event)">
+  <div class="wg-modal" onclick="event.stopPropagation()">
+    <div class="wg-hdr" style="background:#0a1525;">
+      <div>
+        <div class="wg-title" id="countryModalTitle">► NATIONAL INTELLIGENCE BRIEFING</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.12em;margin-top:2px;">SECURE OSINT INTERCEPT · REAL-TIME RSS SYNDICATION</div>
+      </div>
+      <div class="wg-close" onclick="closeCountryModalDirect()">⨉</div>
+    </div>
+    <div class="wg-body">
+      <div style="font-family:var(--mono); color:#00aaff; font-size:11px; padding:8px 12px; background:rgba(0,170,255,0.06); border:1px solid rgba(0,170,255,0.15); border-radius:3px;">
+        ℹ LIVE FEED ACTIVE · Synthesizing regional developments and localized economic/tactical news.
+      </div>
+      
+      <!-- Output Terminal -->
+      <div class="wg-terminal" id="countryTerminal">
+        <div style="color:#0f0;opacity:0.4;" id="countryTermLogs">// AWAITING CONNECTION TO TARGET INFRASTRUCTURE...</div>
+        <div class="wg-scanline"></div>
+      </div>
+
+      <!-- Structured Phases Output -->
+      <div id="countryPhases" style="display:none; margin-top: -10px;"></div>
+      
+      <button id="countryCloseBtn" class="wg-submit" style="align-self:center; margin-top:10px; background:#00aaff; color:#fff;" onclick="closeCountryModalDirect()">CLOSE BRIEFING</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 // ── CONFIG ──────────────────────────────────────────────
 const API = ''; // Auto-routes relative to active host port to prevent failures
@@ -1722,7 +1752,85 @@ document.getElementById('qInput').addEventListener('keydown',e=>{if(e.key==='Ent
 function openDoom(){document.getElementById('doomOverlay').classList.add('on');document.body.style.overflow='hidden';}
 function closeDoom(e){if(e.target===document.getElementById('doomOverlay'))closeDoomDirect();}
 function closeDoomDirect(){document.getElementById('doomOverlay').classList.remove('on');document.body.style.overflow='';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDoomDirect(); closeWgDirect();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDoomDirect(); closeWgDirect(); closeCountryModalDirect();}});
+
+// ── COUNTRY INTEL MODAL ──────────────────────────────────
+function closeCountryModal(e) { if(e.target === document.getElementById('countryOverlay')) closeCountryModalDirect(); }
+function closeCountryModalDirect() { document.getElementById('countryOverlay').classList.remove('on'); document.body.style.overflow=''; }
+
+async function openCountryModal(country, flag) {
+  const overlay = document.getElementById('countryOverlay');
+  overlay.classList.add('on');
+  document.body.style.overflow='hidden';
+  
+  document.getElementById('countryModalTitle').textContent = `► ${flag} ${country.toUpperCase()} SECURE INTELLIGENCE BRIEFING`;
+  const term = document.getElementById('countryTerminal');
+  const phases = document.getElementById('countryPhases');
+  const btn = document.getElementById('countryCloseBtn');
+  
+  btn.disabled = true;
+  btn.textContent = 'LOADING BRIEFING...';
+  phases.style.display = 'none';
+  phases.innerHTML = '';
+  
+  const loadingMsgs = [
+    '> ESTABLISHING SECURE CONNECTION...',
+    '> INTERCEPTING REGIONAL PRESS FEEDS...',
+    '> AGGREGATING MILITARY & ECONOMIC TELEMETRY...',
+    '> SYNTHESIZING NATIONAL BRIEFING...'
+  ];
+  
+  term.innerHTML = '<div class="wg-scanline"></div>';
+  let msgIdx = 0;
+  const loadInterval = setInterval(() => {
+    if (msgIdx < loadingMsgs.length) {
+      const line = document.createElement('div');
+      line.style.color = '#00aaff';
+      line.style.opacity = '0.8';
+      line.textContent = loadingMsgs[msgIdx];
+      term.insertBefore(line, term.querySelector('.wg-scanline'));
+      msgIdx++;
+    }
+  }, 400);
+
+  try {
+    const r = await fetch(API+'/api/country-intel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ country }) });
+    clearInterval(loadInterval);
+    if(!r.ok) throw new Error('OSINT subsystem offline');
+    const d = await r.json();
+    
+    const text = d.text || d.error || '';
+    const phaseData = parsePhases(text); // we can reuse parsePhases from wargames!
+    
+    term.innerHTML = '<div class="wg-scanline"></div><div id="countryTypingText" style="color:#0f0;"></div>';
+    const target = document.getElementById('countryTypingText');
+    let i = 0;
+    const typeWriter = setInterval(() => {
+      const chunk = text.substring(i, Math.min(i + 3, text.length));
+      target.textContent += chunk;
+      i += 3;
+      if (i >= text.length) {
+        clearInterval(typeWriter);
+        btn.disabled = false;
+        btn.textContent = 'CLOSE BRIEFING';
+        if (phaseData.length > 0) {
+          phases.style.display = 'block';
+          phases.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:#666;letter-spacing:.12em;margin-bottom:8px;margin-top:12px;">// STRUCTURED ANALYSIS OUTPUT</div>' +
+            phaseData.map(p => `<div class="wg-phase ${p.cls}">
+              <div class="wg-phase-title" style="color:${p.color};">${p.icon} ${p.title}</div>
+              <div class="wg-phase-text">${p.text}</div>
+            </div>`).join('');
+        }
+      }
+    }, 8);
+    
+  } catch (e) {
+    clearInterval(loadInterval);
+    term.innerHTML = `<div style="color:#f00;">> CRITICAL ERROR: ${e.message.toUpperCase()}</div><div style="color:#660000;margin-top:4px;">> Retry or check server connection</div><div class="wg-scanline"></div>`;
+    btn.disabled = false;
+    btn.textContent = 'CLOSE BRIEFING';
+  }
+}
 
 // ── WAR GAMES SIMULATOR ──────────────────────────────────
 function openWg() { document.getElementById('wgOverlay').classList.add('on'); document.body.style.overflow='hidden'; document.getElementById('wgInput').focus(); }
@@ -1845,9 +1953,14 @@ async function runWg() {
 function parsePhases(text) {
   const phases = [];
   const sections = [
+    // War Games
     { regex: /IMMEDIATE|PHASE\s*1|FIRST\s*\d+\s*HOURS?|0-24|WITHIN\s*24/i, title: 'IMMEDIATE (0-24 HRS)', cls: 'immediate', color: '#ff2020', icon: '⚡' },
     { regex: /7.?DAY|PHASE\s*2|ONE\s*WEEK|WEEK\s*1|DAYS?\s*2-7/i, title: '7-DAY PROJECTION', cls: 'sevenday', color: '#d08000', icon: '📊' },
     { regex: /GLOBAL|PHASE\s*3|FALLOUT|30.?DAY|LONG.?TERM|MONTH/i, title: 'GLOBAL FALLOUT (30-DAY)', cls: 'global', color: '#2878c8', icon: '🌍' },
+    // Country Intel Deep Dive
+    { regex: /MILITARY|TACTICAL|POSTURE/i, title: 'MILITARY & TACTICAL POSTURE', cls: 'immediate', color: '#ff2020', icon: '⚔️' },
+    { regex: /ECONOMIC|STRATEGIC|SHIFTS|ECONOMY/i, title: 'ECONOMIC & STRATEGIC SHIFTS', cls: 'sevenday', color: '#d08000', icon: '📈' },
+    { regex: /72-HOUR|OUTLOOK|FORECAST/i, title: '72-HOUR OUTLOOK', cls: 'global', color: '#2878c8', icon: '⏱️' }
   ];
   
   const lines = text.split('\n');
@@ -2180,7 +2293,7 @@ function renderCountryDev(countries) {
     // Override AI hallucinated flags with hardcoded maps based on country name
     const displayFlag = flagMap[c.country] || '🌍';
     
-    return `<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--radius);padding:16px;transition:transform .2s;" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='none'">
+    return `<div style="background:var(--bg2);border:1px solid var(--b2);border-radius:var(--radius);padding:16px;cursor:pointer;transition:transform .2s;" onclick="openCountryModal('${c.country.replace(/'/g, "\\'")}', '${displayFlag}')" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform='none'">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b2);">
         <span style="font-size:28px; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;">${displayFlag}</span>
         <div>
