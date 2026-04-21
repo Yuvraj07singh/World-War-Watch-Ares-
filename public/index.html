@@ -375,7 +375,7 @@ img, svg { max-width: 100%; height: auto; }
   .hdr-sub { font-size: 7px; letter-spacing: .12em; }
   .hdr-ts { font-size: 10px; }
   .defcon-badge { margin-right: 0; font-size: 12px; height: 26px; padding: 0 8px; }
-  .defcon-badge span { display: none; }
+  .defcon-badge span { display: inline; font-size: 10px; }
   .wg-btn { margin-right: 0; font-size: 11px; height: 26px; padding: 0 10px; }
   .export-btn { display: none; }
   .war-counter { margin-left: auto; }
@@ -399,9 +399,9 @@ img, svg { max-width: 100%; height: auto; }
   /* — Update Bar — */
   .ubar { padding: 4px 0; font-size: 8px; gap: 6px; flex-wrap: wrap; }
 
-  /* — Conflict Cards (2 columns!) — */
-  .cgrid { grid-template-columns: 1fr 1fr !important; gap: 1px; }
-  .ccard { padding: 10px; }
+  /* — Conflict Cards (1 column on mobile) — */
+  .cgrid { grid-template-columns: 1fr !important; gap: 2px; }
+  .ccard { padding: 14px 10px; }
   .cc-name { font-size: 14px; }
   .cc-wm { font-size: 36px; }
   .cc-stats { gap: 6px; }
