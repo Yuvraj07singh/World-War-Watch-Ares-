@@ -2088,13 +2088,13 @@ function parsePhases(text) {
   const phases = [];
   const sections = [
     // War Games
-    { regex: /IMMEDIATE|PHASE\s*1|FIRST\s*\d+\s*HOURS?|0-24|WITHIN\s*24/i, title: 'IMMEDIATE (0-24 HRS)', cls: 'immediate', color: '#ff2020', icon: '⚡' },
-    { regex: /7.?DAY|PHASE\s*2|ONE\s*WEEK|WEEK\s*1|DAYS?\s*2-7/i, title: '7-DAY PROJECTION', cls: 'sevenday', color: '#d08000', icon: '📊' },
-    { regex: /GLOBAL|PHASE\s*3|FALLOUT|30.?DAY|LONG.?TERM|MONTH/i, title: 'GLOBAL FALLOUT (30-DAY)', cls: 'global', color: '#2878c8', icon: '🌍' },
+    { regex: /^[\s\*\-\#]*(?:PHASE\s*1|IMMEDIATE)/i, title: 'IMMEDIATE (0-24 HRS)', cls: 'immediate', color: '#ff2020', icon: '⚡' },
+    { regex: /^[\s\*\-\#]*(?:PHASE\s*2|7-?DAY)/i, title: '7-DAY PROJECTION', cls: 'sevenday', color: '#d08000', icon: '📊' },
+    { regex: /^[\s\*\-\#]*(?:PHASE\s*3|GLOBAL FALLOUT)/i, title: 'GLOBAL FALLOUT (30-DAY)', cls: 'global', color: '#2878c8', icon: '🌍' },
     // Country Intel Deep Dive
-    { regex: /MILITARY|TACTICAL|POSTURE/i, title: 'MILITARY & TACTICAL POSTURE', cls: 'immediate', color: '#ff2020', icon: '⚔️' },
-    { regex: /ECONOMIC|STRATEGIC|SHIFTS|ECONOMY/i, title: 'ECONOMIC & STRATEGIC SHIFTS', cls: 'sevenday', color: '#d08000', icon: '📈' },
-    { regex: /72-HOUR|OUTLOOK|FORECAST/i, title: '72-HOUR OUTLOOK', cls: 'global', color: '#2878c8', icon: '⏱️' }
+    { regex: /^[\s\*\-\#]*(?:MILITARY\s*\&?\s*TACTICAL|MILITARY POSTURE)/i, title: 'MILITARY & TACTICAL POSTURE', cls: 'immediate', color: '#ff2020', icon: '⚔️' },
+    { regex: /^[\s\*\-\#]*(?:ECONOMIC\s*\&?\s*STRATEGIC|ECONOMIC SHIFTS)/i, title: 'ECONOMIC & STRATEGIC SHIFTS', cls: 'sevenday', color: '#d08000', icon: '📈' },
+    { regex: /^[\s\*\-\#]*(?:72-HOUR|OUTLOOK)/i, title: '72-HOUR OUTLOOK', cls: 'global', color: '#2878c8', icon: '⏱️' }
   ];
   
   const lines = text.split('\n');
