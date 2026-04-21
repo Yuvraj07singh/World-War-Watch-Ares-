@@ -723,9 +723,9 @@ img, svg { max-width: 100%; height: auto; }
 .wg-btn { background: var(--red2); color: #fff; border: 1px solid var(--red); padding: 0 16px; font-family: var(--head); font-size: 14px; letter-spacing: .05em; cursor: pointer; border-radius: var(--radius); transition: all .2s; height: 32px; display: inline-flex; align-items: center; margin-right: 12px; }
 .wg-btn:hover { background: #fff; color: var(--red); box-shadow: 0 0 10px rgba(224,32,16,0.3); }
 
-.wg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,8,0.95); z-index: 2000; display: none; padding: 20px; overflow-y: auto; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+.wg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,8,0.95); z-index: 2000; display: none; padding: 20px; overflow-y: auto; justify-content: center; align-items: flex-start; backdrop-filter: blur(8px); }
 .wg-overlay.on { display: flex; }
-.wg-modal { background: #000; border: 1px solid var(--red); max-width: 900px; width: 100%; border-radius: var(--radius); position: relative; box-shadow: 0 0 40px rgba(224,32,16,0.15); display: flex; flex-direction: column; overflow: hidden; }
+.wg-modal { background: #000; border: 1px solid var(--red); max-width: 1200px; width: 100%; margin: 40px auto; border-radius: var(--radius); position: relative; box-shadow: 0 0 40px rgba(224,32,16,0.15); display: flex; flex-direction: column; overflow: hidden; }
 .wg-hdr { background: var(--red2); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
 .wg-title { font-family: var(--head); font-size: 20px; color: #fff; letter-spacing: .1em; }
 .wg-close { color: #fff; cursor: pointer; font-family: var(--mono); font-size: 24px; opacity: 0.8; }
