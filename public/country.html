@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Country Intelligence — World War Watch</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-719T6XEHFC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-719T6XEHFC');
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070a;--bg2:#0e0e12;--bg3:#15151a;--bg4:#1c1c22;--b1:#22222a;--b2:#2e2e38;--b3:#3a3a46;--red:#e02010;--red2:#901408;--amber:#d08000;--amb2:#6a4000;--blue:#2878c8;--blue2:#0e2848;--green:#28883a;--cyan:#00aaff;--t1:#f0e8cc;--t2:#c0b490;--t3:#807060;--t4:#484038;--inter:'Inter',sans-serif;--head:'Bebas Neue',sans-serif;--mono:'Share Tech Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--t1);font-family:var(--inter);font-size:14px;line-height:1.6;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--b2);}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px 80px;}
+
+/* TOP NAV */
+.topnav{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid var(--blue2);flex-wrap:wrap;}
+.back-btn{background:none;border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;cursor:pointer;border-radius:3px;font-weight:600;font-family:var(--inter);transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.back-btn:hover{border-color:var(--t3);color:var(--t1);}
+.nav-title{font-family:var(--head);font-size:clamp(18px,3vw,26px);letter-spacing:.07em;color:var(--t1);}
+.nav-badge{font-size:9px;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase;font-weight:700;background:rgba(0,170,255,.1);padding:3px 9px;border:1px solid rgba(0,170,255,.3);margin-left:auto;}
+
+/* HERO */
+.hero{padding:30px 0 24px;border-bottom:1px solid var(--b1);}
+.hero-flag{font-size:clamp(48px,8vw,80px);line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;}
+.hero-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.hero-info{flex:1;}
+.hero-region{font-size:10px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:6px;}
+.hero-name{font-family:var(--head);font-size:clamp(36px,7vw,68px);letter-spacing:.04em;color:var(--t1);text-transform:uppercase;line-height:1;}
+.hero-subtitle{font-size:14px;color:var(--t3);margin-top:6px;font-weight:400;}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-top:20px;}
+.stat-cell{background:var(--bg2);padding:14px;text-align:center;transition:background .15s;}
+.stat-cell:hover{background:var(--bg3);}
+.stat-val{font-family:var(--head);font-size:22px;color:var(--t1);line-height:1;}
+.stat-lbl{font-size:9px;color:var(--t4);margin-top:4px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;}
+.stat-rank{font-size:10px;color:var(--cyan);font-family:var(--mono);margin-top:2px;}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--b1);margin:24px 0 0;overflow-x:auto;}
+.tab{flex:1;min-width:fit-content;background:var(--bg2);padding:13px 18px;font-size:11px;letter-spacing:.12em;color:var(--t4);text-transform:uppercase;cursor:pointer;border:none;font-weight:700;font-family:var(--inter);transition:all .15s;white-space:nowrap;}
+.tab.on{background:var(--bg3);color:var(--t1);border-bottom:2px solid var(--cyan);}
+.tab:hover:not(.on){background:var(--bg3);color:var(--t2);}
+
+/* PANEL */
+.panel{display:none;padding:26px 0;}
+.panel.on{display:block;}
+.p-loading{font-size:12px;color:var(--t4);letter-spacing:.16em;text-transform:uppercase;font-weight:500;animation:blink 1s step-end infinite;text-align:center;padding:40px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+/* NEWS FEED */
+.news-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--b1);transition:background .15s;cursor:default;}
+.news-item:hover{background:var(--bg2);}
+.news-time{font-family:var(--mono);font-size:10px;color:var(--cyan);min-width:55px;flex-shrink:0;padding-top:3px;}
+.news-body{flex:1;}
+.news-title{font-size:14px;color:var(--t1);font-weight:600;line-height:1.4;margin-bottom:4px;}
+.news-title a{color:var(--t1);text-decoration:none;transition:color .15s;}
+.news-title a:hover{color:var(--cyan);}
+.news-source{font-size:10px;color:var(--t4);font-weight:500;letter-spacing:.06em;}
+.news-snippet{font-size:12px;color:var(--t3);margin-top:4px;line-height:1.5;}
+.news-empty{color:var(--t4);font-size:13px;padding:30px 0;text-align:center;}
+
+/* PROFILE TABLE */
+.profile-section{margin-bottom:28px;}
+.profile-title{font-size:10px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b1);}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.profile-card{background:var(--bg2);border:1px solid var(--b1);padding:16px;border-left:3px solid var(--b3);}
+.profile-card.mil{border-left-color:var(--red);}
+.profile-card.eco{border-left-color:var(--amber);}
+.profile-card.soc{border-left-color:var(--green);}
+.profile-card.tech{border-left-color:var(--cyan);}
+.pc-label{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:5px;}
+.pc-value{font-family:var(--head);font-size:24px;color:var(--t1);line-height:1;}
+.pc-note{font-size:11px;color:var(--t3);margin-top:4px;}
+
+/* BRIEFING TERMINAL */
+.brief-terminal{background:#050505;border:1px solid rgba(0,170,255,.3);padding:20px;border-radius:4px;min-height:200px;font-family:var(--mono);color:#0f0;font-size:14px;line-height:1.7;white-space:pre-wrap;position:relative;overflow:hidden;box-shadow:inset 0 0 20px rgba(0,170,255,.05);}
+.brief-terminal::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px);pointer-events:none;}
+.brief-scanline{width:100%;height:10px;background:rgba(0,255,0,.1);position:absolute;top:0;left:0;animation:scanline 4s linear infinite;pointer-events:none;}
+@keyframes scanline{0%{top:-10px}100%{top:100%}}
+.brief-btn{background:var(--cyan);color:#000;border:none;padding:10px 22px;font-family:var(--head);font-size:15px;cursor:pointer;border-radius:3px;letter-spacing:.06em;transition:all .2s;margin-top:14px;}
+.brief-btn:hover{box-shadow:0 0 15px rgba(0,170,255,.5);}
+.brief-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* UPDATED BAR */
+.updated-bar{background:var(--bg2);border:1px solid var(--b1);padding:8px 14px;font-size:10px;color:var(--t4);letter-spacing:.1em;text-transform:uppercase;font-weight:500;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+
+/* ASK AI */
+.ask-box{background:var(--bg2);border:1px solid var(--b1);padding:20px;margin-top:28px;}
+.ask-label{font-size:10px;letter-spacing:.18em;color:var(--t4);text-transform:uppercase;font-weight:600;margin-bottom:12px;}
+.ask-row{display:flex;gap:0;}
+.ask-input{flex:1;background:var(--bg);border:1px solid var(--b2);border-right:none;color:var(--t1);font-family:var(--inter);font-size:13px;padding:11px 15px;outline:none;border-radius:3px 0 0 3px;}
+.ask-input::placeholder{color:var(--t4);}
+.ask-input:focus{border-color:var(--t3);}
+.ask-btn{background:var(--bg);border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:11px 16px;cursor:pointer;font-weight:700;border-radius:0 3px 3px 0;font-family:var(--inter);transition:all .15s;}
+.ask-btn:hover:not(:disabled){background:var(--bg3);color:var(--t1);}
+.ask-btn:disabled{opacity:.4;cursor:not-allowed;}
+.ask-out{display:none;font-size:13px;color:var(--t2);line-height:1.85;margin-top:14px;padding-top:12px;border-top:1px dashed var(--b1);}
+.ask-out.on{display:block;}
+
+/* MOBILE */
+@media(max-width:640px){
+  .wrap{padding:0 12px 60px;}
+  .topnav{flex-direction:column;gap:8px;align-items:flex-start;}
+  .nav-badge{margin-left:0;}
+  .hero{padding:20px 0 18px;}
+  .hero-name{font-size:clamp(28px,6vw,48px);}
+  .hero-top{gap:12px;}
+  .hero-flag{font-size:48px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .stat-val{font-size:18px;}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tab{padding:11px 14px;font-size:10px;}
+  .panel{padding:18px 0;}
+  .profile-grid{grid-template-columns:1fr;}
+  .ask-row{flex-direction:column;}
+  .ask-input{border-right:1px solid var(--b2);border-radius:3px 3px 0 0;padding:14px 15px;font-size:14px;}
+  .ask-btn{border-radius:0 0 3px 3px;padding:14px 16px;font-size:12px;}
+  body::before{display:none;}
+}
+@media(max-width:420px){
+  .wrap{padding:0 8px 50px;}
+  .hero-name{font-size:26px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:16px;}
+  .tab{font-size:9px;padding:9px 10px;}
+  .pc-value{font-size:20px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <a class="back-btn" href="/">← Back to dashboard</a>
+  <div class="nav-title">Country Intelligence</div>
+  <div class="nav-badge" id="navBadge">OSINT ACTIVE</div>
+</div>
+
+<!-- LOADING STATE -->
+<div id="loadingState" style="padding:60px;text-align:center;color:var(--t4);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;animation:blink 1s step-end infinite;">
+  // Establishing OSINT connection...
+</div>
+
+<!-- CONTENT (hidden until loaded) -->
+<div id="pageContent" style="display:none;">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-top">
+    <div class="hero-flag" id="heroFlag"></div>
+    <div class="hero-info">
+      <div class="hero-region" id="heroRegion"></div>
+      <div class="hero-name" id="heroName"></div>
+      <div class="hero-subtitle" id="heroSubtitle"></div>
+    </div>
+  </div>
+  <!-- STATS -->
+  <div class="stats-grid" id="statsGrid"></div>
+</div>
+
+<!-- UPDATED BAR -->
+<div class="updated-bar">
+  <span id="updatedAt">Fetching intelligence...</span>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="switchTab(this,'news')">📰 Last 24 Hours</button>
+  <button class="tab" onclick="switchTab(this,'profile')">📊 National Profile</button>
+  <button class="tab" onclick="switchTab(this,'briefing')">🧠 AI Briefing</button>
+</div>
+
+<!-- NEWS PANEL -->
+<div class="panel on" id="panel-news">
+  <div id="newsFeed"><div class="p-loading">Scanning global RSS feeds...</div></div>
+</div>
+
+<!-- PROFILE PANEL -->
+<div class="panel" id="panel-profile">
+  <div id="profileContent"></div>
+</div>
+
+<!-- BRIEFING PANEL -->
+<div class="panel" id="panel-briefing">
+  <div style="font-family:var(--mono);color:var(--cyan);font-size:11px;margin-bottom:14px;letter-spacing:.06em;">// Click below to generate a comprehensive AI strategic analysis using live intelligence feeds.</div>
+  <button class="brief-btn" id="briefBtn" onclick="generateBriefing()">► GENERATE LIVE INTELLIGENCE BRIEFING</button>
+  <div class="brief-terminal" id="briefTerminal" style="display:none;">
+    <div class="brief-scanline"></div>
+    <div id="briefText" style="position:relative;z-index:1;"></div>
+  </div>
+</div>
+
+<!-- ASK AI -->
+<div class="ask-box">
+  <div class="ask-label">// Ask anything about this country — AI answers using latest news</div>
+  <div class="ask-row">
+    <input class="ask-input" id="askInput" type="text" placeholder="e.g. What is the current military posture? Any recent economic sanctions?" />
+    <button class="ask-btn" id="askBtn" onclick="askAI()">Ask ↗</button>
+  </div>
+  <div class="ask-out" id="askOut"></div>
+</div>
+
+</div><!-- /pageContent -->
+</div><!-- /wrap -->
+
+<script>
+const API='';
+let countryName = '';
+let countryMeta = null;
+
+// ── COUNTRY DATABASE ─────────────────────────────────────
+const COUNTRIES = {
+  'USA': {
+    flag:'🇺🇸', region:'North America', capital:'Washington D.C.', fullName:'United States of America',
+    subtitle:'Global Superpower · NATO Leader · $28.78T Economy',
+    stats:[
+      {val:'$28.78T',lbl:'GDP (PPP)',rank:'#1 Global'},
+      {val:'1.39M',lbl:'Active Military',rank:'#3 Global'},
+      {val:'341M',lbl:'Population',rank:'#3 Global'},
+      {val:'$886B',lbl:'Defense Budget',rank:'#1 Global'},
+      {val:'5,500+',lbl:'Nuclear Warheads',rank:'#1 Arsenal'},
+      {val:'23',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'Active Personnel',value:'1.39 Million',note:'Army, Navy, Air Force, Marines, Space Force, Coast Guard'},
+        {label:'Defense Budget',value:'$886 Billion (2024)',note:'~3.4% of GDP — largest in the world'},
+        {label:'Nuclear Arsenal',value:'5,500+ warheads',note:'Land ICBMs, Sea SLBMs, Air-launched cruise missiles'},
+        {label:'Aircraft Carriers',value:'11 Supercarriers',note:'More than all other nations combined'},
+        {label:'Overseas Bases',value:'750+ installations',note:'80 countries across every continent'}
+      ],
+      economy:[
+        {label:'GDP (Nominal)',value:'$28.78 Trillion',note:'Largest economy in the world'},
+        {label:'GDP Per Capita',value:'$85,373',note:'Among the highest globally'},
+        {label:'Debt-to-GDP',value:'~123%',note:'$34+ trillion national debt'},
+        {label:'Unemployment',value:'~3.7%',note:'Near historic lows'},
+        {label:'Trade Deficit',value:'~$773B',note:'Largest goods trade deficit globally'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.921',note:'Very High Human Development'},
+        {label:'Life Expectancy',value:'77.5 years',note:'Below peer nations'},
+        {label:'Press Freedom',value:'#55',note:'Reporters Without Borders 2024'},
+        {label:'Corruption Index',value:'24/180',note:'Transparency International'}
+      ]
+    }
+  },
+  'China': {
+    flag:'🇨🇳', region:'East Asia', capital:'Beijing', fullName:"People's Republic of China",
+    subtitle:'Rising Superpower · BRICS Leader · $35.29T Economy (PPP)',
+    stats:[
+      {val:'$35.29T',lbl:'GDP (PPP)',rank:'#1 PPP'},
+      {val:'2.0M',lbl:'Active Military',rank:'#1 Global'},
+      {val:'1.41B',lbl:'Population',rank:'#2 Global'},
+      {val:'$296B',lbl:'Defense Budget',rank:'#2 Global'},
+      {val:'500+',lbl:'Nuclear Warheads',rank:'Expanding'},
+      {val:'60',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'Active Personnel',value:'2.0 Million',note:'PLA: Worlds largest standing military'},
+        {label:'Defense Budget',value:'$296 Billion (est.)',note:'Real spending believed 50-70% higher'},
+        {label:'Nuclear Arsenal',value:'500+ warheads',note:'Rapidly expanding — projected 1,000 by 2030'},
+        {label:'Navy',value:'370+ vessels',note:'Worlds largest navy by ship count'},
+        {label:'Hypersonic Weapons',value:'DF-27, DF-ZF',note:'Operational hypersonic glide vehicles'}
+      ],
+      economy:[
+        {label:'GDP (PPP)',value:'$35.29 Trillion',note:'Largest economy by purchasing power'},
+        {label:'GDP (Nominal)',value:'$18.53 Trillion',note:'Second largest nominal GDP'},
+        {label:'Growth Rate',value:'~4.6%',note:'Slowing but still significant'},
+        {label:'Manufacturing',value:'~30% of global output',note:'Factory of the world'},
+        {label:'Belt & Road',value:'150+ countries',note:'$1T+ infrastructure investment worldwide'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.788',note:'High Human Development'},
+        {label:'Life Expectancy',value:'78.6 years',note:'Surpassed the US'},
+        {label:'Press Freedom',value:'#179',note:'Among the lowest globally'},
+        {label:'Internet Users',value:'1.05 Billion',note:'Behind Great Firewall'}
+      ]
+    }
+  },
+  'India': {
+    flag:'🇮🇳', region:'South Asia', capital:'New Delhi', fullName:'Republic of India',
+    subtitle:'Regional Power · Quad Member · Fastest Growing Major Economy',
+    stats:[
+      {val:'$14.59T',lbl:'GDP (PPP)',rank:'#3 Global'},
+      {val:'1.45M',lbl:'Active Military',rank:'#2 Global'},
+      {val:'1.44B',lbl:'Population',rank:'#1 Global'},
+      {val:'$75B',lbl:'Defense Budget',rank:'#4 Global'},
+      {val:'172',lbl:'Nuclear Warheads',rank:'#6 Arsenal'},
+      {val:'126',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'Active Personnel',value:'1.45 Million',note:'Army, Navy, Air Force — 2nd largest'},
+        {label:'Defense Budget',value:'$75 Billion',note:'~2.4% of GDP, rapidly rising'},
+        {label:'Nuclear Arsenal',value:'172 warheads',note:'Nuclear triad capability'},
+        {label:'ISRO/Space',value:'Mars Orbiter, Chandrayaan-3',note:'Moon landing success 2023'},
+        {label:'Agni Missiles',value:'Agni-V: 5,500km range',note:'ICBM capable, MIRVed'}
+      ],
+      economy:[
+        {label:'GDP (Nominal)',value:'$3.94 Trillion',note:'5th largest — projected 3rd by 2028'},
+        {label:'Growth Rate',value:'~7.8%',note:'Fastest growing major economy'},
+        {label:'IT Exports',value:'$194 Billion',note:'Global technology hub'},
+        {label:'UPI Transactions',value:'$2T+ annually',note:'Worlds largest digital payments system'},
+        {label:'Forex Reserves',value:'$620 Billion',note:'4th largest globally'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.644',note:'Medium Human Development'},
+        {label:'Life Expectancy',value:'70.4 years',note:'Improving steadily'},
+        {label:'Literacy Rate',value:'77.7%',note:'Rising with education reforms'},
+        {label:'Press Freedom',value:'#161',note:'Reporters Without Borders'}
+      ]
+    }
+  },
+  'Russia': {
+    flag:'🇷🇺', region:'Eurasia', capital:'Moscow', fullName:'Russian Federation',
+    subtitle:'Nuclear Superpower · BRICS Core · Under Western Sanctions',
+    stats:[
+      {val:'$4.77T',lbl:'GDP (PPP)',rank:'#5 Global'},
+      {val:'1.32M',lbl:'Active Military',rank:'#5 Global'},
+      {val:'144M',lbl:'Population',rank:'#9 Global'},
+      {val:'$109B',lbl:'Defense Budget',rank:'#3 Global'},
+      {val:'5,580',lbl:'Nuclear Warheads',rank:'#1 Arsenal'},
+      {val:'68',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'Active Personnel',value:'1.32 Million',note:'Wartime mobilization ongoing since 2022'},
+        {label:'Defense Budget',value:'$109 Billion (2024)',note:'~6% of GDP — wartime surge'},
+        {label:'Nuclear Arsenal',value:'5,580 warheads',note:'Worlds largest nuclear stockpile'},
+        {label:'Hypersonic Weapons',value:'Kinzhal, Avangard, Zircon',note:'Operational and deployed'},
+        {label:'Navy',value:'Northern, Pacific, Black Sea Fleets',note:'Submarine force significant'}
+      ],
+      economy:[
+        {label:'GDP (Nominal)',value:'$2.02 Trillion',note:'Contracted then adapted to sanctions'},
+        {label:'Oil/Gas Revenue',value:'~40% of federal budget',note:'Major energy exporter'},
+        {label:'Sanctions',value:'16,000+ individual measures',note:'Most sanctioned nation in history'},
+        {label:'Inflation',value:'~7.5%',note:'Central bank rate at 16%'},
+        {label:'BRICS Trade',value:'Growing non-dollar trade',note:'Yuan, Rupee-based settlements'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.822',note:'Very High Human Development'},
+        {label:'Life Expectancy',value:'73.4 years',note:'Male life expectancy significantly lower'},
+        {label:'Press Freedom',value:'#164',note:'Critical media suppressed'},
+        {label:'Brain Drain',value:'500K+ emigrated since 2022',note:'Technology sector heavily impacted'}
+      ]
+    }
+  },
+  'Israel': {
+    flag:'🇮🇱', region:'Middle East', capital:'Jerusalem (disputed)', fullName:'State of Israel',
+    subtitle:'Regional Military Power · US Ally · Active Multi-Front Operations',
+    stats:[
+      {val:'$564B',lbl:'GDP (Nominal)',rank:'#29 Global'},
+      {val:'170K',lbl:'Active Military',rank:'+ 465K Reserves'},
+      {val:'9.8M',lbl:'Population',rank:''},
+      {val:'$24B',lbl:'Defense Budget',rank:'~5.3% GDP'},
+      {val:'90+',lbl:'Nuclear Warheads',rank:'Undeclared'},
+      {val:'4',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'Active + Reserve',value:'170K + 465K reserves',note:'Mandatory conscription'},
+        {label:'Iron Dome',value:'90%+ intercept rate',note:'Multi-layered missile defense'},
+        {label:'Nuclear Policy',value:'Ambiguous (est. 90+ warheads)',note:'Never confirmed nor denied'},
+        {label:'Air Force',value:'F-35I Adir fleet',note:'Most advanced in the Middle East'},
+        {label:'Intelligence',value:'Mossad, Shin Bet, Aman',note:'Among worlds best intelligence apparatus'}
+      ],
+      economy:[
+        {label:'GDP Per Capita',value:'$55,533',note:'High-income advanced economy'},
+        {label:'Tech Sector',value:'Startup Nation',note:'Most startups per capita globally'},
+        {label:'Defense Exports',value:'$13 Billion',note:'Top 10 global arms exporter'},
+        {label:'War Cost',value:'$75B+ (2023-2026)',note:'Significant fiscal burden'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.919',note:'Very High Human Development'},
+        {label:'Press Freedom',value:'#97',note:'Declined amid conflict'},
+        {label:'Conscription',value:'Mandatory 32mo (M) / 24mo (F)',note:'Universal military service'}
+      ]
+    }
+  },
+  'Iran': {
+    flag:'🇮🇷', region:'Middle East', capital:'Tehran', fullName:'Islamic Republic of Iran',
+    subtitle:'Regional Power · Nuclear Threshold State · Under Maximum Pressure',
+    stats:[
+      {val:'$1.69T',lbl:'GDP (PPP)',rank:'#17 Global'},
+      {val:'610K',lbl:'Active Military',rank:'+ IRGC + Basij'},
+      {val:'88.5M',lbl:'Population',rank:'#17 Global'},
+      {val:'$10B',lbl:'Defense Budget',rank:'Proxy networks'},
+      {val:'0',lbl:'Nuclear Warheads',rank:'Threshold State'},
+      {val:'100',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'IRGC',value:'190,000 personnel',note:'Islamic Revolutionary Guard Corps — elite force'},
+        {label:'Ballistic Missiles',value:'3,000+ inventory',note:'Largest missile arsenal in Middle East'},
+        {label:'Proxy Network',value:'Hezbollah, Houthis, PMF',note:'Axis of Resistance across region'},
+        {label:'Nuclear Program',value:'60-83.7% enrichment',note:'Weeks from weapons-grade capability'},
+        {label:'Navy',value:'Fast-attack craft, mines',note:'Asymmetric warfare in Persian Gulf'}
+      ],
+      economy:[
+        {label:'GDP (Nominal)',value:'$413 Billion',note:'Heavily sanctioned economy'},
+        {label:'Oil Exports',value:'~1.5M bpd (shadow fleet)',note:'Despite US maximum pressure'},
+        {label:'Inflation',value:'~40%',note:'Currency devalued significantly'},
+        {label:'Sanctions',value:'Comprehensive US/EU',note:'Banking, oil, tech sectors targeted'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.774',note:'High Human Development'},
+        {label:'Life Expectancy',value:'76.7 years',note:'Declining due to sanctions impact'},
+        {label:'Press Freedom',value:'#176',note:'Among most repressive'}
+      ]
+    }
+  },
+  'Pakistan': {
+    flag:'🇵🇰', region:'South Asia', capital:'Islamabad', fullName:'Islamic Republic of Pakistan',
+    subtitle:'Nuclear Power · Two-Front Crisis · IMF Program Active',
+    stats:[
+      {val:'$1.51T',lbl:'GDP (PPP)',rank:'#22 Global'},
+      {val:'654K',lbl:'Active Military',rank:'#6 Global'},
+      {val:'240M',lbl:'Population',rank:'#5 Global'},
+      {val:'$10B',lbl:'Defense Budget',rank:'~3.5% GDP'},
+      {val:'170',lbl:'Nuclear Warheads',rank:'#5 Arsenal'},
+      {val:'108',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'Active Personnel',value:'654,000',note:'6th largest military globally'},
+        {label:'Nuclear Arsenal',value:'170 warheads',note:'Fastest growing nuclear stockpile'},
+        {label:'Two-Front War',value:'India + Afghanistan',note:'Unprecedented dual-threat posture'},
+        {label:'JF-17 Thunder',value:'Indigenous fighter program',note:'Co-produced with China'},
+        {label:'ISI',value:'Inter-Services Intelligence',note:'Powerful intelligence apparatus'}
+      ],
+      economy:[
+        {label:'GDP (Nominal)',value:'$340 Billion',note:'Struggling with debt crisis'},
+        {label:'IMF Bailout',value:'$3B Stand-By (2024)',note:'23rd IMF program'},
+        {label:'Inflation',value:'~25%',note:'Food/fuel prices critical'},
+        {label:'Remittances',value:'$28 Billion',note:'Lifeline from diaspora'},
+        {label:'Debt-to-GDP',value:'~75%',note:'Severe fiscal constraints'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.544',note:'Low Human Development'},
+        {label:'Literacy Rate',value:'58%',note:'Among lowest in Asia'},
+        {label:'Press Freedom',value:'#150',note:'Journalist safety critical'}
+      ]
+    }
+  },
+  'Japan': {
+    flag:'🇯🇵', region:'East Asia', capital:'Tokyo', fullName:'Japan',
+    subtitle:'Economic Power · US Ally · Historic Rearmament Underway',
+    stats:[
+      {val:'$6.27T',lbl:'GDP (PPP)',rank:'#4 Global'},
+      {val:'247K',lbl:'Self-Defense Forces',rank:'Expanding'},
+      {val:'124M',lbl:'Population',rank:'#12 Global'},
+      {val:'$50B',lbl:'Defense Budget',rank:'Doubled to 2% GDP'},
+      {val:'0',lbl:'Nuclear Warheads',rank:'Non-Nuclear'},
+      {val:'47',lbl:'Happiness Index',rank:'World Rank'}
+    ],
+    profile:{
+      military:[
+        {label:'JSDF Personnel',value:'247,000',note:'Self-Defense Forces — rebranding underway'},
+        {label:'Defense Budget',value:'$50 Billion (doubled)',note:'Historic shift to 2% GDP target'},
+        {label:'Counterstrike',value:'Tomahawk cruise missiles',note:'First offensive capability since WWII'},
+        {label:'Naval Power',value:'4 helicopter carriers',note:'Izumo-class converting for F-35B'},
+        {label:'US Alliance',value:'55,000 US troops in Japan',note:'Cornerstone of Indo-Pacific security'}
+      ],
+      economy:[
+        {label:'GDP (Nominal)',value:'$4.21 Trillion',note:'4th largest economy'},
+        {label:'Tech Exports',value:'Semiconductors, robotics',note:'Critical global supply chain node'},
+        {label:'Debt-to-GDP',value:'~264%',note:'Highest in developed world'},
+        {label:'Yen',value:'Historically weak',note:'BoJ policy divergence from Fed'}
+      ],
+      social:[
+        {label:'HDI Score',value:'0.920',note:'Very High Human Development'},
+        {label:'Life Expectancy',value:'84.8 years',note:'Highest in the world'},
+        {label:'Population Crisis',value:'-800K/year',note:'Demographic emergency'},
+        {label:'Press Freedom',value:'#70',note:'Free but concerns remain'}
+      ]
+    }
+  }
+};
+
+// Aliases
+COUNTRIES['United States'] = COUNTRIES['USA'];
+COUNTRIES['UK'] = {
+  flag:'🇬🇧', region:'Western Europe', capital:'London', fullName:'United Kingdom',
+  subtitle:'NATO Nuclear Power · P5 Member · Post-Brexit Realignment',
+  stats:[
+    {val:'$3.59T',lbl:'GDP (Nominal)',rank:'#6 Global'},
+    {val:'150K',lbl:'Active Military',rank:''},
+    {val:'67.7M',lbl:'Population',rank:'#21 Global'},
+    {val:'$75B',lbl:'Defense Budget',rank:'#4 Global'},
+    {val:'225',lbl:'Nuclear Warheads',rank:'#5 Arsenal'},
+    {val:'20',lbl:'Happiness Index',rank:'World Rank'}
+  ],
+  profile:{military:[{label:'Armed Forces',value:'150,000 active',note:'Army, Royal Navy, RAF'},{label:'Nuclear',value:'225 warheads (Trident)',note:'Continuous At-Sea Deterrent'},{label:'AUKUS',value:'Nuclear submarine pact',note:'Australia, UK, USA security collaboration'}],economy:[{label:'GDP',value:'$3.59 Trillion',note:'6th largest economy'},{label:'City of London',value:'Global financial center',note:'2nd largest financial hub'}],social:[{label:'HDI',value:'0.929',note:'Very High'},{label:'Press Freedom',value:'#26',note:'Reporters Without Borders'}]}
+};
+
+function getCountryName() {
+  const p = window.location.pathname.split('/');
+  const raw = decodeURIComponent(p[p.length - 1] || p[p.length - 2] || '');
+  // Also check query param fallback
+  const q = new URLSearchParams(window.location.search).get('name');
+  return raw || q || 'USA';
+}
+
+async function initPage() {
+  countryName = getCountryName();
+  countryMeta = COUNTRIES[countryName];
+
+  if (!countryMeta) {
+    document.getElementById('loadingState').innerHTML = `<span style="color:var(--amber)">Unknown country: ${countryName}</span><br><br><a href="/" style="color:var(--cyan)">← Return to Dashboard</a>`;
+    return;
+  }
+
+  document.title = countryName + ' Intelligence — World War Watch';
+
+  // Render hero
+  document.getElementById('heroFlag').textContent = countryMeta.flag;
+  document.getElementById('heroRegion').textContent = countryMeta.region + ' · ' + countryMeta.capital;
+  document.getElementById('heroName').textContent = countryName;
+  document.getElementById('heroSubtitle').textContent = countryMeta.subtitle;
+
+  // Stats
+  document.getElementById('statsGrid').innerHTML = countryMeta.stats.map(s => `
+    <div class="stat-cell">
+      <div class="stat-val">${s.val}</div>
+      <div class="stat-lbl">${s.lbl}</div>
+      ${s.rank ? `<div class="stat-rank">${s.rank}</div>` : ''}
+    </div>`).join('');
+
+  // Profile
+  renderProfile();
+
+  // Show content
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('pageContent').style.display = 'block';
+
+  // Load news feed
+  loadNewsFeed();
+}
+
+function renderProfile() {
+  const p = countryMeta.profile;
+  if (!p) { document.getElementById('profileContent').innerHTML = '<div class="news-empty">Profile data not available.</div>'; return; }
+
+  let html = '';
+
+  if (p.military) {
+    html += `<div class="profile-section"><div class="profile-title">⚔ Military & Defense</div><div class="profile-grid">${
+      p.military.map(m => `<div class="profile-card mil"><div class="pc-label">${m.label}</div><div class="pc-value">${m.value}</div><div class="pc-note">${m.note}</div></div>`).join('')
+    }</div></div>`;
+  }
+  if (p.economy) {
+    html += `<div class="profile-section"><div class="profile-title">📈 Economy & Trade</div><div class="profile-grid">${
+      p.economy.map(m => `<div class="profile-card eco"><div class="pc-label">${m.label}</div><div class="pc-value">${m.value}</div><div class="pc-note">${m.note}</div></div>`).join('')
+    }</div></div>`;
+  }
+  if (p.social) {
+    html += `<div class="profile-section"><div class="profile-title">🏛 Society & Governance</div><div class="profile-grid">${
+      p.social.map(m => `<div class="profile-card soc"><div class="pc-label">${m.label}</div><div class="pc-value">${m.value}</div><div class="pc-note">${m.note}</div></div>`).join('')
+    }</div></div>`;
+  }
+
+  document.getElementById('profileContent').innerHTML = html;
+}
+
+async function loadNewsFeed() {
+  const feed = document.getElementById('newsFeed');
+  try {
+    const r = await fetch(API + '/api/news?limit=300');
+    const d = await r.json();
+    const articles = (d.articles || []).filter(a => {
+      const regex = new RegExp(countryName, 'i');
+      return regex.test(a.title) || regex.test(a.snippet || '');
+    });
+
+    if (articles.length === 0) {
+      feed.innerHTML = '<div class="news-empty">No dedicated headlines found for ' + countryName + ' in the last RSS cycle. Check the AI Briefing tab for synthesized intelligence.</div>';
+      return;
+    }
+
+    document.getElementById('updatedAt').textContent = `${articles.length} articles intercepted · Last scan: ${fmtDate(d._updatedAt)}`;
+
+    feed.innerHTML = articles.slice(0, 30).map(a => {
+      const time = a.pubDate ? fmtTime(a.pubDate) : '';
+      return `<div class="news-item">
+        <div class="news-time">${time}</div>
+        <div class="news-body">
+          <div class="news-title"><a href="${a.link || '#'}" target="_blank" rel="noopener">${a.title || 'Untitled'}</a></div>
+          <div class="news-source">${a.source || 'Unknown Source'}</div>
+          ${a.snippet ? `<div class="news-snippet">${a.snippet.substring(0, 180)}...</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch (e) {
+    feed.innerHTML = '<div class="news-empty">Failed to load news feed: ' + e.message + '</div>';
+  }
+}
+
+async function generateBriefing() {
+  const btn = document.getElementById('briefBtn');
+  const term = document.getElementById('briefTerminal');
+  const text = document.getElementById('briefText');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ GENERATING BRIEFING...';
+  term.style.display = 'block';
+  text.textContent = '> ESTABLISHING SECURE CONNECTION...\n> INTERCEPTING REGIONAL FEEDS...\n> SYNTHESIZING NATIONAL BRIEFING...\n';
+
+  try {
+    const r = await fetch(API + '/api/country-intel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ country: countryName })
+    });
+    if (!r.ok) throw new Error('OSINT subsystem offline');
+    const d = await r.json();
+    const content = d.text || d.error || '';
+
+    // Typewriter
+    text.textContent = '';
+    let i = 0;
+    const writer = setInterval(() => {
+      const chunk = content.substring(i, Math.min(i + 3, content.length));
+      text.textContent += chunk;
+      i += 3;
+      if (i >= content.length) {
+        clearInterval(writer);
+        btn.disabled = false;
+        btn.textContent = '↻ REGENERATE BRIEFING';
+      }
+    }, 8);
+
+  } catch (e) {
+    text.textContent += '\n> CRITICAL ERROR: ' + e.message.toUpperCase();
+    btn.disabled = false;
+    btn.textContent = '↻ RETRY BRIEFING';
+  }
+}
+
+// Tab switching
+function switchTab(el, name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('panel-' + name).classList.add('on');
+}
+
+// Ask AI
+async function askAI() {
+  const inp = document.getElementById('askInput');
+  const q = inp.value.trim(); if (!q) return;
+  const btn = document.getElementById('askBtn');
+  const out = document.getElementById('askOut');
+  btn.disabled = true; btn.textContent = 'Thinking...';
+  out.classList.add('on'); out.textContent = 'Analyzing...';
+  try {
+    const r = await fetch(API + '/api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: `Regarding ${countryName}: ${q}` }) });
+    const d = await r.json();
+    out.textContent = d.text || d.error;
+  } catch (e) { out.textContent = 'Error: ' + e.message; }
+  btn.disabled = false; btn.textContent = 'Ask ↗';
+  inp.value = '';
+}
+document.getElementById('askInput').addEventListener('keydown', e => { if (e.key === 'Enter') askAI(); });
+
+function fmtDate(iso) {
+  if (!iso) return 'Unknown';
+  const d = new Date(iso);
+  const ms = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${String(d.getDate()).padStart(2,'0')} ${ms[d.getMonth()]} ${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diffH = Math.floor((now - d) / 3600000);
+  if (diffH < 1) return 'Just now';
+  if (diffH < 24) return diffH + 'h ago';
+  return Math.floor(diffH / 24) + 'd ago';
+}
+
+// START
+initPage();
+</script>
+</body>
+</html>

@@ -276,6 +276,10 @@ app.get('/conflict/*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'conflict.html'));
 });
 
+app.get('/country/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'country.html'));
+});
+
 // ── CRON SCHEDULER ────────────────────────────────────────────────────────────
 // Convert minutes interval to cron expression
 function minutesToCron(mins) {
