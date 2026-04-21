@@ -2319,14 +2319,14 @@ function renderCountryDev(countries) {
     const displayFlag = flagMap[c.country] || '🌍';
     const countryUrl = '/country/' + encodeURIComponent(c.country);
     
-    return `<a href="${countryUrl}" style="text-decoration:none;display:block;background:var(--bg2);border:1px solid var(--b2);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .25s ease;" onmouseenter="this.style.transform='translateY(-3px)';this.style.borderColor='#00aaff';this.style.boxShadow='0 4px 20px rgba(0,170,255,.1)'" onmouseleave="this.style.transform='none';this.style.borderColor='';this.style.boxShadow='none'">
+    return `<a href="${countryUrl}" style="text-decoration:none;display:block;background:var(--bg2);border:1px solid var(--b2);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .25s ease;" onmouseenter="this.style.transform='translateY(-3px)';this.style.borderColor='#d08000';this.style.boxShadow='0 4px 20px rgba(208,128,0,.12)'" onmouseleave="this.style.transform='none';this.style.borderColor='';this.style.boxShadow='none'">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b2);">
         <span style="font-size:28px; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;">${displayFlag}</span>
         <div style="flex:1;">
           <div style="font-family:var(--head);font-size:22px;letter-spacing:.04em;color:var(--t1);">${c.country || ''}</div>
           <div style="font-family:var(--mono);font-size:9px;color:var(--t4);letter-spacing:.15em;">DEVELOPMENT INTEL</div>
         </div>
-        <div style="font-family:var(--mono);font-size:8px;color:#00aaff;letter-spacing:.1em;opacity:.7;">VIEW ↗</div>
+        <div style="font-family:var(--mono);font-size:8px;color:#d08000;letter-spacing:.1em;opacity:.7;">VIEW ↗</div>
       </div>
       ${devs}
     </a>`;

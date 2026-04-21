@@ -25,11 +25,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .wrap{max-width:1100px;margin:0 auto;padding:0 18px 80px;}
 
 /* TOP NAV */
-.topnav{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid var(--blue2);flex-wrap:wrap;}
+.topnav{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:2px solid var(--amb2);flex-wrap:wrap;}
 .back-btn{background:none;border:1px solid var(--b2);color:var(--t3);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;cursor:pointer;border-radius:3px;font-weight:600;font-family:var(--inter);transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
 .back-btn:hover{border-color:var(--t3);color:var(--t1);}
 .nav-title{font-family:var(--head);font-size:clamp(18px,3vw,26px);letter-spacing:.07em;color:var(--t1);}
-.nav-badge{font-size:9px;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase;font-weight:700;background:rgba(0,170,255,.1);padding:3px 9px;border:1px solid rgba(0,170,255,.3);margin-left:auto;}
+.nav-badge{font-size:9px;letter-spacing:.15em;color:var(--amber);text-transform:uppercase;font-weight:700;background:rgba(208,128,0,.1);padding:3px 9px;border:1px solid rgba(208,128,0,.3);margin-left:auto;}
 
 /* HERO */
 .hero{padding:30px 0 24px;border-bottom:1px solid var(--b1);}
@@ -46,12 +46,12 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .stat-cell:hover{background:var(--bg3);}
 .stat-val{font-family:var(--head);font-size:22px;color:var(--t1);line-height:1;}
 .stat-lbl{font-size:9px;color:var(--t4);margin-top:4px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;}
-.stat-rank{font-size:10px;color:var(--cyan);font-family:var(--mono);margin-top:2px;}
+.stat-rank{font-size:10px;color:var(--amber);font-family:var(--mono);margin-top:2px;}
 
 /* TABS */
 .tabs{display:flex;gap:2px;background:var(--b1);margin:24px 0 0;overflow-x:auto;}
 .tab{flex:1;min-width:fit-content;background:var(--bg2);padding:13px 18px;font-size:11px;letter-spacing:.12em;color:var(--t4);text-transform:uppercase;cursor:pointer;border:none;font-weight:700;font-family:var(--inter);transition:all .15s;white-space:nowrap;}
-.tab.on{background:var(--bg3);color:var(--t1);border-bottom:2px solid var(--cyan);}
+.tab.on{background:var(--bg3);color:var(--t1);border-bottom:2px solid var(--amber);}
 .tab:hover:not(.on){background:var(--bg3);color:var(--t2);}
 
 /* PANEL */
@@ -63,11 +63,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* NEWS FEED */
 .news-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--b1);transition:background .15s;cursor:default;}
 .news-item:hover{background:var(--bg2);}
-.news-time{font-family:var(--mono);font-size:10px;color:var(--cyan);min-width:55px;flex-shrink:0;padding-top:3px;}
+.news-time{font-family:var(--mono);font-size:10px;color:var(--amber);min-width:55px;flex-shrink:0;padding-top:3px;}
 .news-body{flex:1;}
 .news-title{font-size:14px;color:var(--t1);font-weight:600;line-height:1.4;margin-bottom:4px;}
 .news-title a{color:var(--t1);text-decoration:none;transition:color .15s;}
-.news-title a:hover{color:var(--cyan);}
+.news-title a:hover{color:var(--amber);}
 .news-source{font-size:10px;color:var(--t4);font-weight:500;letter-spacing:.06em;}
 .news-snippet{font-size:12px;color:var(--t3);margin-top:4px;line-height:1.5;}
 .news-empty{color:var(--t4);font-size:13px;padding:30px 0;text-align:center;}
@@ -80,18 +80,18 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .profile-card.mil{border-left-color:var(--red);}
 .profile-card.eco{border-left-color:var(--amber);}
 .profile-card.soc{border-left-color:var(--green);}
-.profile-card.tech{border-left-color:var(--cyan);}
+.profile-card.tech{border-left-color:var(--blue);}
 .pc-label{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:5px;}
 .pc-value{font-family:var(--head);font-size:24px;color:var(--t1);line-height:1;}
 .pc-note{font-size:11px;color:var(--t3);margin-top:4px;}
 
 /* BRIEFING TERMINAL */
-.brief-terminal{background:#050505;border:1px solid rgba(0,170,255,.3);padding:20px;border-radius:4px;min-height:200px;font-family:var(--mono);color:#0f0;font-size:14px;line-height:1.7;white-space:pre-wrap;position:relative;overflow:hidden;box-shadow:inset 0 0 20px rgba(0,170,255,.05);}
+.brief-terminal{background:#050505;border:1px solid rgba(208,128,0,.3);padding:20px;border-radius:4px;min-height:200px;font-family:var(--mono);color:#0f0;font-size:14px;line-height:1.7;white-space:pre-wrap;position:relative;overflow:hidden;box-shadow:inset 0 0 20px rgba(208,128,0,.05);}
 .brief-terminal::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px);pointer-events:none;}
 .brief-scanline{width:100%;height:10px;background:rgba(0,255,0,.1);position:absolute;top:0;left:0;animation:scanline 4s linear infinite;pointer-events:none;}
 @keyframes scanline{0%{top:-10px}100%{top:100%}}
-.brief-btn{background:var(--cyan);color:#000;border:none;padding:10px 22px;font-family:var(--head);font-size:15px;cursor:pointer;border-radius:3px;letter-spacing:.06em;transition:all .2s;margin-top:14px;}
-.brief-btn:hover{box-shadow:0 0 15px rgba(0,170,255,.5);}
+.brief-btn{background:var(--amber);color:#000;border:none;padding:10px 22px;font-family:var(--head);font-size:15px;cursor:pointer;border-radius:3px;letter-spacing:.06em;transition:all .2s;margin-top:14px;}
+.brief-btn:hover{box-shadow:0 0 15px rgba(208,128,0,.5);}
 .brief-btn:disabled{opacity:.5;cursor:not-allowed;}
 
 /* UPDATED BAR */
@@ -196,7 +196,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 <!-- BRIEFING PANEL -->
 <div class="panel" id="panel-briefing">
-  <div style="font-family:var(--mono);color:var(--cyan);font-size:11px;margin-bottom:14px;letter-spacing:.06em;">// Click below to generate a comprehensive AI strategic analysis using live intelligence feeds.</div>
+  <div style="font-family:var(--mono);color:var(--amber);font-size:11px;margin-bottom:14px;letter-spacing:.06em;">// Click below to generate a comprehensive AI strategic analysis using live intelligence feeds.</div>
   <button class="brief-btn" id="briefBtn" onclick="generateBriefing()">► GENERATE LIVE INTELLIGENCE BRIEFING</button>
   <div class="brief-terminal" id="briefTerminal" style="display:none;">
     <div class="brief-scanline"></div>
@@ -521,7 +521,7 @@ async function initPage() {
   countryMeta = COUNTRIES[countryName];
 
   if (!countryMeta) {
-    document.getElementById('loadingState').innerHTML = `<span style="color:var(--amber)">Unknown country: ${countryName}</span><br><br><a href="/" style="color:var(--cyan)">← Return to Dashboard</a>`;
+    document.getElementById('loadingState').innerHTML = `<span style="color:var(--amber)">Unknown country: ${countryName}</span><br><br><a href="/" style="color:var(--amber)">← Return to Dashboard</a>`;
     return;
   }
 
