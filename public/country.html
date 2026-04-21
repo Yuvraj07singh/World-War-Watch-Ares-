@@ -41,7 +41,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .hero-subtitle{font-size:14px;color:var(--t3);margin-top:6px;font-weight:400;}
 
 /* STATS GRID */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-top:20px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:2px;background:var(--b1);border:1px solid var(--b1);margin-top:20px;}
 .stat-cell{background:var(--bg2);padding:14px;text-align:center;transition:background .15s;}
 .stat-cell:hover{background:var(--bg3);}
 .stat-val{font-family:var(--head);font-size:22px;color:var(--t1);line-height:1;}
@@ -75,7 +75,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* PROFILE TABLE */
 .profile-section{margin-bottom:28px;}
 .profile-title{font-size:10px;letter-spacing:.22em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--b1);}
-.profile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.profile-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;}
 .profile-card{background:var(--bg2);border:1px solid var(--b1);padding:16px;border-left:3px solid var(--b3);}
 .profile-card.mil{border-left-color:var(--red);}
 .profile-card.eco{border-left-color:var(--amber);}
