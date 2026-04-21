@@ -854,10 +854,10 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
   <svg class="cmap-svg" id="cmapSvg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));">
     <defs>
       <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gGrey"><stop offset="0%" stop-color="#aaa" stop-opacity=".4"/><stop offset="100%" stop-color="#aaa" stop-opacity="0"/></radialGradient>
-      <radialGradient id="gPurple"><stop offset="0%" stop-color="#9060d0" stop-opacity=".5"/><stop offset="100%" stop-color="#9060d0" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gAmber"><stop offset="0%" stop-color="#cc5500" stop-opacity=".6"/><stop offset="100%" stop-color="#cc5500" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gBlue"><stop offset="0%" stop-color="#457b9d" stop-opacity=".5"/><stop offset="100%" stop-color="#457b9d" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gGrey"><stop offset="0%" stop-color="#8f8572" stop-opacity=".4"/><stop offset="100%" stop-color="#8f8572" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gPurple"><stop offset="0%" stop-color="#52997e" stop-opacity=".5"/><stop offset="100%" stop-color="#52997e" stop-opacity="0"/></radialGradient>
     </defs>
     <image href="map_bg.png?v=3" width="1000" height="500" x="0" y="0" preserveAspectRatio="xMidYMid slice" />
     <!-- Dots rendered by JS -->
@@ -2459,10 +2459,10 @@ setInterval(() => init(true), 60000);
 
   const eraConfig = {
     active:  {grad:'gRed',   color:'#e02010', r:22, opacity:.6, pulse:true, label:'ACTIVE WAR'},
-    recent:  {grad:'gAmber', color:'#d08000', r:10, opacity:.45, pulse:false, label:'RECENT (2000s)'},
-    coldwar: {grad:'gBlue',  color:'#2878c8', r:9,  opacity:.35, pulse:false, label:'COLD WAR ERA'},
-    ww:      {grad:'gGrey',  color:'#aaaaaa', r:11, opacity:.3,  pulse:false, label:'WORLD WAR ERA'},
-    dispute: {grad:'gPurple',color:'#9060d0', r:8,  opacity:.4,  pulse:false, label:'TERRITORIAL DISPUTE'}
+    recent:  {grad:'gAmber', color:'#cc5500', r:10, opacity:.45, pulse:false, label:'RECENT (2000s)'},
+    coldwar: {grad:'gBlue',  color:'#457b9d', r:9,  opacity:.35, pulse:false, label:'COLD WAR ERA'},
+    ww:      {grad:'gGrey',  color:'#8f8572', r:11, opacity:.3,  pulse:false, label:'WORLD WAR ERA'},
+    dispute: {grad:'gPurple',color:'#52997e', r:8,  opacity:.4,  pulse:false, label:'TERRITORIAL DISPUTE'}
   };
 
   let currentEra = 'all';
