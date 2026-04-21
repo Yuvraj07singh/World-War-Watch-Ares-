@@ -1351,7 +1351,7 @@ const FALLBACK_GEO = {
 };
 
 // ── INIT ────────────────────────────────────────────────
-async function init(){
+async function init(isRefresh = false){
   document.getElementById('ubarText').textContent='Refreshing...';
 
   // 1. INSTANT CACHE LOAD — render every section from last known good data immediately
@@ -1413,8 +1413,10 @@ async function init(){
   // Load news separately
   loadNews();
   
-  // Initialize 3D Globe
-  setTimeout(initGlobe, 500);
+  // Initialize 3D Globe only on first load
+  if (!isRefresh) {
+    setTimeout(initGlobe, 500);
+  }
 }
 
 function fmtDate(iso){
@@ -2385,6 +2387,9 @@ function renderDebates(debates) {
 
 // ── INIT ────────────────────────────────────────────────
 init();
+
+// Auto-update dashboard silently every 60 seconds
+setInterval(() => init(true), 60000);
 </script>
 </body>
 </html>
