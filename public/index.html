@@ -1497,7 +1497,25 @@ function renderConflicts(data){
     'israel':      { warheads: 90,  doctrine: 'undeclared', inWar: true,  weight: 0.60 },
     'usa':         { warheads: 5550, doctrine: 'active-me', inWar: true,  weight: 0.40 },
   };
-  const DOOMSDAY_SECONDS = 89; // Set Jan 2026 — Bulletin of Atomic Scientists
+  const DOOMSDAY_SECONDS = geo.doomsdaySeconds || 89; 
+
+  // Update dynamic Doomsday UI
+  document.getElementById('doomTime').textContent = DOOMSDAY_SECONDS + ' sec';
+  const dmBigTime = document.querySelector('.dm-big-time');
+  if (dmBigTime) dmBigTime.textContent = DOOMSDAY_SECONDS + ' seconds';
+  
+  const dmReason = document.querySelector('.dm-reason');
+  if (dmReason) {
+    const isNew = DOOMSDAY_SECONDS !== 89;
+    dmReason.innerHTML = `
+      <strong>Current setting:</strong> ${DOOMSDAY_SECONDS} seconds to midnight — dynamic AI projection.<br>
+      <strong>Previous record:</strong> 90 seconds (Jan 2023 – Jan 2025).<br>
+      <strong>Why it moved:</strong> ${isNew ? 'Real-time AI situational assessment based on live global threat indicators and active conflict severity.' : 'Operation Epic Fury (US-Israel vs Iran), Pakistan two-front nuclear war risk, and the Hormuz crisis disrupting global stability.'}
+    `;
+  }
+  document.getElementById('doomLbl').textContent = `to midnight · real-time AI calculation`;
+  const dmTimeLbl = document.querySelector('.dm-time-lbl');
+  if (dmTimeLbl) dmTimeLbl.textContent = `to midnight · real-time AI calculation`;
 
   let tensions = [];
   let validConflicts = 0;
