@@ -285,6 +285,42 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cmap-tt-level.a{color:var(--amber);}
 .cmap-tt-level.b{color:var(--blue);}
 .cmap-label{font-size:7px;fill:var(--t4);text-anchor:middle;pointer-events:none;font-family:var(--inter);letter-spacing:.08em;text-transform:uppercase;font-weight:600;}
+
+/* ── MAP FILTER BUTTONS ── */
+.map-filters{display:flex;gap:4px;margin-bottom:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:2px 0;}
+.map-filters::-webkit-scrollbar{display:none;}
+.mf-btn{background:var(--bg2);border:1px solid var(--b1);color:var(--t3);font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:6px 14px;cursor:pointer;white-space:nowrap;border-radius:3px;transition:all .2s;}
+.mf-btn:hover{border-color:var(--t4);color:var(--t2);}
+.mf-btn.on{background:var(--bg3);border-color:var(--amber);color:var(--amber);}
+
+/* ── CONFLICT DETAIL MODAL ── */
+.conflict-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9500;display:none;overflow-y:auto;padding:20px;backdrop-filter:blur(6px);}
+.conflict-modal-overlay.on{display:flex;align-items:center;justify-content:center;}
+.conflict-modal{background:#0a0a0e;border:1px solid var(--b2);border-radius:8px;max-width:640px;width:100%;padding:28px;position:relative;border-left:4px solid var(--amber);}
+.cm-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--t3);font-size:28px;cursor:pointer;line-height:1;}
+.cm-close:hover{color:var(--t1);}
+.cm-era{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--t4);margin-bottom:6px;}
+.cm-header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.cm-name{font-family:var(--head);font-size:clamp(22px,5vw,30px);color:var(--t1);letter-spacing:.03em;}
+.cm-years{font-family:var(--mono);font-size:14px;color:var(--amber);white-space:nowrap;}
+.cm-type{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin:8px 0 16px;padding:3px 10px;border:1px solid var(--b2);display:inline-block;border-radius:2px;}
+.cm-field{margin-bottom:12px;}
+.cm-label{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--t4);margin-bottom:4px;display:block;}
+.cm-val{font-size:13px;color:var(--t2);line-height:1.6;}
+.cm-summary{font-size:14px;color:var(--t1);line-height:1.7;}
+.cm-divider{height:1px;background:var(--b1);margin:16px 0;}
+.cm-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.cm-link-wrap{margin-top:18px;text-align:center;}
+.cm-link{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--red);text-decoration:none;padding:10px 20px;border:1px solid var(--red2);display:inline-block;border-radius:3px;transition:all .2s;}
+.cm-link:hover{background:var(--red2);color:#fff;}
+@media(max-width:480px){
+  .conflict-modal{padding:20px 14px;border-radius:6px;}
+  .cm-name{font-size:22px;}
+  .cm-row{grid-template-columns:1fr;}
+  .map-filters{gap:3px;}
+  .mf-btn{padding:5px 10px;font-size:9px;}
+}
+
 #globeViz canvas { filter: sepia(1) hue-rotate(-10deg) saturate(2.5) brightness(0.85) contrast(1.3); cursor: grab; }
 #globeViz canvas:active { cursor: grabbing; }
 #globeViz::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: linear-gradient(rgba(200,120,20,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,120,20,0.1) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 5; }
@@ -797,50 +833,63 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
   </div>
 </div>
 
-<!-- GLOBAL CONFLICT MAP -->
-<div class="sh"><span class="sh-label">// Global Conflict Theater Map — Live Zones</span><div class="sh-line"></div></div>
+<!-- GLOBAL CONFLICT MAP — 100 YEARS -->
+<div class="sh"><span class="sh-label">// Global Conflict Atlas — 100 Years of Geopolitical Conflicts</span><div class="sh-line"></div></div>
+
+<!-- Era Filter Buttons -->
+<div class="map-filters" id="mapFilters">
+  <button class="mf-btn on" data-era="all">ALL</button>
+  <button class="mf-btn" data-era="active">🔴 ACTIVE</button>
+  <button class="mf-btn" data-era="recent">🟠 2000s</button>
+  <button class="mf-btn" data-era="coldwar">🔵 COLD WAR</button>
+  <button class="mf-btn" data-era="ww">⚪ WORLD WARS</button>
+  <button class="mf-btn" data-era="dispute">🟣 DISPUTES</button>
+</div>
+
 <div class="cmap-wrap" id="cmapWrap">
   <div class="cmap-tooltip" id="cmapTip">
     <div class="cmap-tt-name" id="cmapTipName"></div>
     <div class="cmap-tt-level" id="cmapTipLevel"></div>
   </div>
-  <svg class="cmap-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));">
+  <svg class="cmap-svg" id="cmapSvg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));">
     <defs>
       <radialGradient id="gRed"><stop offset="0%" stop-color="#e02010" stop-opacity=".7"/><stop offset="100%" stop-color="#e02010" stop-opacity="0"/></radialGradient>
       <radialGradient id="gAmber"><stop offset="0%" stop-color="#d08000" stop-opacity=".6"/><stop offset="100%" stop-color="#d08000" stop-opacity="0"/></radialGradient>
       <radialGradient id="gBlue"><stop offset="0%" stop-color="#2878c8" stop-opacity=".5"/><stop offset="100%" stop-color="#2878c8" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gGrey"><stop offset="0%" stop-color="#aaa" stop-opacity=".4"/><stop offset="100%" stop-color="#aaa" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gPurple"><stop offset="0%" stop-color="#9060d0" stop-opacity=".5"/><stop offset="100%" stop-color="#9060d0" stop-opacity="0"/></radialGradient>
     </defs>
-    <!-- Image Background -->
     <image href="map_bg.png?v=3" width="1000" height="500" x="0" y="0" preserveAspectRatio="xMidYMid slice" />
-    
-    <!-- CONFLICT ZONE 1: Iran / Middle East -->
-    <a href="/conflict.html?id=iran" class="cmap-dot" onmouseenter="showMapTip(event,'US + Israel vs Iran','● CRITICAL — Active War','r')" onmouseleave="hideMapTip()">
-      <circle cx="610" cy="240" r="30" fill="url(#gRed)" opacity=".6"><animate attributeName="r" values="25;35;25" dur="2.5s" repeatCount="indefinite"/></circle>
-      <circle cx="610" cy="240" r="5" fill="#e02010"><animate attributeName="opacity" values="1;.4;1" dur="1.5s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- CONFLICT ZONE 2: India-Pakistan border -->
-    <a href="/conflict.html?id=india-pakistan" class="cmap-dot" onmouseenter="showMapTip(event,'India vs Pakistan','● HIGH — Ceasefire Fragile','a')" onmouseleave="hideMapTip()">
-      <circle cx="690" cy="270" r="25" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="20;30;20" dur="3s" repeatCount="indefinite"/></circle>
-      <circle cx="690" cy="270" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- CONFLICT ZONE 3: Af-Pak border -->
-    <a href="/conflict.html?id=pakistan-afghanistan" class="cmap-dot" onmouseenter="showMapTip(event,'Pakistan vs Afghanistan','● HIGH — Active War','a')" onmouseleave="hideMapTip()">
-      <circle cx="670" cy="240" r="22" fill="url(#gAmber)" opacity=".5"><animate attributeName="r" values="18;26;18" dur="2.8s" repeatCount="indefinite"/></circle>
-      <circle cx="670" cy="240" r="4" fill="#d08000"><animate attributeName="opacity" values="1;.3;1" dur="2.2s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- CONFLICT ZONE 4: Russia-Ukraine -->
-    <a href="/conflict.html?id=russia-ukraine" class="cmap-dot" onmouseenter="showMapTip(event,'Russia vs Ukraine','● ELEVATED — Year 4','b')" onmouseleave="hideMapTip()">
-      <circle cx="560" cy="180" r="24" fill="url(#gBlue)" opacity=".5"><animate attributeName="r" values="19;28;19" dur="3.2s" repeatCount="indefinite"/></circle>
-      <circle cx="560" cy="180" r="4" fill="#2878c8"><animate attributeName="opacity" values="1;.3;1" dur="2.5s" repeatCount="indefinite"/></circle>
-    </a>
-
-    <!-- Coordinates -->
-    <text x="10" y="495" fill="#00aaff" font-size="6" font-family="monospace" opacity="0.6">MERCATOR PROJECTION · REAL-TIME CONFLICT OVERLAY</text>
-    <text x="990" y="495" fill="#00aaff" font-size="6" font-family="monospace" text-anchor="end" opacity="0.6">WORLD WAR WATCH — THEATER MAP</text>
+    <!-- Dots rendered by JS -->
+    <g id="conflictDotsLayer"></g>
+    <text x="10" y="495" fill="#00aaff" font-size="6" font-family="monospace" opacity="0.6">MERCATOR PROJECTION · 100-YEAR CONFLICT OVERLAY</text>
+    <text x="990" y="495" fill="#00aaff" font-size="6" font-family="monospace" text-anchor="end" opacity="0.6">WORLD WAR WATCH — ATLAS MODE</text>
   </svg>
+</div>
+
+<!-- Conflict Detail Modal -->
+<div class="conflict-modal-overlay" id="conflictModal">
+  <div class="conflict-modal">
+    <button class="cm-close" onclick="closeConflictModal()">&times;</button>
+    <div class="cm-era" id="cmEra"></div>
+    <div class="cm-header">
+      <div class="cm-name" id="cmName"></div>
+      <div class="cm-years" id="cmYears"></div>
+    </div>
+    <div class="cm-type" id="cmType"></div>
+    <div class="cm-field"><span class="cm-label">PARTIES</span><div class="cm-val" id="cmParties"></div></div>
+    <div class="cm-field"><span class="cm-label">CASUALTIES</span><div class="cm-val" id="cmCasualties"></div></div>
+    <div class="cm-divider"></div>
+    <div class="cm-field"><span class="cm-label">SUMMARY</span><div class="cm-summary" id="cmSummary"></div></div>
+    <div class="cm-divider"></div>
+    <div class="cm-row">
+      <div class="cm-field"><span class="cm-label">OUTCOME</span><div class="cm-val" id="cmOutcome"></div></div>
+      <div class="cm-field"><span class="cm-label">SIGNIFICANCE</span><div class="cm-val" id="cmSignificance"></div></div>
+    </div>
+    <div class="cm-link-wrap" id="cmLinkWrap" style="display:none;">
+      <a class="cm-link" id="cmLink">→ VIEW FULL INTELLIGENCE DOSSIER</a>
+    </div>
+  </div>
 </div>
 
 <!-- TENSION METERS -->
@@ -2398,6 +2447,137 @@ init();
 
 // Auto-update dashboard silently every 60 seconds
 setInterval(() => init(true), 60000);
+</script>
+
+<!-- 100-Year Conflict Atlas Engine -->
+<script src="conflicts-db.js"></script>
+<script>
+// ── CONFLICT ATLAS — Rendering & Interaction ──
+(function(){
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const layer = document.getElementById('conflictDotsLayer');
+  if (!layer || typeof CONFLICT_DB === 'undefined') return;
+
+  const eraConfig = {
+    active:  {grad:'gRed',   color:'#e02010', r:22, opacity:.6, pulse:true, label:'ACTIVE WAR'},
+    recent:  {grad:'gAmber', color:'#d08000', r:10, opacity:.45, pulse:false, label:'RECENT (2000s)'},
+    coldwar: {grad:'gBlue',  color:'#2878c8', r:9,  opacity:.35, pulse:false, label:'COLD WAR ERA'},
+    ww:      {grad:'gGrey',  color:'#aaaaaa', r:11, opacity:.3,  pulse:false, label:'WORLD WAR ERA'},
+    dispute: {grad:'gPurple',color:'#9060d0', r:8,  opacity:.4,  pulse:false, label:'TERRITORIAL DISPUTE'}
+  };
+
+  let currentEra = 'all';
+
+  function renderDots(era) {
+    layer.innerHTML = '';
+    const filtered = era === 'all' ? CONFLICT_DB : CONFLICT_DB.filter(c => c.era === era);
+
+    filtered.forEach((c, i) => {
+      const cfg = eraConfig[c.era] || eraConfig.recent;
+      const g = document.createElementNS(SVG_NS, 'g');
+      g.style.cursor = 'pointer';
+      g.setAttribute('data-idx', i);
+
+      // Glow circle
+      const glow = document.createElementNS(SVG_NS, 'circle');
+      glow.setAttribute('cx', c.x); glow.setAttribute('cy', c.y);
+      glow.setAttribute('r', cfg.r); glow.setAttribute('fill', `url(#${cfg.grad})`);
+      glow.setAttribute('opacity', cfg.opacity);
+      if (cfg.pulse) {
+        const anim = document.createElementNS(SVG_NS, 'animate');
+        anim.setAttribute('attributeName','r'); anim.setAttribute('values',`${cfg.r-5};${cfg.r+5};${cfg.r-5}`);
+        anim.setAttribute('dur',`${2.5+i*0.3}s`); anim.setAttribute('repeatCount','indefinite');
+        glow.appendChild(anim);
+      }
+      g.appendChild(glow);
+
+      // Center dot
+      const dot = document.createElementNS(SVG_NS, 'circle');
+      dot.setAttribute('cx', c.x); dot.setAttribute('cy', c.y);
+      dot.setAttribute('r', cfg.pulse ? 5 : 3.5);
+      dot.setAttribute('fill', cfg.color);
+      if (cfg.pulse) {
+        const a2 = document.createElementNS(SVG_NS, 'animate');
+        a2.setAttribute('attributeName','opacity'); a2.setAttribute('values','1;.4;1');
+        a2.setAttribute('dur','1.5s'); a2.setAttribute('repeatCount','indefinite');
+        dot.appendChild(a2);
+      }
+      g.appendChild(dot);
+
+      // Hover tooltip
+      g.addEventListener('mouseenter', function(e) {
+        showMapTip(e, c.name, `● ${c.years} — ${c.type}`, c.era==='active'?'r':c.era==='recent'?'a':'b');
+      });
+      g.addEventListener('mouseleave', hideMapTip);
+
+      // Click → open detail modal
+      g.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        openConflictModal(c);
+      });
+
+      layer.appendChild(g);
+    });
+  }
+
+  // Initial render
+  renderDots('all');
+
+  // Filter buttons
+  document.querySelectorAll('.mf-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.mf-btn').forEach(b => b.classList.remove('on'));
+      this.classList.add('on');
+      currentEra = this.dataset.era;
+      renderDots(currentEra);
+    });
+  });
+
+  // Modal logic
+  window.openConflictModal = function(c) {
+    const cfg = eraConfig[c.era] || eraConfig.recent;
+    document.getElementById('cmEra').textContent = cfg.label;
+    document.getElementById('cmName').textContent = c.name;
+    document.getElementById('cmYears').textContent = c.years;
+    document.getElementById('cmType').textContent = c.type;
+    document.getElementById('cmParties').textContent = c.parties;
+    document.getElementById('cmCasualties').textContent = c.casualties;
+    document.getElementById('cmSummary').textContent = c.summary;
+    document.getElementById('cmOutcome').textContent = c.outcome;
+    document.getElementById('cmSignificance').textContent = c.significance;
+
+    // Color the modal border based on era
+    const modal = document.querySelector('.conflict-modal');
+    modal.style.borderLeftColor = cfg.color;
+
+    // Show link for active conflicts only
+    const linkWrap = document.getElementById('cmLinkWrap');
+    if (c.link) {
+      linkWrap.style.display = 'block';
+      document.getElementById('cmLink').href = c.link;
+    } else {
+      linkWrap.style.display = 'none';
+    }
+
+    document.getElementById('conflictModal').classList.add('on');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeConflictModal = function() {
+    document.getElementById('conflictModal').classList.remove('on');
+    document.body.style.overflow = '';
+  };
+
+  // Close on overlay click
+  document.getElementById('conflictModal').addEventListener('click', function(e) {
+    if (e.target === this) closeConflictModal();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeConflictModal();
+  });
+})();
 </script>
 </body>
 </html>
