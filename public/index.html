@@ -1374,7 +1374,7 @@ async function init(isRefresh = false){
   // 2. FETCH LIVE DATA — only overwrite sections where new data is BETTER
   try{
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45000);
+    const timeout = setTimeout(() => controller.abort(), 12000);
     const r = await fetch(API+'/api/all', { signal: controller.signal });
     clearTimeout(timeout);
     if(!r.ok) throw new Error('Backend data not ready');

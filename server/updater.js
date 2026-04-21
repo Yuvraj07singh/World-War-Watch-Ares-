@@ -28,8 +28,10 @@ const save  = (f, d) => {
   dbSave(f, d).catch(() => {}); // Fire and forget purely for persistence 
 };
 
+const CACHE_TTL = (parseInt(process.env.UPDATE_INTERVAL_MINUTES || '15') * 60 * 1000); // Match update interval
+
 const load  = (f) => { 
-  if (memCache[f] && memCache[f].time > Date.now() - 30000) return memCache[f].data; // Serve from RAM if fresh (<30s)
+  if (memCache[f] && memCache[f].time > Date.now() - CACHE_TTL) return memCache[f].data; // Serve from RAM for the full update cycle
   try { 
     const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f))); 
     memCache[f] = { time: Date.now(), data };

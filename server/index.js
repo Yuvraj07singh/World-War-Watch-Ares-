@@ -80,21 +80,35 @@ app.get('/api/news', apiLimiter, (req, res) => {
   res.json({ articles: articles.slice(0, parseInt(limit)), total: articles.length, _updatedAt: d._updatedAt });
 });
 
-// Combined all-data endpoint
-app.get('/api/all', apiLimiter, (req, res) => {
+// Combined all-data endpoint — pre-cached for instant response
+let cachedAllResponse = null;
+let cachedAllTimestamp = 0;
+
+function buildAllResponse() {
   const files = ['meta.json', 'conflicts.json', 'economic.json', 'daily-briefing.json', 'upcoming-events.json', 'update-log.json', 'tension-history.json', 'geopolitics.json'];
   const coreFiles = ['meta.json', 'conflicts.json'];
   const result = {};
   for (const f of files) {
     const d = load(f);
-    if (!d && coreFiles.includes(f)) {
-      return res.status(503).json({ error: `Core data (${f}) not initialized.` });
-    }
+    if (!d && coreFiles.includes(f)) return null; // core data missing
     const key = f.replace('.json', '').replace(/-([a-z])/g, (_, c) => c.toUpperCase()).replace('Daily','daily');
     result[key] = d || null;
   }
+  return result;
+}
+
+app.get('/api/all', apiLimiter, (req, res) => {
+  const now = Date.now();
+  // Rebuild cache every 30 seconds at most
+  if (!cachedAllResponse || now - cachedAllTimestamp > 30000) {
+    const built = buildAllResponse();
+    if (!built) return res.status(503).json({ error: 'Core data not initialized.' });
+    cachedAllResponse = JSON.stringify(built);
+    cachedAllTimestamp = now;
+  }
   res.set('Cache-Control', 'public, max-age=120');
-  res.json(result);
+  res.set('Content-Type', 'application/json');
+  res.send(cachedAllResponse);
 });
 
 // ── LIVE AI ENDPOINTS ──────────────────────────────────────────────────────────
