@@ -206,22 +206,27 @@ ${contextStr}
 
 SCENARIO: "${scenario}"
 
-Analyze this scenario with clinical, objective precision. Focus on geopolitical, economic, and humanitarian consequences. Output EXACTLY this structure (use CAPS for headers):
+Analyze this scenario with clinical precision. Output a JSON object (raw JSON, no markdown) containing a 'metrics' object and a 'timeline' array. Use exact structure below:
 
-PHASE 1: IMMEDIATE (0-24 HOURS)
-[Analyze immediate military response, diplomatic fallout, market reactions, and initial civilian displacement. 60-80 words.]
+{
+  "metrics": {
+    "casualties": "<e.g., 50k - 100k, or 'Minimal'>",
+    "economic": "<e.g., Oil spikes to $150/bbl>",
+    "defcon": "<e.g., DEFCON 2>",
+    "probability": "<e.g., 82%>"
+  },
+  "timeline": [
+    { "time": "T+0:00 (IMMEDIATE)", "title": "<3-4 word title>", "detail": "<Analyze immediate military/diplomatic response. 40 words.>" },
+    { "time": "T+7 DAYS", "title": "<3-4 word title>", "detail": "<Analyze escalation over one week: economic shock, alliances. 40 words.>" },
+    { "time": "T+30 DAYS", "title": "<3-4 word title>", "detail": "<Analyze long-term global impact: nuclear risk, refugee flows. 40 words.>" }
+  ]
+}
 
-PHASE 2: 7-DAY PROJECTION
-[Analyze escalation over one week: alliance responses, economic shock (oil price, supply chains), diplomatic actions, humanitarian crisis development. 60-80 words.]
-
-PHASE 3: GLOBAL FALLOUT (30-DAY)
-[Analyze long-term global impact: nuclear risk assessment, refugee flows, trade disruption, geopolitical realignment. 60-80 words.]
-
-Rules: No markdown. Clinical intelligence tone. Focus heavily on strategic, economic, and humanitarian impacts rather than visceral violence. Use realistic estimates.`;
+Rules: Focus on geopolitical, economic, and humanitarian consequences. Use realistic estimates. Output ONLY raw JSON.`;
 
   try {
-    const text = await ask(prompt, { maxTokens: 1000, json: false });
-    res.json({ text, generatedAt: new Date().toISOString() });
+    const data = await ask(prompt, { maxTokens: 1000, json: true });
+    res.json({ data, generatedAt: new Date().toISOString() });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

@@ -709,22 +709,28 @@ img, svg { max-width: 100%; height: auto; }
 .wg-submit { align-self: flex-end; background: #0f0; color: #000; border: none; padding: 8px 16px; font-family: var(--head); font-size: 14px; cursor: pointer; border-radius: 2px; }
 .wg-submit:hover { box-shadow: 0 0 10px rgba(0,255,0,0.5); }
 .wg-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-.wg-terminal { background: #050505; border: 1px solid #222; padding: 20px; border-radius: 4px; min-height: 250px; font-family: 'Share Tech Mono', monospace; color: #0f0; font-size: 15px; line-height: 1.6; white-space: pre-wrap; position: relative; overflow: hidden; }
-.wg-terminal::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; }
-.wg-scanline { width: 100%; height: 10px; background: rgba(0,255,0,0.1); position: absolute; top: 0; left: 0; animation: scanline 4s linear infinite; pointer-events: none; }
+/* ── NEW ESCALATION DASHBOARD ── */
+.wg-terminal { background: #050505; border: 1px solid #222; padding: 20px; border-radius: 4px; min-height: 250px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.wg-mc-count { font-family: var(--head); font-size: 24px; color: #fff; letter-spacing: 0.1em; z-index: 2; margin-top: 15px; text-shadow: 0 0 10px rgba(0,255,0,0.5); }
+.wg-mc-bg { position: absolute; top:0; left:0; width:100%; height:100%; font-size: 10px; color: #0f0; opacity: 0.05; word-wrap: break-word; overflow: hidden; z-index: 1; font-family: var(--mono); text-align: left; }
+.wg-scanline { width: 100%; height: 10px; background: rgba(0,255,0,0.1); position: absolute; top: 0; left: 0; animation: scanline 4s linear infinite; pointer-events: none; z-index: 3; }
 @keyframes scanline { 0% { top: -10px; } 100% { top: 100%; } }
-.wg-preset { background: #0a0a0a; border: 1px solid #1a3a1a; color: #0f0; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; padding: 10px 8px; cursor: pointer; border-radius: 3px; transition: all .2s; text-align: center; }
-.wg-preset:hover { background: #0a1a0a; border-color: #0f0; box-shadow: 0 0 12px rgba(0,255,0,0.15); transform: translateY(-1px); }
-.wg-phase { background: #080808; border: 1px solid #1a1a1a; border-radius: 4px; padding: 16px; margin-bottom: 8px; border-left: 3px solid #333; }
-.wg-phase.immediate { border-left-color: #ff2020; }
-.wg-phase.sevenday { border-left-color: #d08000; }
-.wg-phase.global { border-left-color: #2878c8; }
-.wg-phase-title { font-family: var(--head); font-size: 16px; letter-spacing: .06em; margin-bottom: 6px; }
-.wg-phase-text { font-size: 12px; color: var(--t2); line-height: 1.7; }
-.wg-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
-.wg-metric { background: #050505; border: 1px solid #1a1a1a; padding: 10px; border-radius: 3px; text-align: center; }
-.wg-metric-val { font-family: var(--head); font-size: 20px; line-height: 1; }
-.wg-metric-lbl { font-family: var(--mono); font-size: 9px; color: #666; letter-spacing: .1em; margin-top: 4px; }
+
+.wg-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.wgm-box { background: #080808; border: 1px solid #1a1a1a; padding: 20px; border-radius: 4px; text-align: center; }
+.wgm-val { font-family: var(--head); font-size: 20px; margin-bottom: 5px; }
+.wgm-lbl { font-family: var(--mono); font-size: 10px; color: #888; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.wg-timeline { display: flex; flex-direction: column; gap: 20px; position: relative; padding-left: 30px; margin-top: 10px; }
+.wg-timeline::before { content: ''; position: absolute; left: 6px; top: 10px; bottom: 10px; width: 2px; background: #222; }
+.wgt-node { position: relative; background: #080808; border: 1px solid #1a1a1a; border-radius: 4px; padding: 16px; border-left: none; }
+.wgt-dot { position: absolute; left: -30px; top: 16px; width: 14px; height: 14px; border-radius: 50%; background: #000; border: 2px solid #555; z-index: 2; }
+.wgt-node.n0 .wgt-dot { border-color: #ff2020; box-shadow: 0 0 10px rgba(255,32,32,0.5); }
+.wgt-node.n1 .wgt-dot { border-color: #d08000; box-shadow: 0 0 10px rgba(208,128,0,0.5); }
+.wgt-node.n2 .wgt-dot { border-color: #2878c8; box-shadow: 0 0 10px rgba(40,120,200,0.5); }
+.wgt-time { font-family: var(--mono); font-size: 10px; color: var(--amber); letter-spacing: 0.1em; margin-bottom: 4px; }
+.wgt-title { font-family: var(--head); font-size: 18px; color: #fff; letter-spacing: 0.05em; margin-bottom: 8px; }
+.wgt-desc { font-size: 13px; color: var(--t2); line-height: 1.6; }
 
 /* ── DEFCON RATING ── */
 .defcon-badge { background: #000; border: 1px solid var(--b2); padding: 0 12px; margin-right: 12px; font-family: var(--head); font-size: 16px; letter-spacing: .05em; display: inline-flex; align-items: center; justify-content: center; height: 32px; border-radius: var(--radius); transition: all 0.5s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
@@ -1997,32 +2003,22 @@ async function runWg() {
   gauge.style.display = 'block';
   phases.style.display = 'none';
   phases.innerHTML = '';
+  term.style.display = 'flex';
   
-  // Animated loading sequence
-  const loadingMsgs = [
-    '> PARSING SCENARIO INPUT...',
-    '> LOADING LIVE CONFLICT CONTEXT...',
-    '> INITIALIZING MONTE CARLO SIMULATION...',
-    '> CALCULATING FORCE DEPLOYMENTS...',
-    '> MODELING ECONOMIC SHOCK VECTORS...',
-    '> ASSESSING NUCLEAR ESCALATION PROBABILITY...',
-    '> COMPILING THREAT ASSESSMENT...'
-  ];
+  // High-intensity loading screen
+  term.innerHTML = '<div class="wg-mc-bg" id="wgMcBg"></div><div class="wg-mc-count" id="wgMcCount">SIMULATION RUNNING: 0 ITERATIONS</div><div class="wg-scanline"></div>';
+  const bg = document.getElementById('wgMcBg');
+  const count = document.getElementById('wgMcCount');
   
-  term.innerHTML = '<div class="wg-scanline"></div>';
-  let msgIdx = 0;
+  let iters = 0;
   const loadInterval = setInterval(() => {
-    if (msgIdx < loadingMsgs.length) {
-      const line = document.createElement('div');
-      line.style.color = '#0f0';
-      line.style.opacity = '0.7';
-      line.textContent = loadingMsgs[msgIdx];
-      term.insertBefore(line, term.querySelector('.wg-scanline'));
-      msgIdx++;
-    }
-  }, 400);
+    iters += Math.floor(Math.random() * 500) + 100;
+    count.textContent = `SIMULATION RUNNING: ${iters.toLocaleString()} ITERATIONS`;
+    let hex = '';
+    for(let i=0; i<80; i++) hex += Math.random().toString(16).substr(2, 8) + ' ';
+    bg.textContent = hex;
+  }, 50);
   
-  // Animate threat bar during loading
   const bar = document.getElementById('wgThreatBar');
   const lvl = document.getElementById('wgThreatLvl');
   bar.style.width = '0%';
@@ -2037,42 +2033,49 @@ async function runWg() {
     if(!r.ok) throw new Error('Simulation engine offline');
     const d = await r.json();
     
-    const text = d.text || d.error || '';
-    
-    // Parse phases from text
-    const phaseData = parsePhases(text);
+    const data = d.data || {};
+    if (!data.metrics || !data.timeline) throw new Error('Simulation failed to converge on stable probabilities');
     
     // Set threat level based on content
-    const threatScore = calcThreat(text);
+    const threatScore = calcThreat(JSON.stringify(data));
     bar.style.width = threatScore + '%';
     if (threatScore > 80) { bar.style.background = '#ff0000'; lvl.textContent = 'EXTREME'; lvl.style.color = '#ff0000'; }
     else if (threatScore > 60) { bar.style.background = '#e02010'; lvl.textContent = 'CRITICAL'; lvl.style.color = '#e02010'; }
     else if (threatScore > 40) { bar.style.background = '#d08000'; lvl.textContent = 'HIGH'; lvl.style.color = '#d08000'; }
     else { bar.style.background = '#28883a'; lvl.textContent = 'MODERATE'; lvl.style.color = '#28883a'; }
     
-    // Typewriter in terminal
-    term.innerHTML = '<div class="wg-scanline"></div><div id="wgTypingText" style="color:#0f0;"></div>';
-    const target = document.getElementById('wgTypingText');
-    let i = 0;
-    const typeWriter = setInterval(() => {
-      const chunk = text.substring(i, Math.min(i + 3, text.length));
-      target.textContent += chunk;
-      i += 3;
-      if (i >= text.length) {
-        clearInterval(typeWriter);
-        btn.disabled = false;
-        btn.textContent = '▶ EXECUTE SIMULATION';
-        // Show structured phases
-        if (phaseData.length > 0) {
-          phases.style.display = 'block';
-          phases.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:#666;letter-spacing:.12em;margin-bottom:8px;margin-top:12px;">// STRUCTURED ANALYSIS</div>' +
-            phaseData.map(p => `<div class="wg-phase ${p.cls}">
-              <div class="wg-phase-title" style="color:${p.color};">${p.icon} ${p.title}</div>
-              <div class="wg-phase-text">${p.text}</div>
-            </div>`).join('');
-        }
-      }
-    }, 8);
+    btn.disabled = false;
+    btn.textContent = '▶ EXECUTE SIMULATION';
+    
+    // Remove terminal entirely and show the new Dashboard
+    term.style.display = 'none';
+    phases.style.display = 'block';
+    
+    // Build Matrix
+    let mHtml = '<div class="wg-matrix">';
+    mHtml += `<div class="wgm-box"><div class="wgm-val" style="color:var(--red)">${data.metrics.casualties || 'N/A'}</div><div class="wgm-lbl">EST. CASUALTIES</div></div>`;
+    mHtml += `<div class="wgm-box"><div class="wgm-val" style="color:var(--amber)">${data.metrics.economic || 'N/A'}</div><div class="wgm-lbl">ECONOMIC SHOCK</div></div>`;
+    mHtml += `<div class="wgm-box"><div class="wgm-val" style="color:#00aaff">${data.metrics.defcon || 'N/A'}</div><div class="wgm-lbl">DEFCON PROJECTION</div></div>`;
+    mHtml += `<div class="wgm-box"><div class="wgm-val" style="color:#0f0">${data.metrics.probability || 'N/A'}</div><div class="wgm-lbl">GLOBAL LIKELIHOOD</div></div>`;
+    mHtml += '</div>';
+    
+    // Build Timeline
+    let tHtml = '<div class="wg-timeline">';
+    if(Array.isArray(data.timeline)) {
+      data.timeline.forEach((item, i) => {
+        const cls = i === 0 ? 'n0' : (i === 1 ? 'n1' : 'n2');
+        const cHex = i === 0 ? '#ff2020' : (i === 1 ? '#d08000' : '#2878c8');
+        tHtml += `<div class="wgt-node ${cls}">
+          <div class="wgt-dot"></div>
+          <div class="wgt-time" style="color:${cHex}">${item.time || ''}</div>
+          <div class="wgt-title">${item.title || ''}</div>
+          <div class="wgt-desc">${item.detail || ''}</div>
+        </div>`;
+      });
+    }
+    tHtml += '</div>';
+    
+    phases.innerHTML = mHtml + tHtml;
     
   } catch (e) {
     clearInterval(loadInterval);
