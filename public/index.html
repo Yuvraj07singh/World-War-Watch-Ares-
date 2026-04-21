@@ -1427,8 +1427,11 @@ function fmtDate(iso){
 }
 
 // ── RENDER META (TICKER + ALERT) ─────────────────────────
+let LIVE_DOOMSDAY_SECONDS = 89;
+
 function renderMeta(meta){
   if(!meta || typeof meta !== 'object') return;
+  if(meta.doomsdaySeconds) LIVE_DOOMSDAY_SECONDS = parseInt(meta.doomsdaySeconds) || 89;
   if(meta.topAlert) document.getElementById('alertMsg').textContent=meta.topAlert;
   const tItems = meta.tickerItems || meta.ticker || [];
   if(Array.isArray(tItems) && tItems.length){
@@ -1500,7 +1503,7 @@ function renderConflicts(data){
     'israel':      { warheads: 90,  doctrine: 'undeclared', inWar: activeDataStr.includes('israel'),  weight: 0.60 },
     'usa':         { warheads: 5550, doctrine: 'active-me', inWar: activeDataStr.includes('usa') || activeDataStr.includes('us-'),  weight: 0.40 },
   };
-  const DOOMSDAY_SECONDS = geo.doomsdaySeconds || 89; 
+  const DOOMSDAY_SECONDS = LIVE_DOOMSDAY_SECONDS; 
 
   // Update dynamic Doomsday UI
   document.getElementById('doomTime').textContent = DOOMSDAY_SECONDS + ' sec';
