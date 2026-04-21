@@ -400,17 +400,23 @@ img, svg { max-width: 100%; height: auto; }
   .ubar { padding: 4px 0; font-size: 8px; gap: 6px; flex-wrap: wrap; }
 
   /* — Conflict Cards (1 column on mobile) — */
-  .cgrid { grid-template-columns: 1fr !important; gap: 2px; }
-  .ccard { padding: 14px 10px; }
-  .cc-name { font-size: 14px; }
+  .cgrid { grid-template-columns: 1fr !important; gap: 12px; background: transparent; }
+  .ccard { 
+    padding: 16px 14px; 
+    border: 1px solid var(--b2); 
+    border-radius: 6px; 
+    background: var(--bg2);
+  }
+  .ccard::before { width: 5px; border-radius: 6px 0 0 6px; }
+  .cc-name { font-size: 16px; }
   .cc-wm { font-size: 36px; }
-  .cc-stats { gap: 6px; }
+  .cc-stats { gap: 8px; }
   .cc-sv { font-size: 13px; }
   .cc-sl { font-size: 7px; }
-  .cc-summary { font-size: 9px; line-height: 1.4; }
+  .cc-summary { font-size: 10px; line-height: 1.5; }
   .cc-arrow { opacity: 1; font-size: 10px; }
   .cc-theater { font-size: 7px; }
-  .cc-badge { font-size: 7px; padding: 2px 5px; }
+  .cc-badge { font-size: 8px; padding: 3px 8px; }
   .cc-region,.cc-op { font-size: 8px; }
   .cc-latest { font-size: 8px; }
 
