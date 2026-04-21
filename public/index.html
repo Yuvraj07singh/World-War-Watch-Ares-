@@ -1489,13 +1489,14 @@ function renderConflicts(data){
 
   // ═══ DEFCON ENGINE v2 — Weighted Multi-Factor Calculation ═══
   // Real-world-calibrated nuclear risk assessment
+  const activeDataStr = JSON.stringify(nData).toLowerCase();
   const NUCLEAR_WEIGHTS = {
-    'pakistan':     { warheads: 165, doctrine: 'first-use', inWar: true,  weight: 0.95 },
-    'iran':        { warheads: 0,   doctrine: '84%-enriched', inWar: true,  weight: 0.90 },
-    'russia':      { warheads: 6255, doctrine: 'tactical-threat', inWar: true,  weight: 0.80 },
-    'india':       { warheads: 170, doctrine: 'no-first-use', inWar: true,  weight: 0.50 },
-    'israel':      { warheads: 90,  doctrine: 'undeclared', inWar: true,  weight: 0.60 },
-    'usa':         { warheads: 5550, doctrine: 'active-me', inWar: true,  weight: 0.40 },
+    'pakistan':     { warheads: 165, doctrine: 'first-use', inWar: activeDataStr.includes('pakistan'),  weight: 0.95 },
+    'iran':        { warheads: 0,   doctrine: '84%-enriched', inWar: activeDataStr.includes('iran'),  weight: 0.90 },
+    'russia':      { warheads: 6255, doctrine: 'tactical-threat', inWar: activeDataStr.includes('russia') || activeDataStr.includes('ukraine'),  weight: 0.80 },
+    'india':       { warheads: 170, doctrine: 'no-first-use', inWar: activeDataStr.includes('india'),  weight: 0.50 },
+    'israel':      { warheads: 90,  doctrine: 'undeclared', inWar: activeDataStr.includes('israel'),  weight: 0.60 },
+    'usa':         { warheads: 5550, doctrine: 'active-me', inWar: activeDataStr.includes('usa') || activeDataStr.includes('us-'),  weight: 0.40 },
   };
   const DOOMSDAY_SECONDS = geo.doomsdaySeconds || 89; 
 
@@ -1536,9 +1537,9 @@ function renderConflicts(data){
     // Factor 2: Hottest single theater (15%)
     const f_max = maxTension;
 
-    // Factor 3: War count scaling — more simultaneous wars = exponentially worse (15%)
-    // 1 war = 30, 2 = 50, 3 = 70, 4+ = 90
-    const f_warCount = Math.min(100, 20 + (validConflicts * 18));
+    // Factor 3: War count scaling — more simultaneous wars
+    // 1 war = 20, 2 = 35, 3 = 50, 4 = 65, 5+ = 80+
+    const f_warCount = Math.min(100, 5 + (validConflicts * 15));
 
     // Factor 4: Nuclear factor — weighted average of nuclear-armed parties in active conflict (20%)
     const nukeEntries = Object.values(NUCLEAR_WEIGHTS).filter(n => n.inWar);
@@ -1564,10 +1565,10 @@ function renderConflicts(data){
     );
 
     let defcon = 5, color = '#28883a', label = 'NORMAL READINESS';
-    if      (defconScore >= 90) { defcon = 1; color = '#ff0000'; label = 'MAXIMUM FORCE READINESS'; }
-    else if (defconScore >= 75) { defcon = 2; color = '#e02010'; label = 'ARMED FORCES READY'; }
-    else if (defconScore >= 55) { defcon = 3; color = '#d08000'; label = 'INCREASE READINESS'; }
-    else if (defconScore >= 35) { defcon = 4; color = '#28883a'; label = 'ABOVE NORMAL'; }
+    if      (defconScore >= 85) { defcon = 1; color = '#ff0000'; label = 'MAXIMUM FORCE READINESS'; }
+    else if (defconScore >= 70) { defcon = 2; color = '#e02010'; label = 'ARMED FORCES READY'; }
+    else if (defconScore >= 50) { defcon = 3; color = '#d08000'; label = 'INCREASE READINESS'; }
+    else if (defconScore >= 30) { defcon = 4; color = '#28883a'; label = 'ABOVE NORMAL'; }
 
     document.body.className = `defcon-${defcon}`;
     const dbg = document.getElementById('defconBadge');
