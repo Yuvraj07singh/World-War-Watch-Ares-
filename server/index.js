@@ -200,24 +200,24 @@ app.post('/api/wargames', aiLimiter, async (req, res) => {
     if(ctx[id]) contextStr += `[${ctx[id].name}: ${ctx[id].summary}] `;
   });
 
-  const prompt = `You are the ARES military simulation engine — a classified AI war-gaming system. A user has inputted a hypothetical escalation scenario.
+  const prompt = `You are the ARES Escalation Projection Model — an objective, clinical geopolitical analysis system. A user has inputted a hypothetical geopolitical escalation scenario.
 
 ${contextStr}
 
 SCENARIO: "${scenario}"
 
-Analyze this scenario with clinical precision. Output EXACTLY this structure (use CAPS for headers):
+Analyze this scenario with clinical, objective precision. Focus on geopolitical, economic, and humanitarian consequences. Output EXACTLY this structure (use CAPS for headers):
 
 PHASE 1: IMMEDIATE (0-24 HOURS)
-[Analyze immediate military response, troop movements, first strikes, civilian impact. 60-80 words.]
+[Analyze immediate military response, diplomatic fallout, market reactions, and initial civilian displacement. 60-80 words.]
 
 PHASE 2: 7-DAY PROJECTION
-[Analyze escalation over one week: alliance responses, economic shock (oil price, markets), diplomatic actions, casualty estimates. 60-80 words.]
+[Analyze escalation over one week: alliance responses, economic shock (oil price, supply chains), diplomatic actions, humanitarian crisis development. 60-80 words.]
 
 PHASE 3: GLOBAL FALLOUT (30-DAY)
-[Analyze long-term global impact: nuclear risk assessment, refugee flows, trade disruption, geopolitical realignment, historical parallels. 60-80 words.]
+[Analyze long-term global impact: nuclear risk assessment, refugee flows, trade disruption, geopolitical realignment. 60-80 words.]
 
-Rules: No markdown. Clinical intelligence tone. Use specific numbers for casualties, oil prices, troop counts where possible. Be visceral but realistic.`;
+Rules: No markdown. Clinical intelligence tone. Focus heavily on strategic, economic, and humanitarian impacts rather than visceral violence. Use realistic estimates.`;
 
   try {
     const text = await ask(prompt, { maxTokens: 1000, json: false });

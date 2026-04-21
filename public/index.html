@@ -735,6 +735,18 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
 /* DEFCON 3, 4 & 5 use default darker themes (no override needed) */
 /* DEFCON 4 & 5 use default darker themes (no override needed) */
 
+/* ── PROGRESSIVE DISCLOSURE (EXEC MODE) ── */
+body.exec-mode .chart-wrap,
+body.exec-mode .tension-box,
+body.exec-mode .cc-stats,
+body.exec-mode .cc-headlines,
+body.exec-mode .t-row,
+body.exec-mode .events-grid,
+body.exec-mode .economic-grid,
+body.exec-mode .geo-grid,
+body.exec-mode #tickerEl { display: none !important; }
+body.exec-mode #tickerEl::after { content: " [ EXECUTIVE SUMMARY ACTIVE — AUXILIARY DATA HIDDEN ]"; color: var(--amber); font-family: var(--mono); font-size: 11px; display: block; }
+body.exec-mode .sh:not(:first-of-type) { opacity: 0.3; }
 
 </style>
 </head>
@@ -759,7 +771,8 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
       </div>
     </div>
     <div class="defcon-badge" id="defconBadge"><span>THREAT LEVEL</span> EVALUATING...</div>
-    <button class="wg-btn" onclick="openWg()">⛌ WAR GAMES SIMULATOR</button>
+    <button class="wg-btn" onclick="openWg()">⛌ ESCALATION PROJECTION</button>
+    <div class="toggle-view" id="viewToggle" onclick="toggleViewMode()" style="font-family:var(--mono);font-size:10px;color:var(--t3);cursor:pointer;margin-right:16px;border:1px solid var(--b2);padding:4px 8px;border-radius:2px;letter-spacing:0.05em;transition:all 0.2s;">[ EXEC SUMMARY ]</div>
     <div class="live-badge"><div class="ldot"></div><span class="live-txt">Live</span></div>
     <div class="war-counter"><div class="wc-num" id="hdrWarCount">04</div><div class="wc-lbl">Active wars</div></div>
   </div>
@@ -770,6 +783,7 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
   <span class="ldot"></span>
   <span class="a-badge">Critical</span>
   <span class="a-msg" id="alertMsg">Loading latest intelligence...</span>
+  <span class="a-conf" id="alertConf" style="font-family:var(--mono);font-size:9px;color:var(--amber);margin-left:12px;letter-spacing:0.1em;" title="AI OSINT Confidence Score"></span>
   <span class="a-time" id="alertTime"></span>
 </div>
 
@@ -1190,8 +1204,8 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
   <div class="wg-modal" onclick="event.stopPropagation()">
     <div class="wg-hdr">
       <div>
-        <div class="wg-title">⛌ ARES CONFLICT SIMULATION ENGINE</div>
-        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.12em;margin-top:2px;">PREDICTIVE AI · POWERED BY GEMINI · REAL-TIME CONTEXT</div>
+        <div class="wg-title">⛌ ARES ESCALATION PROJECTION MODEL</div>
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.12em;margin-top:2px;">CLINICAL GEOPOLITICAL ANALYSIS · REAL-TIME CONTEXT</div>
       </div>
       <div class="wg-close" onclick="closeWgDirect()">×</div>
     </div>
@@ -1487,6 +1501,8 @@ const LIVE_DOOMSDAY_SECONDS = 85; // Hardcoded official Bulletin of Atomic Scien
 function renderMeta(meta){
   if(!meta || typeof meta !== 'object') return;
   if(meta.topAlert) document.getElementById('alertMsg').textContent=meta.topAlert;
+  if(meta.confidenceScore) document.getElementById('alertConf').textContent=`[ OSINT CONFIDENCE: ${meta.confidenceScore} ]`;
+  if(meta.verificationNote) document.getElementById('alertConf').title = meta.verificationNote;
   const tItems = meta.tickerItems || meta.ticker || [];
   if(Array.isArray(tItems) && tItems.length){
     const items=[...tItems,...tItems];
@@ -1533,6 +1549,7 @@ function renderConflicts(data){
       ${c.lastEvent?`<div class="cc-last">Latest: ${c.lastEvent} ${c.lastEventDate?`(${c.lastEventDate})`:''}</div>`:''}
       ${hl?`<div class="cc-headlines">${hl}</div>`:''}
       <div class="cc-arrow">→ Full history, timeline & leader statements</div>
+      <div class="cc-humanitarian" onclick="event.stopPropagation(); window.open('https://www.doctorswithoutborders.org/', '_blank')" style="font-size:9px;color:var(--t4);margin-top:8px;border-top:1px solid var(--b1);padding-top:8px;text-transform:uppercase;letter-spacing:0.05em;cursor:pointer;transition:color 0.2s;">+ Humanitarian impact & civilian support</div>
     </a>`;
   }).join('');
 
@@ -1935,10 +1952,24 @@ async function openCountryModal(country, flag) {
   }
 }
 
-// ── WAR GAMES SIMULATOR ──────────────────────────────────
+// ── ESCALATION PROJECTION MODEL ──────────────────────────
 function openWg() { document.getElementById('wgOverlay').classList.add('on'); document.body.style.overflow='hidden'; document.getElementById('wgInput').focus(); }
 function closeWg(e) { if(e.target === document.getElementById('wgOverlay')) closeWgDirect(); }
 function closeWgDirect() { document.getElementById('wgOverlay').classList.remove('on'); document.body.style.overflow=''; }
+
+// ── PROGRESSIVE DISCLOSURE TOGGLE ──
+function toggleViewMode() {
+  const isExec = document.body.classList.toggle('exec-mode');
+  const btn = document.getElementById('viewToggle');
+  btn.textContent = isExec ? '[ TACTICAL VIEW ]' : '[ EXEC SUMMARY ]';
+  if(isExec) {
+    btn.style.color = 'var(--amber)';
+    btn.style.borderColor = 'var(--amber)';
+  } else {
+    btn.style.color = 'var(--t3)';
+    btn.style.borderColor = 'var(--b2)';
+  }
+}
 
 function loadPreset(text) {
   const inp = document.getElementById('wgInput');
