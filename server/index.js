@@ -216,13 +216,37 @@ Analyze this scenario with clinical precision. Output a JSON object (raw JSON, n
     "probability": "<e.g., 82%>"
   },
   "timeline": [
-    { "time": "T+0:00 (IMMEDIATE)", "title": "<3-4 word title>", "detail": "<Analyze immediate military/diplomatic response. 40 words.>" },
-    { "time": "T+7 DAYS", "title": "<3-4 word title>", "detail": "<Analyze escalation over one week: economic shock, alliances. 40 words.>" },
-    { "time": "T+30 DAYS", "title": "<3-4 word title>", "detail": "<Analyze long-term global impact: nuclear risk, refugee flows. 40 words.>" }
+    { 
+      "time": "T+0:00 (IMMEDIATE)", 
+      "title": "<3-4 word title>", 
+      "details": [
+        "<Detailed bullet point 1 analyzing immediate military/kinetic response. 25-40 words.>",
+        "<Detailed bullet point 2 analyzing diplomatic fallout and initial civilian displacement. 25-40 words.>",
+        "<Detailed bullet point 3 analyzing immediate market reactions and asset freezing. 25-40 words.>"
+      ]
+    },
+    { 
+      "time": "T+7 DAYS", 
+      "title": "<3-4 word title>", 
+      "details": [
+        "<Detailed bullet point 1 analyzing military escalation over one week. 25-40 words.>",
+        "<Detailed bullet point 2 analyzing economic shock, supply chains, oil prices. 25-40 words.>",
+        "<Detailed bullet point 3 analyzing alliance responses and humanitarian crisis. 25-40 words.>"
+      ]
+    },
+    { 
+      "time": "T+30 DAYS", 
+      "title": "<3-4 word title>", 
+      "details": [
+        "<Detailed bullet point 1 analyzing nuclear risk assessment or long-term kinetic outcome. 25-40 words.>",
+        "<Detailed bullet point 2 analyzing refugee flows and infrastructure collapse. 25-40 words.>",
+        "<Detailed bullet point 3 analyzing geopolitical realignment and trade disruption. 25-40 words.>"
+      ]
+    }
   ]
 }
 
-Rules: Focus on geopolitical, economic, and humanitarian consequences. Use realistic estimates. Output ONLY raw JSON.`;
+Rules: Focus heavily on geopolitical, economic, and humanitarian consequences. Use realistic estimates and hard numbers. Output ONLY raw JSON. Do not include markdown blocks.`;
 
   try {
     const data = await ask(prompt, { maxTokens: 1000, json: true });

@@ -2065,11 +2065,17 @@ async function runWg() {
       data.timeline.forEach((item, i) => {
         const cls = i === 0 ? 'n0' : (i === 1 ? 'n1' : 'n2');
         const cHex = i === 0 ? '#ff2020' : (i === 1 ? '#d08000' : '#2878c8');
+        
+        let detailsHtml = item.detail || '';
+        if (Array.isArray(item.details)) {
+          detailsHtml = `<ul style="margin:0;padding-left:16px;">` + item.details.map(d => `<li style="margin-bottom:8px;">${d}</li>`).join('') + `</ul>`;
+        }
+        
         tHtml += `<div class="wgt-node ${cls}">
           <div class="wgt-dot"></div>
           <div class="wgt-time" style="color:${cHex}">${item.time || ''}</div>
           <div class="wgt-title">${item.title || ''}</div>
-          <div class="wgt-desc">${item.detail || ''}</div>
+          <div class="wgt-desc">${detailsHtml}</div>
         </div>`;
       });
     }
