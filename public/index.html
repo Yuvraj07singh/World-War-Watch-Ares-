@@ -784,9 +784,9 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
     </svg>
   </div>
   <div class="doom-info">
-    <div class="doom-time" id="doomTime">89 sec</div>
-    <div class="doom-lbl" id="doomLbl">to midnight · set January 2026 · Closest ever in 79-year history</div>
-    <div class="doom-desc">Set by the Bulletin of Atomic Scientists reflecting 4 simultaneous active wars, Iranian nuclear escalation, Pakistan two-front nuclear risk, and the Hormuz crisis. Previous record: 90 seconds (2023–2025).</div>
+    <div class="doom-time" id="doomTime">85 sec</div>
+    <div class="doom-lbl" id="doomLbl">to midnight · set January 27, 2026 · Closest ever in 79-year history</div>
+    <div class="doom-desc">Set by the Bulletin of Atomic Scientists reflecting nuclear escalation, AI risks, climate crisis, and 4 simultaneous active wars. Previous record: 90 seconds (2023–2025).</div>
     <div class="doom-cta">→ Click for full Doomsday Clock interface, historical timeline & risk breakdown</div>
   </div>
 </div>
@@ -1087,16 +1087,16 @@ body.defcon-2 { --bg: #120606; --bg2: #1c0a0a; --b1: #2c1212; --b2: #3a1818; }
           <circle cx="100" cy="100" r="2.5" fill="#fff" opacity=".35"/>
         </svg>
         <div class="dm-info">
-          <div class="dm-big-time">89 seconds</div>
-          <div class="dm-time-lbl">to midnight · set January 2026</div>
+          <div class="dm-big-time">85 seconds</div>
+          <div class="dm-time-lbl">to midnight · set January 27, 2026</div>
           <div class="dm-reason">
-            <strong>Current setting:</strong> 89 seconds — the closest in the clock's 79-year history.<br>
+            <strong>Current setting:</strong> 85 seconds — the closest in the clock's 79-year history.<br>
             <strong>Previous record:</strong> 90 seconds (Jan 2023 – Jan 2025).<br>
-            <strong>Why it moved:</strong> Operation Epic Fury (US-Israel vs Iran), Pakistan two-front nuclear war risk, renewed Russian nuclear rhetoric in Ukraine Year 4, and the Hormuz crisis disrupting global stability simultaneously.
+            <strong>Why it moved:</strong> Nuclear escalation risks, 4 simultaneous active wars, AI-driven weapons proliferation, climate emergency, and the erosion of international arms control frameworks.
           </div>
         </div>
       </div>
-      <div class="dm-sec-title">// Why 89 Seconds — Risk Factor Breakdown</div>
+      <div class="dm-sec-title">// Why 85 Seconds — Risk Factor Breakdown</div>
       <div class="dm-factors">
         <div class="df"><div class="df-lbl">Nuclear risk</div><div class="df-val r">Extreme</div><div class="df-note">Iran 84% enriched, Pakistan two-front, Russia tactical threat</div></div>
         <div class="df"><div class="df-lbl">Climate disruption</div><div class="df-val a">High</div><div class="df-note">Wars accelerating fossil fuel use, pledges abandoned</div></div>
@@ -1427,11 +1427,11 @@ function fmtDate(iso){
 }
 
 // ── RENDER META (TICKER + ALERT) ─────────────────────────
-let LIVE_DOOMSDAY_SECONDS = 89;
+let LIVE_DOOMSDAY_SECONDS = 85;
 
 function renderMeta(meta){
   if(!meta || typeof meta !== 'object') return;
-  if(meta.doomsdaySeconds) LIVE_DOOMSDAY_SECONDS = parseInt(meta.doomsdaySeconds) || 89;
+  if(meta.doomsdaySeconds) LIVE_DOOMSDAY_SECONDS = parseInt(meta.doomsdaySeconds) || 85;
   if(meta.topAlert) document.getElementById('alertMsg').textContent=meta.topAlert;
   const tItems = meta.tickerItems || meta.ticker || [];
   if(Array.isArray(tItems) && tItems.length){
@@ -1512,16 +1512,15 @@ function renderConflicts(data){
   
   const dmReason = document.querySelector('.dm-reason');
   if (dmReason) {
-    const isNew = DOOMSDAY_SECONDS !== 89;
     dmReason.innerHTML = `
-      <strong>Current setting:</strong> ${DOOMSDAY_SECONDS} seconds to midnight — dynamic AI projection.<br>
+      <strong>Current setting:</strong> ${DOOMSDAY_SECONDS} seconds to midnight — set January 27, 2026 by the Bulletin of the Atomic Scientists.<br>
       <strong>Previous record:</strong> 90 seconds (Jan 2023 – Jan 2025).<br>
-      <strong>Why it moved:</strong> ${isNew ? 'Real-time AI situational assessment based on live global threat indicators and active conflict severity.' : 'Operation Epic Fury (US-Israel vs Iran), Pakistan two-front nuclear war risk, and the Hormuz crisis disrupting global stability.'}
+      <strong>Why it moved:</strong> Nuclear escalation risks, 4 simultaneous active wars, AI-driven weapons proliferation, climate emergency, and the erosion of international arms control frameworks.
     `;
   }
-  document.getElementById('doomLbl').textContent = `to midnight · real-time AI calculation`;
+  document.getElementById('doomLbl').textContent = `to midnight · set January 27, 2026 · Closest ever`;
   const dmTimeLbl = document.querySelector('.dm-time-lbl');
-  if (dmTimeLbl) dmTimeLbl.textContent = `to midnight · real-time AI calculation`;
+  if (dmTimeLbl) dmTimeLbl.textContent = `to midnight · set January 27, 2026`;
 
   let tensions = [];
   let validConflicts = 0;

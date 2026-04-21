@@ -163,7 +163,7 @@ function makeMetaPrompt(articles) {
 {
   "topAlert": "<single most critical breaking news sentence about active wars — under 120 chars>",
   "globalThreatLevel": "CRITICAL",
-  "doomsdaySeconds": 90,
+  "doomsdaySeconds": 85,
   "tickerItems": [
     {"text": "<short headline 1 — under 60 chars>", "hot": true, "link": "<actual URL from the article>"},
     {"text": "<short headline 2>", "hot": false, "link": "<actual URL>"},
@@ -177,7 +177,7 @@ function makeMetaPrompt(articles) {
 }
 
 hot:true = urgent/breaking. hot:false = regular update. Keep each text under 60 chars. Use the EXACT link URL from the articles provided. Do not invent links.
-For doomsdaySeconds, output an integer between 60 and 100 based on the current existential threat level in the news (90 is the historical baseline, lower means closer to midnight/global catastrophe).
+IMPORTANT: doomsdaySeconds MUST always be exactly 85. This is the official Bulletin of the Atomic Scientists setting as of January 27, 2026. Do NOT change this value.
 
 HEADLINES:
 ${top}
