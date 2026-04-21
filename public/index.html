@@ -1491,7 +1491,7 @@ function renderConflicts(data){
   document.getElementById('conflictGrid').innerHTML = html;
   
   // Update War Counters and DEFCON
-  const count = Object.keys(nData).length;
+  const count = order.filter(id => nData[id] || Object.values(nData).find(x => x?.id === id)).length;
   const countStr = String(count).padStart(2, '0');
   const hdrCount = document.getElementById('hdrWarCount');
   const gridCount = document.getElementById('gridWarCount');
