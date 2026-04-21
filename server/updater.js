@@ -16,15 +16,28 @@ const { dbSave, Cache } = require('./db');
 const DATA_DIR = path.join(__dirname, '..', 'public', 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
+const memCache = {};
+
 const save  = (f, d) => {
   // NEVER-BLANK GUARD: refuse to overwrite good data with empty/null
   if (d === null || d === undefined) return;
   if (Array.isArray(d) && d.length === 0 && exists(f)) return; // don't overwrite with empty array
   if (typeof d === 'object' && !Array.isArray(d) && Object.keys(d).length <= 1 && exists(f)) return; // only _updatedAt = useless
   fs.writeFileSync(path.join(DATA_DIR, f), JSON.stringify(d, null, 2));
+  memCache[f] = { time: Date.now(), data: d }; // Fast RAM cache
   dbSave(f, d).catch(() => {}); // Fire and forget purely for persistence 
 };
-const load  = (f) => { try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, f))); } catch { return null; } };
+
+const load  = (f) => { 
+  if (memCache[f] && memCache[f].time > Date.now() - 30000) return memCache[f].data; // Serve from RAM if fresh (<30s)
+  try { 
+    const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f))); 
+    memCache[f] = { time: Date.now(), data };
+    return data;
+  } catch { 
+    return null; 
+  } 
+};
 const exists = (f) => fs.existsSync(path.join(DATA_DIR, f));
 
 async function restoreFromDB() {
