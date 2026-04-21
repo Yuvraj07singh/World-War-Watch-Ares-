@@ -75,7 +75,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tl-text{font-size:13px;color:var(--t2);line-height:1.6;}
 
 /* CURRENT STATUS */
-.cur-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:22px;}
+.cur-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px;background:var(--b1);border:1px solid var(--b1);margin-bottom:22px;}
 .cur-cell{background:var(--bg2);padding:16px;}
 .cc-lbl{font-size:9px;letter-spacing:.16em;color:var(--t4);text-transform:uppercase;font-weight:700;margin-bottom:5px;}
 .cc-val{font-family:var(--head);font-size:20px;color:var(--t1);line-height:1;}
@@ -161,7 +161,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .tl-date{position:static;width:auto;text-align:left;margin-bottom:2px;font-size:9px;}
   .tl-item{flex-direction:column;gap:4px;}
   .tl-dot{display:none;}
-  .cur-grid{grid-template-columns:1fr 1fr;}
   .qcard{padding:14px 16px;}
   .q-meta{flex-direction:column;gap:4px;align-items:flex-start;}
   .sc-card{padding:16px;}
@@ -348,13 +347,12 @@ function renderHero(meta, data){
   document.getElementById('heroBadges').innerHTML=badge;
 
   // Stats from conflict data
-  const stats=data?.current?.casualties?[
-    {val:data.current.casualties,lbl:'Casualties'},
-    {val:data.current.diplomaticSituation?.substring(0,20)||'Ongoing',lbl:'Diplomacy'},
-    {val:data.current.militarySituation?.substring(0,20)||'Active',lbl:'Military'}
-  ]:[];
-
-  document.getElementById('heroStats').innerHTML=stats.map(s=>`<div class="hs"><div class="hs-val">${s.val}</div><div class="hs-lbl">${s.lbl}</div></div>`).join('');
+  // Only show short stats in the hero, skip long AI paragraphs
+  const stats = [];
+  if (data?.current?.casualties && data.current.casualties.length < 30) {
+    stats.push({val: data.current.casualties, lbl: 'Casualties'});
+  }
+  document.getElementById('heroStats').innerHTML = stats.map(s=>`<div class="hs"><div class="hs-val">${s.val}</div><div class="hs-lbl">${s.lbl}</div></div>`).join('');
 }
 
 function renderHistory(history){
@@ -380,9 +378,9 @@ function renderCurrent(cur){
   if(!cur)return;
   const grid=document.getElementById('currentGrid');
   grid.innerHTML=`
-    <div class="cur-cell"><div class="cc-lbl">Military Status</div><div class="cc-val" style="font-size:14px;line-height:1.4;">${cur.militarySituation||'Ongoing'}</div></div>
-    <div class="cur-cell"><div class="cc-lbl">Diplomatic Status</div><div class="cc-val" style="font-size:14px;line-height:1.4;">${cur.diplomaticSituation||'Ongoing'}</div></div>
-    <div class="cur-cell"><div class="cc-lbl">Casualties</div><div class="cc-val">${cur.casualties||'Ongoing'}</div></div>`;
+    <div class="cur-cell"><div class="cc-lbl">Military Status</div><div class="cc-val" style="font-family:var(--inter);font-weight:500;font-size:14px;line-height:1.6;">${cur.militarySituation||'Ongoing'}</div></div>
+    <div class="cur-cell"><div class="cc-lbl">Diplomatic Status</div><div class="cc-val" style="font-family:var(--inter);font-weight:500;font-size:14px;line-height:1.6;">${cur.diplomaticSituation||'Ongoing'}</div></div>
+    <div class="cur-cell"><div class="cc-lbl">Casualties</div><div class="cc-val" style="font-family:var(--inter);font-weight:500;font-size:14px;line-height:1.6;">${cur.casualties||'Ongoing'}</div></div>`;
 
   const summary=document.getElementById('currentSummary');
   summary.innerHTML=(cur.summary||'').split('\n\n').filter(p=>p.trim()).map(p=>`<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
