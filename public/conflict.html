@@ -149,12 +149,30 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .wrap{padding:0 12px 60px;}
   .topnav{flex-direction:column;gap:8px;align-items:flex-start;}
   .nav-badge{margin-left:0;}
-  .hero{padding:20px 0 18px;}
-  .hero-name{font-size:clamp(28px,6vw,48px);}
+  .hero{padding:20px 0 16px;}
+  .hero-name{font-size:clamp(32px,10vw,48px);line-height:0.9;}
   .hero-stats{gap:16px;}
   .hs-val{font-size:22px;}
-  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .tab{padding:11px 14px;font-size:10px;}
+  
+  .tabs{
+    position:sticky;
+    top:0;
+    z-index:100;
+    margin:18px -12px 0; /* bleed to screen edge */
+    padding:0 12px;
+    background:rgba(21,21,26,0.95);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--b1);
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; /* Firefox */
+  }
+  .tabs::-webkit-scrollbar{display:none;} /* Webkit */
+  .tab{padding:14px 16px;font-size:11px;flex-shrink:0;background:transparent;}
+  .tab.on{background:transparent;}
+  
   .panel{padding:18px 0;}
   .timeline{padding-left:0;}
   .timeline::before{display:none;}
@@ -165,19 +183,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .q-meta{flex-direction:column;gap:4px;align-items:flex-start;}
   .sc-card{padding:16px;}
   .sc-title{font-size:20px;}
-  .ask-row{flex-direction:column;gap:0;}
-  .ask-input{border-right:1px solid var(--b2);border-radius:3px 3px 0 0;padding:14px 15px;font-size:14px;}
-  .ask-btn{border-radius:0 0 3px 3px;padding:14px 16px;font-size:12px;}
+  
+  .ask-row{flex-direction:column;gap:8px;}
+  .ask-input{border-right:1px solid var(--b2);border-radius:3px;padding:14px 15px;font-size:14px;}
+  .ask-btn{border-radius:3px;padding:14px 16px;font-size:12px;}
+  
   .ls-filter{gap:4px;}
   .ls-filter-btn{padding:6px 10px;font-size:9px;}
   body::before{display:none;} /* Remove grain overlay on mobile for performance */
 }
 @media(max-width:420px){
   .wrap{padding:0 8px 50px;}
-  .hero-name{font-size:26px;}
+  .hero-name{font-size:32px;}
   .hs-val{font-size:18px;}
   .cur-grid{grid-template-columns:1fr;}
-  .tab{font-size:9px;padding:9px 10px;}
+  .tab{font-size:10px;padding:12px 14px;}
 }
 </style>
 </head>
