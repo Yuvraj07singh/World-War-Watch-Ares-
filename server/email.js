@@ -1,31 +1,27 @@
 // server/email.js
 // ─────────────────────────────────────────────
-//  World War Watch — Email Service
+//  World War Watch — Email Service (Resend HTTP API)
 //  Sends themed welcome emails on newsletter signup
+//  Uses HTTPS (port 443) — works on Render free tier
 // ─────────────────────────────────────────────
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create reusable transporter (lazy-initialized)
-let transporter = null;
+// Lazy-initialized Resend client
+let resend = null;
 
-function getTransporter() {
-  if (transporter) return transporter;
+function getClient() {
+  if (resend) return resend;
 
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASS;
-
-  if (!user || !pass) {
-    console.warn('⚠️  EMAIL_USER or EMAIL_PASS not set. Email sending disabled.');
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('⚠️  RESEND_API_KEY not set. Email sending disabled.');
     return null;
   }
 
-  transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass },
-  });
-
-  return transporter;
+  resend = new Resend(apiKey);
+  console.log('✓ Resend email client initialized');
+  return resend;
 }
 
 /**
@@ -34,23 +30,27 @@ function getTransporter() {
  * @returns {Promise<boolean>} - true if sent successfully
  */
 async function sendWelcomeEmail(email) {
-  const t = getTransporter();
-  if (!t) {
-    console.log('[email] Transporter not configured — skipping welcome email.');
+  const client = getClient();
+  if (!client) {
+    console.log('[email] Resend not configured — skipping welcome email.');
     return false;
   }
 
-  const mailOptions = {
-    from: `"ARES // World War Watch" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: '🔴 INTEL BRIEFING ACTIVATED — Welcome to World War Watch',
-    html: buildWelcomeHTML(email),
-    text: buildWelcomeText(email),
-  };
-
   try {
-    await t.sendMail(mailOptions);
-    console.log(`[email] ✓ Welcome email sent to ${email}`);
+    const { data, error } = await client.emails.send({
+      from: 'ARES Intelligence <onboarding@resend.dev>',
+      to: [email],
+      subject: '🔴 INTEL BRIEFING ACTIVATED — Welcome to World War Watch',
+      html: buildWelcomeHTML(email),
+      text: buildWelcomeText(email),
+    });
+
+    if (error) {
+      console.error(`[email] ✗ Resend error for ${email}:`, error.message);
+      return false;
+    }
+
+    console.log(`[email] ✓ Welcome email sent to ${email} (id: ${data?.id})`);
     return true;
   } catch (err) {
     console.error(`[email] ✗ Failed to send to ${email}:`, err.message);
@@ -65,21 +65,25 @@ async function sendWelcomeEmail(email) {
  * @returns {Promise<boolean>}
  */
 async function sendBriefingEmail(email, briefingData) {
-  const t = getTransporter();
-  if (!t) return false;
+  const client = getClient();
+  if (!client) return false;
 
   const { subject, briefingText, conflicts = [], updatedAt } = briefingData;
 
-  const mailOptions = {
-    from: `"ARES // World War Watch" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: `🔴 ${subject || 'INTEL BRIEFING UPDATE'}`,
-    html: buildBriefingHTML(briefingText, conflicts, updatedAt),
-    text: `WORLD WAR WATCH — INTEL BRIEFING\n\n${briefingText}\n\nGenerated: ${updatedAt || new Date().toISOString()}\n\nhttps://ares-ykga.onrender.com`,
-  };
-
   try {
-    await t.sendMail(mailOptions);
+    const { data, error } = await client.emails.send({
+      from: 'ARES Intelligence <onboarding@resend.dev>',
+      to: [email],
+      subject: `🔴 ${subject || 'INTEL BRIEFING UPDATE'}`,
+      html: buildBriefingHTML(briefingText, conflicts, updatedAt),
+      text: `WORLD WAR WATCH — INTEL BRIEFING\n\n${briefingText}\n\nGenerated: ${updatedAt || new Date().toISOString()}\n\nhttps://ares-ykga.onrender.com`,
+    });
+
+    if (error) {
+      console.error(`[email] Briefing send failed for ${email}:`, error.message);
+      return false;
+    }
+
     return true;
   } catch (err) {
     console.error(`[email] Briefing send failed for ${email}:`, err.message);
@@ -108,7 +112,7 @@ function buildWelcomeHTML(email) {
     </div>
 
     <!-- Status Bar -->
-    <div style="background:#080808;padding:12px 25px;border-bottom:1px solid #1a1a1a;display:flex;">
+    <div style="background:#080808;padding:12px 25px;border-bottom:1px solid #1a1a1a;">
       <span style="color:#28883a;font-size:11px;letter-spacing:0.1em;">● LINK ACTIVE</span>
       <span style="color:#444;font-size:11px;margin-left:15px;">${new Date().toISOString().replace('T', ' ').split('.')[0]} UTC</span>
     </div>
