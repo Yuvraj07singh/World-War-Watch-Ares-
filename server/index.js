@@ -19,6 +19,7 @@ const { runUpdate, load, restoreFromDB } = require('./updater');
 const { connectDB, Subscriber } = require('./db');
 const mongoose    = require('mongoose');
 const { fetchAllNews, filterByConflict, categorizeNews } = require('./news');
+const { sendWelcomeEmail } = require('./email');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -155,11 +156,25 @@ app.post('/api/subscribe', apiLimiter, async (req, res) => {
   }
 
   try {
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    // Check if this is a NEW subscriber (not already in DB)
+    const existing = await Subscriber.findOne({ email: normalizedEmail });
+    const isNew = !existing;
+
     const sub = await Subscriber.findOneAndUpdate(
-      { email: email.toLowerCase().trim() },
+      { email: normalizedEmail },
       {},
       { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
+
+    // Send welcome email only to NEW subscribers (fire-and-forget)
+    if (isNew) {
+      sendWelcomeEmail(normalizedEmail).catch(err => {
+        console.error('[subscribe] Welcome email failed:', err.message);
+      });
+    }
+
     res.json({ success: true, message: 'Subscribed to Intel Briefings' });
   } catch (err) {
     console.error('Subscription error:', err.message);
